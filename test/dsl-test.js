@@ -8,6 +8,7 @@ describe('LLParse', () => {
   it('should compile `example.js`', () => {
     const dsl = new DSL(fixtures.source.example);
 
-    dsl.compile();
+    const out = dsl.compile();
+    console.log(out);
   });
 });
