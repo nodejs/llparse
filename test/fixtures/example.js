@@ -23,8 +23,9 @@ const HTTP_RESPONSE = 2;
 const INVALID_METHOD = 1;
 const INVALID_URL_CHARACTER = 2;
 
-'@default';
 const init = () => {
+  '@default';
+
   switch (_) {
     default:
       rerun(start_req_or_res);
