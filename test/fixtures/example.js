@@ -23,7 +23,15 @@ const HTTP_RESPONSE = 2;
 const INVALID_METHOD = 1;
 const INVALID_URL_CHARACTER = 2;
 
-start_req_or_res = () => {
+'@default';
+const init = () => {
+  switch (_) {
+    default:
+      rerun(start_req_or_res);
+  }
+};
+
+const start_req_or_res = () => {
   switch (_) {
     case [ 0x0a, 0x0d ]:
       skip();
@@ -45,7 +53,7 @@ start_req_or_res = () => {
   }
 };
 
-request_after_method = () => {
+const request_after_method = () => {
   switch (_) {
     case ' ':
       skip();
@@ -60,7 +68,7 @@ request_after_method = () => {
   }
 };
 
-url = () => {
+const url = () => {
   switch (_) {
     case ' ':
       next(req_http_start);
@@ -76,5 +84,10 @@ url = () => {
     case [ '\t', '\f' ]:
       error(INVALID_URL_CHARACTER,
             'URL can\'t have "\\t" or "\\f" chars in it');
+  }
+};
+
+const response_slash = () => {
+  switch (_) {
   }
 };
