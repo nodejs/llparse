@@ -10,13 +10,6 @@ const settings = {
   on_url: data('url')
 };
 
-const METHODS = {
-  'GET': 1,
-  'HEAD': 2,
-  'POST': 3,
-  'PUT': 4
-};
-
 const HTTP_REQUEST = 1;
 const HTTP_RESPONSE = 2;
 
@@ -38,7 +31,12 @@ const start_req_or_res = () => {
     case [ 0x0a, 0x0d ]:
       break;
 
-    case METHODS:
+    case {
+      'GET': 1,
+      'HEAD': 2,
+      'POST': 3,
+      'PUT': 4
+    }:
       '@notify-on-start(on_message_begin)';
 
       state.type = HTTP_REQUEST;
@@ -100,6 +98,11 @@ const url = () => {
       error(INVALID_URL_CHARACTER,
             'URL can\'t have "\\t" or "\\f" chars in it');
       break;
+  }
+};
+
+const req_http_start = () => {
+  switch (_) {
   }
 };
 
