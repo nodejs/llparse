@@ -2,3 +2,6 @@ node_modules/
 npm-debug.log
 *.ll
 *.o
+*.c
+main
+1
