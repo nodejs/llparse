@@ -67,11 +67,11 @@ const request_after_method = () => {
     case 0x0:
       '@unlikely';
 
-      error(INVALID_METHOD, '`\0` after method');
+      error(INVALID_METHOD, '`\\0` after method');
       break;
 
     default:
-      settings.on_url.start();
+//      settings.on_url.start();
       redirect(url);
       break;
   }
@@ -81,7 +81,7 @@ const url = () => {
   switch (_) {
     case ' ':
       next(req_http_start);
-      settings.on_url.end();
+//      settings.on_url.end();
       break;
 
     case [ '\r', '\n' ]:
