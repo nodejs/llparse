@@ -103,10 +103,14 @@ const url = () => {
 
 const req_http_start = () => {
   switch (_) {
+    default:
+      break;
   }
 };
 
 const response_slash = () => {
   switch (_) {
+    default:
+      break;
   }
 };
