@@ -37,7 +37,7 @@ const start_req_or_res = () => {
       'POST': 3,
       'PUT': 4
     }: {
-      '@notify-on-start(on_message_begin)';
+      '@notify:start(on_message_begin)';
 
       state.type = HTTP_REQUEST;
       state.method = match();
@@ -46,7 +46,7 @@ const start_req_or_res = () => {
     }
 
     case 'HTTP':
-      '@notify-on-start(on_message_begin)';
+      '@notify:start(on_message_begin)';
 
       state.type = HTTP_RESPONSE;
       next(response_slash);
