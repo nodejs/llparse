@@ -36,13 +36,14 @@ const start_req_or_res = () => {
       'HEAD': 2,
       'POST': 3,
       'PUT': 4
-    }:
+    }: {
       '@notify-on-start(on_message_begin)';
 
       state.type = HTTP_REQUEST;
       state.method = match();
       next(request_after_method);
       break;
+    }
 
     case 'HTTP':
       '@notify-on-start(on_message_begin)';
@@ -80,8 +81,8 @@ const request_after_method = () => {
 const url = () => {
   switch (_) {
     case ' ':
-      next(req_http_start);
 //      settings.on_url.end();
+      next(req_http_start);
       break;
 
     case [ '\r', '\n' ]:
