@@ -16,7 +16,7 @@ const HTTP_RESPONSE = 2;
 const INVALID_METHOD = 1;
 const INVALID_URL_CHARACTER = 2;
 
-const init = () => {
+const initial = () => {
   '@default';
 
   switch (_) {
