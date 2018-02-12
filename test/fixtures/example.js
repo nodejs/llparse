@@ -114,19 +114,3 @@ const response_slash = () => {
       break;
   }
 };
-
-const rec1 = () => {
-  switch (_) {
-    default:
-      next(rec2);
-      break;
-  }
-};
-
-const rec2 = () => {
-  switch (_) {
-    default:
-      next(rec1);
-      break;
-  }
-};
