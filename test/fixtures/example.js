@@ -28,7 +28,7 @@ const init = () => {
 
   switch (_) {
     default:
-      rerun(start_req_or_res);
+      redirect(start_req_or_res);
       break;
   }
 };
@@ -36,24 +36,26 @@ const init = () => {
 const start_req_or_res = () => {
   switch (_) {
     case [ 0x0a, 0x0d ]:
-      skip();
       break;
 
-    '@notify-on-start(on_message_begin)';
     case METHODS:
+      '@notify-on-start(on_message_begin)';
+
       state.type = HTTP_REQUEST;
       state.method = match();
       next(request_after_method);
       break;
 
-    '@notify-on-start(on_message_begin)';
     case 'HTTP':
+      '@notify-on-start(on_message_begin)';
+
       state.type = HTTP_RESPONSE;
       next(response_slash);
       break;
 
-    '@unlikely';
     default:
+      '@unlikely';
+
       error(INVALID_METHOD, 'Unknown method');
       break;
   }
@@ -62,17 +64,17 @@ const start_req_or_res = () => {
 const request_after_method = () => {
   switch (_) {
     case ' ':
-      skip();
       break;
 
-    '@unlikely';
     case 0x0:
+      '@unlikely';
+
       error(INVALID_METHOD, '`\0` after method');
       break;
 
     default:
       settings.on_url.start();
-      rerun(url);
+      redirect(url);
       break;
   }
 };
@@ -84,15 +86,17 @@ const url = () => {
       settings.on_url.end();
       break;
 
-    '@unlikely';
     case [ '\r', '\n' ]:
+      '@unlikely';
+
       error(INVALID_URL_CHARACTER,
             'URL can\'t have newline chars in it');
       break;
 
-    '@unlikely';
-    '@mode(strict)';
     case [ '\t', '\f' ]:
+      '@ifdef(strict)';
+      '@unlikely';
+
       error(INVALID_URL_CHARACTER,
             'URL can\'t have "\\t" or "\\f" chars in it');
       break;
