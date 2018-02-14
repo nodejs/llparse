@@ -1,8 +1,7 @@
 {
-  "name": "parser-dsl",
+  "name": "llparse",
   "version": "1.0.0",
-  "description": "",
-  "main": "lib/dsl.js",
+  "main": "lib/llparse.js",
   "scripts": {
     "test": "mocha --reporter=spec test/*-test.js"
   },
@@ -10,9 +9,19 @@
   "author": "Fedor Indutny <fedor@indutny.com> (http://darksi.de/)",
   "license": "MIT",
   "dependencies": {
-    "esprima": "^4.0.0"
+    "esprima": "^4.0.0",
+    "llvm-ir": "^1.0.0-beta1"
   },
   "devDependencies": {
     "mocha": "^5.0.0"
-  }
+  },
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "gh:indutny/llparse"
+  },
+  "description": ""
 }
