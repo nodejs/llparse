@@ -12,7 +12,7 @@ describe('LLParse', () => {
     const error = parse.error(1, 'Invalid word');
 
     start.match('HTTP', response);
-    start.select({ 'GET': 0, 'POST': 1, 'PUT': 2 }, request);
+    start.select({ 'HEAD': 0, 'GET': 1, 'POST': 2, 'PUT': 3 }, request);
     start.otherwise(error);
 
     request.otherwise(parse.invoke('on_request', start));
