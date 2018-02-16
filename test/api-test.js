@@ -16,6 +16,7 @@ describe('LLParse', () => {
     start.otherwise(error);
 
     request.otherwise(parse.invoke('on_request', start));
+    response.otherwise(parse.invoke('on_response', start));
 
     const out = parse.build(start);
     console.log(out);
