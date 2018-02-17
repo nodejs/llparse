@@ -9,11 +9,10 @@ describe('LLParse', () => {
     const start = parse.node('start');
     const request = parse.node('req');
     const response = parse.node('res');
-    const error = parse.error(1, 'Invalid word');
 
     start.match('HTTP', parse.invoke('on_response', {
       0: start
-    }, parse.error(2, '`on_response` error')));
+    }, parse.error(1, '`on_response` error')));
 
     start.select({
       'HEAD': 0, 'GET': 1, 'POST': 2, 'PUT': 3,
@@ -21,9 +20,9 @@ describe('LLParse', () => {
       'TRACE': 7, 'PATCH': 8
     }, parse.invoke('on_request', {
       0: start
-    }, parse.error(3, '`on_request` error')));
+    }, parse.error(2, '`on_request` error')));
 
-    start.otherwise(error);
+    start.otherwise(parse.error(3, 'Invalid word'));
 
     const out = parse.build(start);
     require('fs').writeFileSync('./2.ll', out);
