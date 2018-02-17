@@ -16,7 +16,9 @@ describe('LLParse', () => {
     }, parse.error(2, '`on_response` error')));
 
     start.select({
-      'HEAD': 0, 'GET': 1, 'POST': 2, 'PUT': 3
+      'HEAD': 0, 'GET': 1, 'POST': 2, 'PUT': 3,
+      'DELETE': 4, 'OPTIONS': 5, 'CONNECT': 6,
+      'TRACE': 7, 'PATCH': 8
     }, parse.invoke('on_request', {
       0: start
     }, parse.error(3, '`on_request` error')));
