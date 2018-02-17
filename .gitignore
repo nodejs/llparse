@@ -1,6 +1,8 @@
 node_modules/
 npm-debug.log
 test/tmp
+examples/http/http
+*.dSYM
 *.ll
 *.o
 main

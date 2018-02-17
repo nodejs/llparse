@@ -7,6 +7,8 @@ An API for generating parser in LLVM IR.
 ## Usage
 
 ```js
+'use strict';
+
 const p = require('llparse').create('http_parser');
 
 const method = p.node('method');
@@ -42,7 +44,7 @@ method
   .otherwise(p.error(5, 'Expected method'));
 
 beforeUrl
-  .match(' ', beforeUrl);
+  .match(' ', beforeUrl)
   .otherwise(urlStart);
 
 url
@@ -53,7 +55,7 @@ http
   .match('HTTP/1.1\r\n\r\n', complete)
   .otherwise(p.error(6, 'Expected HTTP/1.1 and two newlines'));
 
-console.log(ir.build(method));
+console.log(p.build(method));
 ```
 
 #### LICENSE
