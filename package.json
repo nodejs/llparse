@@ -9,7 +9,6 @@
   "author": "Fedor Indutny <fedor@indutny.com> (http://darksi.de/)",
   "license": "MIT",
   "dependencies": {
-    "esprima": "^4.0.0",
     "llvm-ir": "^1.0.0-beta5"
   },
   "devDependencies": {
