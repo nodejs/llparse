@@ -38,7 +38,7 @@ describe('LLParse', () => {
   });
 
   describe('`.otherwise()`', () => {
-    it('should not advance position', (callback) => {
+    it('should not advance position by default', (callback) => {
       const p = llparse.create('llparse');
 
       const a = p.node('a');
@@ -52,7 +52,6 @@ describe('LLParse', () => {
         .match('B', printMatch(b))
         .otherwise(a);
 
-
       const binary = fixtures.build('otherwise-noadvance', p.build(a));
 
       binary('AABAB', 'off=3 match=0\noff=5 match=0\n', callback);
@@ -65,7 +64,7 @@ describe('LLParse', () => {
 
       start
         .match(' ', printMatch(start))
-        .otherwise(p.skip());
+        .skip(start);
 
       const binary = fixtures.build('otherwise-skip', p.build(start));
 

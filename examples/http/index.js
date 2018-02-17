@@ -40,7 +40,7 @@ beforeUrl
 
 url
   .match(' ', urlEnd)
-  .otherwise(p.skip());
+  .skip(url);
 
 http
   .match('HTTP/1.1\r\n\r\n', complete)
