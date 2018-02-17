@@ -11,12 +11,11 @@ describe('LLParse', () => {
     const response = parse.node('res');
     const error = parse.error(1, 'Invalid word');
 
-    start.match('HTTP', response);
-    start.select({ 'HEAD': 0, 'GET': 1, 'POST': 2, 'PUT': 3 }, request);
-    start.otherwise(error);
+    start.match('HTTP', parse.invoke('on_response', {
+      0: start
+    }, parse.error(2, '`on_response` error')));
 
-    request.otherwise(parse.invoke('on_request', start));
-    response.otherwise(parse.invoke('on_response', start));
+    start.otherwise(error);
 
     const out = parse.build(start);
     require('fs').writeFileSync('./2.ll', out);
