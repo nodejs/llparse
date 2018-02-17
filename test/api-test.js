@@ -19,6 +19,6 @@ describe('LLParse', () => {
     response.otherwise(parse.invoke('on_response', start));
 
     const out = parse.build(start);
-    console.log(out);
+    require('fs').writeFileSync('./2.ll', out);
   });
 });
