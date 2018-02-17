@@ -15,6 +15,12 @@ describe('LLParse', () => {
       0: start
     }, parse.error(2, '`on_response` error')));
 
+    start.select({
+      'HEAD': 0, 'GET': 1, 'POST': 2, 'PUT': 3
+    }, parse.invoke('on_request', {
+      0: start
+    }, parse.error(3, '`on_request` error')));
+
     start.otherwise(error);
 
     const out = parse.build(start);
