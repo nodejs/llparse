@@ -10,6 +10,8 @@ describe('LLParse', () => {
     const request = parse.node('req');
     const response = parse.node('res');
 
+    start.match(' ', start);
+
     start.match('HTTP', parse.invoke('on_response', {
       0: start
     }, parse.error(1, '`on_response` error')));
