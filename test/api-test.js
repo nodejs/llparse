@@ -1,4 +1,5 @@
 'use strict';
+/* global describe it beforeEach */
 
 const llparse = require('../');
 
@@ -18,8 +19,6 @@ describe('LLParse', () => {
 
   it('should compile simple parser', (callback) => {
     const start = p.node('start');
-    const request = p.node('req');
-    const response = p.node('res');
 
     start.match(' ', start);
 

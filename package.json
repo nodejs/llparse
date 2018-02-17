@@ -3,16 +3,18 @@
   "version": "1.0.0",
   "main": "lib/llparse.js",
   "scripts": {
-    "test": "mocha --reporter=spec test/*-test.js"
+    "lint": "eslint test/*.js test/**/*.js lib/*.js lib/**/*.js lib/**/**/*.js",
+    "test": "mocha --reporter=spec test/*-test.js && npm run lint"
   },
   "keywords": [],
   "author": "Fedor Indutny <fedor@indutny.com> (http://darksi.de/)",
   "license": "MIT",
   "dependencies": {
-    "llvm-ir": "^1.0.0-beta5"
+    "llvm-ir": "^1.0.0-beta7"
   },
   "devDependencies": {
     "async": "^2.6.0",
+    "eslint": "^4.18.0",
     "mocha": "^5.0.0"
   },
   "directories": {

@@ -20,13 +20,14 @@ exports.build = (name, source) => {
   try {
     fs.mkdirSync(TMP_DIR);
   } catch (e) {
+    // no-op
   }
 
   const file = path.join(TMP_DIR, name + '.ll');
   const out = path.join(TMP_DIR, name);
   fs.writeFileSync(file, source);
 
-  const res = spawnSync(CLANG,
+  spawnSync(CLANG,
     [ '-flto', '-Os', '-fvisibility=hidden', MAIN, file, '-o', out ]);
 
   return (input, expected, callback) => {
@@ -53,7 +54,7 @@ exports.build = (name, source) => {
         return callback(err);
 
       for (let i = 0; i < results.length; i++)
-        assert.strictEqual(results[i], expected, 'Scan value: ' + (i + 1))
+        assert.strictEqual(results[i], expected, 'Scan value: ' + (i + 1));
 
       return callback(null);
     });
