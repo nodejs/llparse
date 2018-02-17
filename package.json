@@ -10,9 +10,10 @@
   "license": "MIT",
   "dependencies": {
     "esprima": "^4.0.0",
-    "llvm-ir": "^1.0.0-beta1"
+    "llvm-ir": "^1.0.0-beta5"
   },
   "devDependencies": {
+    "async": "^2.6.0",
     "mocha": "^5.0.0"
   },
   "directories": {

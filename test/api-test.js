@@ -2,8 +2,10 @@
 
 const llparse = require('../');
 
+const fixtures = require('./fixtures');
+
 describe('LLParse', () => {
-  it('should compile simple parser', () => {
+  it('should compile simple parser', (callback) => {
     const parse = llparse.create('llparse');
 
     const start = parse.node('start');
@@ -12,7 +14,7 @@ describe('LLParse', () => {
 
     start.match(' ', start);
 
-    start.match('HTTP', parse.invoke('on_response', {
+    start.match('HTTP', parse.invoke('print_match', {
       0: start
     }, parse.error(1, '`on_response` error')));
 
@@ -20,13 +22,14 @@ describe('LLParse', () => {
       'HEAD': 0, 'GET': 1, 'POST': 2, 'PUT': 3,
       'DELETE': 4, 'OPTIONS': 5, 'CONNECT': 6,
       'TRACE': 7, 'PATCH': 8
-    }, parse.invoke('on_request', {
+    }, parse.invoke('print_match', {
       0: start
-    }, parse.error(2, '`on_request` error')));
+    }, parse.error(2, '`print_match` error')));
 
     start.otherwise(parse.error(3, 'Invalid word'));
 
-    const out = parse.build(start);
-    require('fs').writeFileSync('./2.ll', out);
+    const binary = fixtures.build('simple', parse.build(start));
+
+    binary('GET', 'off=3 match=1\n', callback);
   });
 });
