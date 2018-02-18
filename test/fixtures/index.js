@@ -32,7 +32,7 @@ exports.build = (name, source) => {
   if (ret.status !== 0) {
     process.stderr.write(ret.stdout);
     process.stderr.write(ret.stderr);
-    throw new Error('clang exit code=' + ret.status);
+    throw new Error('clang exit code: ' + ret.status);
   }
 
   return (input, expected, callback) => {
