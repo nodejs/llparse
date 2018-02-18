@@ -57,14 +57,14 @@ describe('LLParse', () => {
       binary('AABAB', 'off=3 match=0\noff=5 match=0\n', callback);
     });
 
-    it('should advance when it is `.skip()`', (callback) => {
+    it('should advance when it is `.skipTo()`', (callback) => {
       const p = llparse.create('llparse');
 
       const start = p.node('start');
 
       start
         .match(' ', printMatch(start))
-        .skip(start);
+        .skipTo(start);
 
       const binary = fixtures.build('otherwise-skip', p.build(start));
 
