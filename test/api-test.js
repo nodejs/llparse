@@ -70,5 +70,18 @@ describe('LLParse', () => {
 
       binary('HELLO WORLD', 'off=6 match=0\n', callback);
     });
+
+    it('should skip everything with `.skipTo()`', (callback) => {
+      const p = llparse.create('llparse');
+
+      const start = p.node('start');
+
+      start
+        .skipTo(start);
+
+      const binary = fixtures.build('all-skip', p.build(start));
+
+      binary('HELLO WORLD', '', callback);
+    });
   });
 });
