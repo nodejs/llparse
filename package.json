@@ -10,7 +10,7 @@
   "author": "Fedor Indutny <fedor@indutny.com> (http://darksi.de/)",
   "license": "MIT",
   "dependencies": {
-    "llvm-ir": "^1.0.0-beta9"
+    "llvm-ir": "^1.0.1"
   },
   "devDependencies": {
     "async": "^2.6.0",
