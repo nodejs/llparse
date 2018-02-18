@@ -12,8 +12,8 @@ struct state {
   int match;
 };
 
-/* 2 gb */
-static const int64_t kBytes = 2147483648LL;
+/* 8 gb */
+static const int64_t kBytes = 8589934592LL;
 
 static int bench = 0;
 static const char* start;
