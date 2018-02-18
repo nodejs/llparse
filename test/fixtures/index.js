@@ -27,8 +27,13 @@ exports.build = (name, source) => {
   const out = path.join(TMP_DIR, name);
   fs.writeFileSync(file, source);
 
-  spawnSync(CLANG,
+  const ret = spawnSync(CLANG,
     [ '-flto', '-Os', '-fvisibility=hidden', MAIN, file, '-o', out ]);
+  if (ret.status !== 0) {
+    process.stderr.write(ret.stdout);
+    process.stderr.write(ret.stderr);
+    throw new Error('clang exit code=' + ret.status);
+  }
 
   return (input, expected, callback) => {
     const buf = Buffer.from(input);
