@@ -49,7 +49,7 @@ describe('LLParse', () => {
 
     const binary = fixtures.build('shallow', p.build(start));
 
-    binary('012', 'off=3 match=1\n', callback);
+    binary('012', 'off=1 match=0\noff=2 match=1\noff=3 match=2\n', callback);
   });
 
   it('should support multi-match', (callback) => {
