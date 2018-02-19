@@ -7,12 +7,24 @@ const beforeUrl = p.node('before_url');
 const url = p.node('url');
 const http = p.node('http');
 
-// Invoke external C function
-const onMethod = p.invoke(p.code.value('on_method'), {
+// Add custom uint8_t property to the state
+p.property(ir => ir.i(8), 'method');
+
+// Store method inside a custom property
+const onMethod = p.invoke(p.code.value('on_method', (ir, context) => {
+  const body = context.fn.body;
+  const trunc = ir._('trunc',
+    [ context.match.type, context.match, 'to', ir.i(8) ]);
+  body.push(trunc);
+
+  context.store(body, 'method', trunc);
+  body.terminate('ret', [ context.ret, context.ret.v(0) ]);
+}), {
   // If that function returns zero
   0: beforeUrl
 }, p.error(1, '`on_method` error'));
 
+// Invoke external C function
 const urlStart = p.invoke(p.code.match('on_url_start'), {
   0: url
 }, p.error(2, '`on_url_start` error'));
