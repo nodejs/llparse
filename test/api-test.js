@@ -5,40 +5,28 @@ const llparse = require('../');
 
 const fixtures = require('./fixtures');
 
+const printMatch = fixtures.printMatch;
+const printOff = fixtures.printOff;
+const compiledPrint = fixtures.compiledPrint;
+
 describe('LLParse', () => {
   let p;
   beforeEach(() => {
     p = llparse.create('llparse');
   });
 
-  const printMatch = (next) => {
-    const code = p.code.store('print_match');
-
-    return p.invoke(code, {
-      0: next
-    }, p.error(1, '`print_match` error'));
-  };
-
-  const printOff = (next) => {
-    const code = p.code.callback('print_off');
-
-    return p.invoke(code, {
-      0: next
-    }, p.error(1, '`print_off` error'));
-  };
-
   it('should compile simple parser', (callback) => {
     const start = p.node('start');
 
     start.match(' ', start);
 
-    start.match('HTTP', printOff(start));
+    start.match('HTTP', printOff(p, start));
 
     start.select({
       'HEAD': 0, 'GET': 1, 'POST': 2, 'PUT': 3,
       'DELETE': 4, 'OPTIONS': 5, 'CONNECT': 6,
       'TRACE': 7, 'PATCH': 8
-    }, printMatch(start));
+    }, printMatch(p, start));
 
     start.otherwise(p.error(3, 'Invalid word'));
 
@@ -53,7 +41,7 @@ describe('LLParse', () => {
     start.select({
       '0': 0, '1': 1, '2': 2, '3': 3, '4': 4,
       '5': 5, '6': 6, '7': 7, '8': 8, '9': 9
-    }, printMatch(start));
+    }, printMatch(p, start));
 
     start.otherwise(p.error(3, 'Invalid word'));
 
@@ -65,9 +53,9 @@ describe('LLParse', () => {
   it('should support key-value select', (callback) => {
     const start = p.node('start');
 
-    start.select('0', 0, printMatch(start));
-    start.select('1', 1, printMatch(start));
-    start.select('2', 2, printMatch(start));
+    start.select('0', 0, printMatch(p, start));
+    start.select('1', 1, printMatch(p, start));
+    start.select('2', 2, printMatch(p, start));
 
     start.otherwise(p.error(3, 'Invalid word'));
 
@@ -84,7 +72,7 @@ describe('LLParse', () => {
     start.select({
       'A': 0,
       'B': 1
-    }, printMatch(start));
+    }, printMatch(p, start));
 
     start.otherwise(p.error(3, 'Invalid word'));
 
@@ -103,7 +91,7 @@ describe('LLParse', () => {
     start.select({
       'A': 0,
       'B': 1
-    }, printMatch(start));
+    }, printMatch(p, start));
 
     start.otherwise(p.error(3, 'Invalid word'));
 
@@ -111,6 +99,23 @@ describe('LLParse', () => {
     binary(
       'A B  A  A',
       'off=1 match=0\noff=3 match=1\noff=6 match=0\noff=9 match=0\n',
+      callback);
+  });
+
+  it('should support compiled code', (callback) => {
+    const start = p.node('start');
+
+    start.select({
+      '0': 0,
+      '1': 1
+    }, compiledPrint(p, start));
+
+    start.otherwise(p.error(3, 'Invalid word'));
+
+    const binary = fixtures.build('compiled', p.build(start));
+    binary(
+      '0110',
+      'not one\none\none\nnot one\n',
       callback);
   });
 
@@ -126,7 +131,7 @@ describe('LLParse', () => {
         .otherwise(b);
 
       b
-        .match('B', printOff(b))
+        .match('B', printOff(p, b))
         .otherwise(a);
 
       const binary = fixtures.build('otherwise-noadvance', p.build(a));
@@ -140,7 +145,7 @@ describe('LLParse', () => {
       const start = p.node('start');
 
       start
-        .match(' ', printOff(start))
+        .match(' ', printOff(p, start))
         .skipTo(start);
 
       const binary = fixtures.build('otherwise-skip', p.build(start));
