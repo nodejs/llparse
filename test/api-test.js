@@ -52,6 +52,20 @@ describe('LLParse', () => {
     binary('012', 'off=1 match=0\noff=2 match=1\noff=3 match=2\n', callback);
   });
 
+  it('should support key-value select', (callback) => {
+    const start = p.node('start');
+
+    start.select('0', 0, printMatch(start));
+    start.select('1', 1, printMatch(start));
+    start.select('2', 2, printMatch(start));
+
+    start.otherwise(p.error(3, 'Invalid word'));
+
+    const binary = fixtures.build('kv-select', p.build(start));
+
+    binary('012', 'off=1 match=0\noff=2 match=1\noff=3 match=2\n', callback);
+  });
+
   it('should support multi-match', (callback) => {
     const start = p.node('start');
 
