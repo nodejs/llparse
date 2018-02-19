@@ -37,6 +37,25 @@ describe('LLParse', () => {
     binary('GET', 'off=3 match=1\n', callback);
   });
 
+  it('should support multi-match', (callback) => {
+    const start = p.node('start');
+
+    start.match([ ' ', '\t', '\r', '\n' ], start);
+
+    start.select({
+      'A': 0,
+      'B': 1
+    }, printMatch(start));
+
+    start.otherwise(p.error(3, 'Invalid word'));
+
+    const binary = fixtures.build('multi-match', p.build(start));
+    binary(
+      'A B\t\tA\r\nA',
+      'off=1 match=0\noff=3 match=1\noff=6 match=0\noff=9 match=0\n',
+      callback);
+  });
+
   describe('`.otherwise()`', () => {
     it('should not advance position by default', (callback) => {
       const p = llparse.create('llparse');
