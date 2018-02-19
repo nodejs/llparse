@@ -119,6 +119,47 @@ describe('LLParse', () => {
       callback);
   });
 
+  it('should support custom state properties', (callback) => {
+    const start = p.node('start');
+    const error = p.error(3, 'Invalid word');
+
+    p.property(ir => ir.i(8), 'custom');
+
+    const setCustom = p.code.value('set_custom', (ir, context) => {
+      const body = context.fn.body;
+      const trunc = ir._('trunc',
+        [ context.match.type, context.match, 'to', ir.i(8) ]);
+      body.push(trunc);
+
+      context.store(body, 'custom', trunc);
+      body.terminate('ret', [ context.ret, context.ret.v(0) ]);
+    });
+
+    const getCustom = p.code.match('get_custom', (ir, context) => {
+      const body = context.fn.body;
+      const load = context.load(body, 'custom');
+      const zext = ir._('zext', [ ir.i(8), load, 'to', context.ret.type ]);
+      body.push(zext);
+      body.terminate('ret', [ context.ret, zext ]);
+    });
+
+    const second = p.invoke(getCustom, {
+      0: p.invoke(p.code.match('print_zero'), { 0: start }, error),
+      1: p.invoke(p.code.match('print_one'), { 0: start }, error)
+    }, error);
+
+    start
+      .select({
+        '0': 0,
+        '1': 1
+      }, p.invoke(setCustom, { 0: second }, error))
+      .otherwise(error);
+
+    const binary = fixtures.build('custom-prop', p.build(start));
+
+    binary('0110', 'zero\none\none\nzero\n', callback);
+  });
+
   describe('`.otherwise()`', () => {
     it('should not advance position by default', (callback) => {
       const p = llparse.create('llparse');

@@ -21,6 +21,22 @@ static const char* start;
 void llparse_init(struct state* s);
 int llparse_execute(struct state* s, const char* p, const char* endp);
 
+int print_zero(struct state* s, const char* p, const char* endp) {
+  if (bench)
+    return 0;
+
+  fprintf(stdout, "zero\n");
+  return 0;
+}
+
+int print_one(struct state* s, const char* p, const char* endp) {
+  if (bench)
+    return 0;
+
+  fprintf(stdout, "one\n");
+  return 0;
+}
+
 int print_off(struct state* s, const char* p, const char* endp) {
   if (bench)
     return 0;
