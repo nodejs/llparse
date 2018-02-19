@@ -131,7 +131,7 @@ describe('LLParse', () => {
 
       const binary = fixtures.build('otherwise-noadvance', p.build(a));
 
-      binary('AABAB', 'off=3 match=0\noff=5 match=0\n', callback);
+      binary('AABAB', 'off=3\noff=5\n', callback);
     });
 
     it('should advance when it is `.skipTo()`', (callback) => {
@@ -145,7 +145,7 @@ describe('LLParse', () => {
 
       const binary = fixtures.build('otherwise-skip', p.build(start));
 
-      binary('HELLO WORLD', 'off=6 match=0\n', callback);
+      binary('HELLO WORLD', 'off=6\n', callback);
     });
 
     it('should skip everything with `.skipTo()`', (callback) => {
