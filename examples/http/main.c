@@ -11,7 +11,6 @@ struct http_parser_state_s {
   int error;
   const char* reason;
   int index;
-  int match;
 
   const char* url_start;
 };
@@ -20,8 +19,9 @@ void http_parser_init(http_parser_state_t* s);
 int http_parser_execute(http_parser_state_t* s, const char* p,
                         const char* endp);
 
-int on_method(http_parser_state_t* s, const char* p, const char* endp) {
-  fprintf(stdout, "on_method=%d\n", s->match);
+int on_method(http_parser_state_t* s, const char* p, const char* endp,
+              int method) {
+  fprintf(stdout, "on_method=%d\n", method);
   return 0;
 }
 

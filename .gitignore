@@ -4,6 +4,7 @@ test/tmp
 examples/http/http
 *.dSYM
 *.ll
+*.bc
 *.o
 main
 1

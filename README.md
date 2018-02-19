@@ -17,20 +17,20 @@ const url = p.node('url');
 const http = p.node('http');
 
 // Invoke external C function
-const onMethod = p.invoke('on_method', {
+const onMethod = p.invoke(p.code.value('on_method'), {
   // If that function returns zero
   0: beforeUrl
 }, p.error(1, '`on_method` error'));
 
-const urlStart = p.invoke('on_url_start', {
+const urlStart = p.invoke(p.code.match('on_url_start'), {
   0: url
 }, p.error(2, '`on_url_start` error'));
 
-const urlEnd = p.invoke('on_url_end', {
+const urlEnd = p.invoke(p.code.match('on_url_end'), {
   0: http
 }, p.error(3, '`on_url_end` error'));
 
-const complete = p.invoke('on_complete', {
+const complete = p.invoke(p.code.match('on_complete'), {
   // Restart
   0: method
 }, p.error(4, '`on_complete` error'));
