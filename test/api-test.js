@@ -12,9 +12,19 @@ describe('LLParse', () => {
   });
 
   const printMatch = (next) => {
-    return p.invoke('print_match', {
+    const code = p.code.store('print_match');
+
+    return p.invoke(code, {
       0: next
     }, p.error(1, '`print_match` error'));
+  };
+
+  const printOff = (next) => {
+    const code = p.code.callback('print_off');
+
+    return p.invoke(code, {
+      0: next
+    }, p.error(1, '`print_off` error'));
   };
 
   it('should compile simple parser', (callback) => {
@@ -22,7 +32,7 @@ describe('LLParse', () => {
 
     start.match(' ', start);
 
-    start.match('HTTP', printMatch(start));
+    start.match('HTTP', printOff(start));
 
     start.select({
       'HEAD': 0, 'GET': 1, 'POST': 2, 'PUT': 3,
@@ -116,7 +126,7 @@ describe('LLParse', () => {
         .otherwise(b);
 
       b
-        .match('B', printMatch(b))
+        .match('B', printOff(b))
         .otherwise(a);
 
       const binary = fixtures.build('otherwise-noadvance', p.build(a));
@@ -130,7 +140,7 @@ describe('LLParse', () => {
       const start = p.node('start');
 
       start
-        .match(' ', printMatch(start))
+        .match(' ', printOff(start))
         .skipTo(start);
 
       const binary = fixtures.build('otherwise-skip', p.build(start));

@@ -21,20 +21,28 @@ static const char* start;
 void llparse_init(struct state* s);
 int llparse_execute(struct state* s, const char* p, const char* endp);
 
-int print_match(struct state* s, const char* p, const char* endp) {
+int print_off(struct state* s, const char* p, const char* endp) {
   if (bench)
     return 0;
 
-  fprintf(stdout, "off=%d match=%d\n", (int) (p - start), s->match);
+  fprintf(stdout, "off=%d\n", (int) (p - start));
   return 0;
 }
 
-int return_match(struct state* s, const char* p, const char* endp) {
+int print_match(struct state* s, const char* p, const char* endp, int value) {
   if (bench)
-    return s->match;
+    return 0;
 
-  fprintf(stdout, "off=%d return match=%d\n", (int) (p - start), s->match);
-  return s->match;
+  fprintf(stdout, "off=%d match=%d\n", (int) (p - start), value);
+  return 0;
+}
+
+int return_match(struct state* s, const char* p, const char* endp, int value) {
+  if (bench)
+    return value;
+
+  fprintf(stdout, "off=%d return match=%d\n", (int) (p - start), value);
+  return value;
 }
 
 static int run_bench(const char* input, int len) {
