@@ -37,6 +37,21 @@ describe('LLParse', () => {
     binary('GET', 'off=3 match=1\n', callback);
   });
 
+  it('should optimize shallow select', (callback) => {
+    const start = p.node('start');
+
+    start.select({
+      '0': 0, '1': 1, '2': 2, '3': 3, '4': 4,
+      '5': 5, '6': 6, '7': 7, '8': 8, '9': 9
+    }, printMatch(start));
+
+    start.otherwise(p.error(3, 'Invalid word'));
+
+    const binary = fixtures.build('shallow', p.build(start));
+
+    binary('012', 'off=3 match=1\n', callback);
+  });
+
   it('should support multi-match', (callback) => {
     const start = p.node('start');
 
