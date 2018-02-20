@@ -9,7 +9,6 @@ struct state {
   int error;
   const char* reason;
   int index;
-  int match;
 };
 
 /* 8 gb */
