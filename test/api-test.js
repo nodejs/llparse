@@ -125,25 +125,7 @@ describe('LLParse', () => {
 
     p.property(ir => ir.i(8), 'custom');
 
-    const setCustom = p.code.value('set_custom', (ir, context) => {
-      const body = context.fn.body;
-      const trunc = ir._('trunc',
-        [ context.match.type, context.match, 'to', ir.i(8) ]);
-      body.push(trunc);
-
-      context.store(body, 'custom', trunc);
-      body.terminate('ret', [ context.ret, context.ret.v(0) ]);
-    });
-
-    const getCustom = p.code.match('get_custom', (ir, context) => {
-      const body = context.fn.body;
-      const load = context.load(body, 'custom');
-      const zext = ir._('zext', [ ir.i(8), load, 'to', context.ret.type ]);
-      body.push(zext);
-      body.terminate('ret', [ context.ret, zext ]);
-    });
-
-    const second = p.invoke(getCustom, {
+    const second = p.invoke(p.code.load('load', 'custom'), {
       0: p.invoke(p.code.match('print_zero'), { 0: start }, error),
       1: p.invoke(p.code.match('print_one'), { 0: start }, error)
     }, error);
@@ -152,7 +134,7 @@ describe('LLParse', () => {
       .select({
         '0': 0,
         '1': 1
-      }, p.invoke(setCustom, { 0: second }, error))
+      }, p.invoke(p.code.store('store', 'custom'), { 0: second }, error))
       .otherwise(error);
 
     const binary = fixtures.build('custom-prop', p.build(start));

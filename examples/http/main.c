@@ -12,6 +12,7 @@ struct http_parser_state_s {
   const char* reason;
   int index;
   void* data;
+  void* mark;
 
   unsigned int method : 8;
   const char* url_start;

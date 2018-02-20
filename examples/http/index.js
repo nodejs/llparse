@@ -11,15 +11,7 @@ const http = p.node('http');
 p.property(ir => ir.i(8), 'method');
 
 // Store method inside a custom property
-const onMethod = p.invoke(p.code.value('on_method', (ir, context) => {
-  const body = context.fn.body;
-  const trunc = ir._('trunc',
-    [ context.match.type, context.match, 'to', ir.i(8) ]);
-  body.push(trunc);
-
-  context.store(body, 'method', trunc);
-  body.terminate('ret', [ context.ret, context.ret.v(0) ]);
-}), {
+const onMethod = p.invoke(p.code.store('on_method', 'method'), {
   // If that function returns zero
   0: beforeUrl
 }, p.error(1, '`on_method` error'));
