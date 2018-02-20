@@ -16,10 +16,10 @@ const beforeUrl = p.node('before_url');
 const url = p.node('url');
 const http = p.node('http');
 
-// Add custom uint8_t property to the state
+// Add custom int8_t property to the state
 p.property(ir => ir.i(8), 'method');
 
-// Store method inside a custom property
+// Store method inside the custom property
 const onMethod = p.invoke(p.code.store('on_method', 'method'), {
   // If that function returns zero
   0: beforeUrl
