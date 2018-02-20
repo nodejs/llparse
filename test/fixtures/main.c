@@ -20,6 +20,13 @@ static const char* start;
 void llparse_init(struct state* s);
 int llparse_execute(struct state* s, const char* p, const char* endp);
 
+void debug(struct state* s, const char* p, const char* endp, const char* msg) {
+  if (bench)
+    return;
+
+  fprintf(stderr, "off=%d msg=%s\n", (int) (p - start), msg);
+}
+
 int print_zero(struct state* s, const char* p, const char* endp) {
   if (bench)
     return 0;
