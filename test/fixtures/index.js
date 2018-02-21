@@ -69,15 +69,11 @@ exports.build = (name, source) => {
 exports.printMatch = (p, next) => {
   const code = p.code.value('print_match');
 
-  return p.invoke(code, {
-    0: next
-  }, p.error(1, '`print_match` error'));
+  return p.invoke(code, next);
 };
 
 exports.printOff = (p, next) => {
   const code = p.code.match('print_off');
 
-  return p.invoke(code, {
-    0: next
-  }, p.error(1, '`print_off` error'));
+  return p.invoke(code, next);
 };
