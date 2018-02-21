@@ -116,7 +116,7 @@ describe('LLParse', () => {
       .select({
         '0': 0,
         '1': 1
-      }, p.invoke(p.code.store('custom'), { 0: second }, error))
+      }, p.invoke(p.code.store('custom'), second))
       .otherwise(error);
 
     const binary = fixtures.build('custom-prop', p.build(start));

@@ -11,13 +11,11 @@ const http = p.node('http');
 p.property(ir => ir.i(8), 'method');
 
 // Store method inside a custom property
-const onMethod = p.invoke(p.code.store('method'), {
-  // If that function returns zero
-  0: beforeUrl
-}, p.error(1, '`on_method` error'));
+const onMethod = p.invoke(p.code.store('method'), beforeUrl);
 
 // Invoke external C function
 const urlStart = p.invoke(p.code.match('on_url_start'), {
+  // If that function returns zero
   0: url
 }, p.error(2, '`on_url_start` error'));
 
