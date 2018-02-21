@@ -67,6 +67,28 @@ int return_match(struct state* s, const char* p, const char* endp, int value) {
   return value;
 }
 
+int on_dot(struct state* s, const char* p, const char* endp, int value) {
+  if (bench)
+    return value;
+
+  fprintf(stdout, "off=%d dot=%.*s\n", (int) (p - start), (int) (endp - p), p);
+}
+
+int on_dash(struct state* s, const char* p, const char* endp, int value) {
+  if (bench)
+    return value;
+
+  fprintf(stdout, "off=%d dash=%.*s\n", (int) (p - start), (int) (endp - p), p);
+}
+
+int on_underscore(struct state* s, const char* p, const char* endp, int value) {
+  if (bench)
+    return value;
+
+  fprintf(stdout, "off=%d underscore=%.*s\n", (int) (p - start),
+      (int) (endp - p), p);
+}
+
 static int run_bench(const char* input, int len) {
   struct state s;
   int64_t i;
