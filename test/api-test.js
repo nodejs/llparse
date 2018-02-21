@@ -7,7 +7,6 @@ const fixtures = require('./fixtures');
 
 const printMatch = fixtures.printMatch;
 const printOff = fixtures.printOff;
-const compiledPrint = fixtures.compiledPrint;
 
 describe('LLParse', () => {
   let p;
@@ -102,30 +101,13 @@ describe('LLParse', () => {
       callback);
   });
 
-  it('should support compiled code', (callback) => {
-    const start = p.node('start');
-
-    start.select({
-      '0': 0,
-      '1': 1
-    }, compiledPrint(p, start));
-
-    start.otherwise(p.error(3, 'Invalid word'));
-
-    const binary = fixtures.build('compiled', p.build(start));
-    binary(
-      '0110',
-      'not one\none\none\nnot one\n',
-      callback);
-  });
-
   it('should support custom state properties', (callback) => {
     const start = p.node('start');
     const error = p.error(3, 'Invalid word');
 
     p.property(ir => ir.i(8), 'custom');
 
-    const second = p.invoke(p.code.load('load', 'custom'), {
+    const second = p.invoke(p.code.load('custom'), {
       0: p.invoke(p.code.match('print_zero'), { 0: start }, error),
       1: p.invoke(p.code.match('print_one'), { 0: start }, error)
     }, error);
@@ -134,7 +116,7 @@ describe('LLParse', () => {
       .select({
         '0': 0,
         '1': 1
-      }, p.invoke(p.code.store('store', 'custom'), { 0: second }, error))
+      }, p.invoke(p.code.store('custom'), { 0: second }, error))
       .otherwise(error);
 
     const binary = fixtures.build('custom-prop', p.build(start));
