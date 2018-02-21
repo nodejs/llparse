@@ -20,9 +20,9 @@ describe('LLParse/span', () => {
     const underscore = p.node('underscore');
 
     const span = {
-      dot: p.span('on_dot'),
-      dash: p.span('on_dash'),
-      underscore: p.span('on_underscore')
+      dot: p.span(p.code.span('on_dot')),
+      dash: p.span(p.code.span('on_dash')),
+      underscore: p.span(p.code.span('on_underscore'))
     };
 
     start.otherwise(span.dot.start(dot));
@@ -48,7 +48,7 @@ describe('LLParse/span', () => {
 
   it('should throw on loops', () => {
     const start = p.node('start');
-    const span = p.span('on_data');
+    const span = p.span(p.code.span('on_data'));
 
     start.otherwise(span.start().otherwise(start));
 
@@ -57,7 +57,7 @@ describe('LLParse/span', () => {
 
   it('should throw on unmatched ends', () => {
     const start = p.node('start');
-    const span = p.span('on_data');
+    const span = p.span(p.code.span('on_data'));
 
     start.otherwise(span.end().otherwise(start));
 
