@@ -3,7 +3,7 @@
   "version": "2.0.0-beta3",
   "main": "lib/llparse.js",
   "scripts": {
-    "lint": "eslint test/*.js test/**/*.js lib/*.js lib/**/*.js lib/**/**/*.js",
+    "lint": "eslint test/*.js test/**/*.js lib/*.js lib/**/*.js lib/**/**/*.js lib/**/**/**/*.js",
     "test": "mocha --reporter=spec test/*-test.js && npm run lint"
   },
   "keywords": [],

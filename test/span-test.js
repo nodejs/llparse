@@ -17,9 +17,12 @@ describe('LLParse/span', () => {
     const start = p.node('start');
     const dot = p.node('dot');
     const dash = p.node('dash');
+    const underscore = p.node('underscore');
+
     const span = {
       dot: p.span('on_dot'),
-      dash: p.span('on_dash')
+      dash: p.span('on_dash'),
+      underscore: p.span('on_underscore')
     };
 
     start.otherwise(span.dot.start(dot));
@@ -27,15 +30,20 @@ describe('LLParse/span', () => {
     dot
       .match('.', dot)
       .match('-', span.dash.start(dash))
+      .match('_', span.underscore.start(underscore))
       .skipTo(span.dot.end(start));
 
     dash
       .match('-', dash)
       .otherwise(span.dash.end(dot));
 
+    underscore
+      .match('_', underscore)
+      .otherwise(span.underscore.end(dot));
+
     const binary = fixtures.build('span', p.build(start));
 
-    binary('012', 'off=3 match=1\n', callback);
+    binary('..--..__..', 'off=3 match=1\n', callback);
   });
 
   it('should throw on loops', () => {
