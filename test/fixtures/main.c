@@ -24,7 +24,7 @@ void debug(struct state* s, const char* p, const char* endp, const char* msg) {
   if (bench)
     return;
 
-  fprintf(stderr, "off=%d msg=%s\n", (int) (p - start), msg);
+  fprintf(stderr, "off=%d > %s\n", (int) (p - start), msg);
 }
 
 int print_zero(struct state* s, const char* p, const char* endp) {
