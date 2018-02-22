@@ -15,7 +15,7 @@ describe('LLParse/transform', () => {
     const start = p.node('start');
 
     start
-      .transform(p.transform.toLower())
+      .transform(p.transform.toLowerUnsafe())
       .match('connect', fixtures.printOff(p, start))
       .match('close', fixtures.printOff(p, start))
       .otherwise(p.error(1, 'error'));
