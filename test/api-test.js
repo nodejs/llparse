@@ -124,6 +124,26 @@ describe('LLParse', () => {
     binary('0110', 'zero\none\none\nzero\n', callback);
   });
 
+  describe('`.peek()`', () => {
+    it('should not advance position', (callback) => {
+      const start = p.node('start');
+      const ab = p.node('ab');
+      const error = p.error(3, 'Invalid word');
+
+      start
+        .peek([ 'a', 'b' ], ab)
+        .otherwise(error);
+
+      ab
+        .match([ 'a', 'b' ], printOff(p, start))
+        .otherwise(error);
+
+      const binary = fixtures.build('peek', p.build(start));
+
+      binary('ab', 'off=1\noff=2\n', callback);
+    });
+  });
+
   describe('`.otherwise()`', () => {
     it('should not advance position by default', (callback) => {
       const p = llparse.create('llparse');

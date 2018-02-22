@@ -29,8 +29,8 @@ describe('LLParse/span', () => {
 
     dot
       .match('.', dot)
-      .match('-', span.dash.start(dash))
-      .match('_', span.underscore.start(underscore))
+      .peek('-', span.dash.start(dash))
+      .peek('_', span.underscore.start(underscore))
       .skipTo(span.dot.end(start));
 
     dash
