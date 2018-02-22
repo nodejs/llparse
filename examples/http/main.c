@@ -12,36 +12,21 @@ struct http_parser_state_s {
   const char* reason;
   int index;
   void* data;
-  void* mark;
 
-  unsigned int method : 8;
-  const char* url_start;
+  uint8_t method;
+  void* mark;
 };
 
 void http_parser_init(http_parser_state_t* s);
 int http_parser_execute(http_parser_state_t* s, const char* p,
                         const char* endp);
 
-static void on_url_part(http_parser_state_t* s, const char* p,
-                        const char* endp) {
+int on_url(http_parser_state_t* s, const char* p, const char* endp) {
   if (p == endp)
-    return;
+    return 0;
 
   fprintf(stdout, "method=%d url_part=\"%.*s\"\n", s->method,
           (int) (endp - p), p);
-}
-
-
-int on_url_start(http_parser_state_t* s, const char* p, const char* endp) {
-  s->url_start = p;
-  return 0;
-}
-
-
-int on_url_end(http_parser_state_t* s, const char* p, const char* endp) {
-  on_url_part(s, s->url_start, p - 1);
-  fprintf(stdout, "url end\n");
-  s->url_start = NULL;
   return 0;
 }
 
@@ -57,8 +42,6 @@ int main(int argc, char** argv) {
 
   http_parser_init(&s);
 
-  s.url_start = NULL;
-
   for (;;) {
     char buf[16384];
     const char* input;
@@ -69,18 +52,12 @@ int main(int argc, char** argv) {
     if (input == NULL)
       break;
 
-    if (s.url_start != NULL)
-      s.url_start = input;
-
     endp = input + strlen(input);
     code = http_parser_execute(&s, input, endp);
     if (code != 0) {
       fprintf(stderr, "code=%d error=%d reason=%s\n", code, s.error, s.reason);
       return -1;
     }
-
-    if (s.url_start != NULL)
-      on_url_part(&s, s.url_start, endp);
   }
 
   return 0;

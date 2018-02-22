@@ -13,25 +13,17 @@ const p = require('llparse').create('http_parser');
 
 const method = p.node('method');
 const beforeUrl = p.node('before_url');
+const urlSpan = p.span(p.code.span('on_url'));
 const url = p.node('url');
 const http = p.node('http');
 
-// Add custom int8_t property to the state
+// Add custom uint8_t property to the state
 p.property(ir => ir.i(8), 'method');
 
-// Store method inside the custom property
+// Store method inside a custom property
 const onMethod = p.invoke(p.code.store('method'), beforeUrl);
 
-// Invoke external C function
-const urlStart = p.invoke(p.code.match('on_url_start'), {
-  // If that function returns zero
-  0: url
-}, p.error(2, '`on_url_start` error'));
-
-const urlEnd = p.invoke(p.code.match('on_url_end'), {
-  0: http
-}, p.error(3, '`on_url_end` error'));
-
+// Invoke custom C function
 const complete = p.invoke(p.code.match('on_complete'), {
   // Restart
   0: method
@@ -47,14 +39,14 @@ method
 
 beforeUrl
   .match(' ', beforeUrl)
-  .otherwise(urlStart);
+  .otherwise(urlSpan.start(url));
 
 url
-  .match(' ', urlEnd)
+  .peek(' ', urlSpan.end(http))
   .skipTo(url);
 
 http
-  .match('HTTP/1.1\r\n\r\n', complete)
+  .match(' HTTP/1.1\r\n\r\n', complete)
   .otherwise(p.error(6, 'Expected HTTP/1.1 and two newlines'));
 
 console.log(p.build(method));
