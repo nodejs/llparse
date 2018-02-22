@@ -59,7 +59,7 @@ describe('LLParse/span', () => {
 
     start.otherwise(span.start().otherwise(start));
 
-    assert.throws(() => p.build(start), /loop/);
+    assert.throws(() => p.build(start), /loop.*on_data/);
   });
 
   it('should throw on unmatched ends', () => {
@@ -68,6 +68,19 @@ describe('LLParse/span', () => {
 
     start.otherwise(span.end().otherwise(start));
 
-    assert.throws(() => p.build(start), /unmatched/i);
+    assert.throws(() => p.build(start), /unmatched.*on_data/i);
+  });
+
+  it('should propagate through the Invoke map', () => {
+    const start = p.node('start');
+    const span = p.span(p.code.span('on_data'));
+
+    p.property(ir => ir.i(8), 'custom');
+
+    start.otherwise(p.invoke(p.code.load('custom'), {
+      0: span.end().otherwise(start)
+    }, span.end().otherwise(start)));
+
+    assert.doesNotThrow(() => p.build(span.start(start)));
   });
 });
