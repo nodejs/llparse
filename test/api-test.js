@@ -34,6 +34,38 @@ describe('LLParse', () => {
     binary('GET', 'off=3 match=1\n', callback);
   });
 
+  it('should compile 16-bit sequence', function(callback) {
+    // It takes a lot of time to scan
+    this.timeout(5000);
+
+    const start = p.node('start');
+
+    const input = new Array(512).fill('a').join('');
+
+    start.match(input, printOff(p, start));
+
+    start.otherwise(p.error(3, 'Invalid word'));
+
+    const binary = fixtures.build('16bit', p.build(start));
+
+    binary(input, 'off=512\n', callback);
+  });
+
+
+  it('should account for sign extension of offset', (callback) => {
+    const start = p.node('start');
+
+    const input = new Array(129).fill('a').join('');
+
+    start.match(input, printOff(p, start));
+
+    start.otherwise(p.error(3, 'Invalid word'));
+
+    const binary = fixtures.build('sign-ext', p.build(start));
+
+    binary(input, 'off=129\n', callback);
+  });
+
   it('should optimize shallow select', (callback) => {
     const start = p.node('start');
 

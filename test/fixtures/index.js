@@ -94,11 +94,14 @@ exports.build = (name, source, options) => {
       proc.stdout.on('data', chunk => stdout += chunk);
 
       async.parallel({
-        exit: cb => proc.once('exit', (code) => cb(null, code)),
+        exit: cb => proc.once('exit', (code, sig) => cb(null, { code, sig })),
         end: cb => proc.stdout.once('end', () => cb(null))
       }, (err, data) => {
-        if (data.exit !== 0)
-          return callback(new Error('Exit code: ' + data.exit));
+        if (data.exit.sig)
+          return callback(new Error('Received signal: ' + data.exit.sig));
+
+        if (data.exit.code !== 0)
+          return callback(new Error('Exit code: ' + data.exit.code));
 
         if (options.normalize === 'span')
           stdout = normalizeSpan(stdout);
