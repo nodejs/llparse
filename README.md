@@ -18,7 +18,7 @@ const url = p.node('url');
 const http = p.node('http');
 
 // Add custom uint8_t property to the state
-p.property(ir => ir.i(8), 'method');
+p.property('i8', 'method');
 
 // Store method inside a custom property
 const onMethod = p.invoke(p.code.store('method'), beforeUrl);

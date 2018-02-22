@@ -75,7 +75,7 @@ describe('LLParse/span', () => {
     const start = p.node('start');
     const span = p.span(p.code.span('on_data'));
 
-    p.property(ir => ir.i(8), 'custom');
+    p.property('i8', 'custom');
 
     start.otherwise(p.invoke(p.code.load('custom'), {
       0: span.end().otherwise(start)

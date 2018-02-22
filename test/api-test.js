@@ -105,7 +105,7 @@ describe('LLParse', () => {
     const start = p.node('start');
     const error = p.error(3, 'Invalid word');
 
-    p.property(ir => ir.i(8), 'custom');
+    p.property('i8', 'custom');
 
     const second = p.invoke(p.code.load('custom'), {
       0: p.invoke(p.code.match('print_zero'), { 0: start }, error),
