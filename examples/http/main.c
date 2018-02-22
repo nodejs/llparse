@@ -10,7 +10,7 @@ struct http_parser_state_s {
   void* current;
   int error;
   const char* reason;
-  uint8_t index;
+  int index;
   void* data;
 
   uint8_t method;

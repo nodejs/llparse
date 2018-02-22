@@ -8,7 +8,7 @@ struct state {
   void* current;
   int error;
   const char* reason;
-  uint8_t index;
+  int index;
 
   /* Give huge leeway */
   void* fields[1024];
