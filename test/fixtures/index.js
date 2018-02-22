@@ -28,7 +28,7 @@ exports.build = (name, source) => {
   fs.writeFileSync(file, source);
 
   const ret = spawnSync(CLANG,
-    [ '-Os', '-fvisibility=hidden', MAIN, file, '-o', out ]);
+    [ '-g3', '-Os', '-fvisibility=hidden', MAIN, file, '-o', out ]);
   if (ret.status !== 0) {
     process.stderr.write(ret.stdout);
     process.stderr.write(ret.stderr);
