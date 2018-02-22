@@ -9,6 +9,9 @@ struct state {
   int error;
   const char* reason;
   int index;
+
+  /* Give huge leeway */
+  void* fields[1024];
 };
 
 /* 8 gb */
@@ -114,7 +117,7 @@ static int run_bench(const char* input, int len) {
   gettimeofday(&end, NULL);
 
   time = (end.tv_sec - start.tv_sec);
-  time += (end.tv_usec - start.tv_usec) * 1e-6;
+  time += (double) (end.tv_usec - start.tv_usec) * 1e-6;
   bw = (double) kBytes / time;
 
   fprintf(stdout, "%.2f mb | %.2f mb/s | %.2f s\n",
