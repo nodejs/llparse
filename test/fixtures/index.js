@@ -16,7 +16,55 @@ const TMP_DIR = path.join(__dirname, '..', 'tmp');
 
 const MAX_PARALLEL = 8;
 
-exports.build = (name, source) => {
+function normalizeSpan(source) {
+  const lines = source.split(/\n/g);
+
+  const parse = (line) => {
+    const match = line.match(
+      /^off=(\d+)\s+len=(\d+)\s+span\[([^\]]+)\]="(.*)"$/);
+    if (!match) {
+      throw new Error('Failed to parse the span output: '+
+        JSON.stringify(line));
+    }
+
+    return {
+      off: match[1] | 0,
+      len: match[2] | 0,
+      span: match[3],
+      value: match[4]
+    };
+  };
+
+  const parsed = lines.filter(l => l).map(parse);
+  const lastMap = new Map();
+  const res = [];
+
+  parsed.forEach((obj) => {
+    if (lastMap.has(obj.span)) {
+      const last = lastMap.get(obj.span);
+      if (last.off + last.len === obj.off) {
+        last.len += obj.len;
+        last.value += obj.value;
+
+        // Move it to the end
+        res.splice(res.indexOf(last), 1);
+        res.push(last);
+        return;
+      }
+    }
+    res.push(obj);
+    lastMap.set(obj.span, obj);
+  });
+
+  const stringify = (obj) => {
+    return `off=${obj.off} len=${obj.len} span[${obj.span}]="${obj.value}"`;
+  };
+  return res.map(stringify).join('\n') + '\n';
+}
+
+exports.build = (name, source, options) => {
+  options = options || {};
+
   try {
     fs.mkdirSync(TMP_DIR);
   } catch (e) {
@@ -51,6 +99,9 @@ exports.build = (name, source) => {
       }, (err, data) => {
         if (data.exit !== 0)
           return callback(new Error('Exit code: ' + data.exit));
+
+        if (options.normalize === 'span')
+          stdout = normalizeSpan(stdout);
 
         callback(null, stdout);
       });

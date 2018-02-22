@@ -41,11 +41,16 @@ describe('LLParse/span', () => {
       .match('_', underscore)
       .otherwise(span.underscore.end(dot));
 
-    const binary = fixtures.build('span', p.build(start, {
-      debug: 'debug'
-    }));
+    const binary = fixtures.build('span', p.build(start), {
+      normalize: 'span'
+    });
 
-    binary('..--..__..', 'off=3 match=1\n', callback);
+    binary(
+      '..--..__..',
+      'off=2 len=2 span[dash]="--"\n' +
+        'off=6 len=2 span[underscore]="__"\n' +
+        'off=0 len=10 span[dot]="..--..__.."\n',
+      callback);
   });
 
   it('should throw on loops', () => {

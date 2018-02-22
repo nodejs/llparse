@@ -67,28 +67,26 @@ int return_match(struct state* s, const char* p, const char* endp, int value) {
   return value;
 }
 
-int on_dot(struct state* s, const char* p, const char* endp) {
+static void print_span(const char* name, const char* p, const char* endp) {
   if (bench)
-    return 0;
+    return;
 
-  fprintf(stdout, "off=%d dot=%.*s\n", (int) (p - start), (int) (endp - p), p);
+  fprintf(stdout, "off=%d len=%d span[%s]=\"%.*s\"\n", (int) (p - start),
+          (int) (endp - p), name, (int) (endp - p), p);
+}
+
+int on_dot(struct state* s, const char* p, const char* endp) {
+  print_span("dot", p, endp);
   return 0;
 }
 
 int on_dash(struct state* s, const char* p, const char* endp) {
-  if (bench)
-    return 0;
-
-  fprintf(stdout, "off=%d dash=%.*s\n", (int) (p - start), (int) (endp - p), p);
+  print_span("dash", p, endp);
   return 0;
 }
 
 int on_underscore(struct state* s, const char* p, const char* endp) {
-  if (bench)
-    return 0;
-
-  fprintf(stdout, "off=%d underscore=%.*s\n", (int) (p - start),
-      (int) (endp - p), p);
+  print_span("underscore", p, endp);
   return 0;
 }
 
