@@ -1,18 +1,9 @@
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
 
-struct state {
-  void* current;
-  int error;
-  const char* reason;
-  int index;
-
-  /* Give huge leeway */
-  void* fields[1024];
-};
+/* NOTE: include is inserted through `-include` clang argument */
 
 /* 8 gb */
 static const int64_t kBytes = 8589934592LL;
@@ -20,17 +11,15 @@ static const int64_t kBytes = 8589934592LL;
 static int bench = 0;
 static const char* start;
 
-void llparse_init(struct state* s);
-int llparse_execute(struct state* s, const char* p, const char* endp);
-
-void debug(struct state* s, const char* p, const char* endp, const char* msg) {
+void debug(llparse_state_t* s, const char* p, const char* endp,
+           const char* msg) {
   if (bench)
     return;
 
   fprintf(stderr, "off=%d > %s\n", (int) (p - start), msg);
 }
 
-int print_zero(struct state* s, const char* p, const char* endp) {
+int print_zero(llparse_state_t* s, const char* p, const char* endp) {
   if (bench)
     return 0;
 
@@ -38,7 +27,7 @@ int print_zero(struct state* s, const char* p, const char* endp) {
   return 0;
 }
 
-int print_one(struct state* s, const char* p, const char* endp) {
+int print_one(llparse_state_t* s, const char* p, const char* endp) {
   if (bench)
     return 0;
 
@@ -46,7 +35,7 @@ int print_one(struct state* s, const char* p, const char* endp) {
   return 0;
 }
 
-int print_off(struct state* s, const char* p, const char* endp) {
+int print_off(llparse_state_t* s, const char* p, const char* endp) {
   if (bench)
     return 0;
 
@@ -54,7 +43,8 @@ int print_off(struct state* s, const char* p, const char* endp) {
   return 0;
 }
 
-int print_match(struct state* s, const char* p, const char* endp, int value) {
+int print_match(llparse_state_t* s, const char* p, const char* endp,
+                int value) {
   if (bench)
     return 0;
 
@@ -62,7 +52,8 @@ int print_match(struct state* s, const char* p, const char* endp, int value) {
   return 0;
 }
 
-int return_match(struct state* s, const char* p, const char* endp, int value) {
+int return_match(llparse_state_t* s, const char* p, const char* endp,
+                 int value) {
   if (bench)
     return value;
 
@@ -78,23 +69,23 @@ static void print_span(const char* name, const char* p, const char* endp) {
           (int) (endp - p), name, (int) (endp - p), p);
 }
 
-int on_dot(struct state* s, const char* p, const char* endp) {
+int on_dot(llparse_state_t* s, const char* p, const char* endp) {
   print_span("dot", p, endp);
   return 0;
 }
 
-int on_dash(struct state* s, const char* p, const char* endp) {
+int on_dash(llparse_state_t* s, const char* p, const char* endp) {
   print_span("dash", p, endp);
   return 0;
 }
 
-int on_underscore(struct state* s, const char* p, const char* endp) {
+int on_underscore(llparse_state_t* s, const char* p, const char* endp) {
   print_span("underscore", p, endp);
   return 0;
 }
 
 static int run_bench(const char* input, int len) {
-  struct state s;
+  llparse_state_t s;
   int64_t i;
   struct timeval start;
   struct timeval end;
@@ -130,7 +121,7 @@ static int run_bench(const char* input, int len) {
 
 
 static int run_scan(int scan, const char* input, int len) {
-  struct state s;
+  llparse_state_t s;
   llparse_init(&s);
 
   if (scan <= 0) {

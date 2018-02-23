@@ -41,4 +41,11 @@ http
   .match(' HTTP/1.1\n\n', complete)
   .otherwise(p.error(6, 'Expected HTTP/1.1 and two newlines'));
 
-console.log(p.build(method));
+// Build
+
+const fs = require('fs');
+const path = require('path');
+
+const artifacts = p.build(method);
+fs.writeFileSync(path.join(__dirname, 'http_parser.h'), artifacts.header);
+fs.writeFileSync(path.join(__dirname, 'http_parser.ll'), artifacts.llvm);

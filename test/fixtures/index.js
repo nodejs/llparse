@@ -72,11 +72,16 @@ exports.build = (name, source, options) => {
   }
 
   const file = path.join(TMP_DIR, name + '.ll');
+  const header = path.join(TMP_DIR, name + '.h');
   const out = path.join(TMP_DIR, name);
-  fs.writeFileSync(file, source);
 
-  const ret = spawnSync(CLANG,
-    [ '-g3', '-Os', '-fvisibility=hidden', MAIN, file, '-o', out ]);
+  fs.writeFileSync(file, source.llvm);
+  fs.writeFileSync(header, source.header);
+
+  const ret = spawnSync(CLANG, [
+    '-g3', '-Os', '-fvisibility=hidden',
+    '-include', header, MAIN, file, '-o', out
+  ]);
   if (ret.status !== 0) {
     process.stderr.write(ret.stdout);
     process.stderr.write(ret.stderr);

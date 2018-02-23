@@ -1,25 +1,9 @@
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
 
-typedef struct http_parser_state_s http_parser_state_t;
-
-struct http_parser_state_s {
-  void* current;
-  int error;
-  const char* reason;
-  int index;
-  void* data;
-
-  uint8_t method;
-  void* mark;
-};
-
-void http_parser_init(http_parser_state_t* s);
-int http_parser_execute(http_parser_state_t* s, const char* p,
-                        const char* endp);
+#include "http_parser.h"
 
 int on_url(http_parser_state_t* s, const char* p, const char* endp) {
   if (p == endp)

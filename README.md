@@ -49,7 +49,13 @@ http
   .match(' HTTP/1.1\r\n\r\n', complete)
   .otherwise(p.error(6, 'Expected HTTP/1.1 and two newlines'));
 
-console.log(p.build(method));
+const artifacts = p.build(method);
+console.log('----- LLVM -----');
+console.log(artifacts.llvm);
+console.log('----- LLVM END -----');
+console.log('----- HEADER -----');
+console.log(artifacts.header);
+console.log('----- HEADER END -----');
 ```
 
 #### LICENSE
