@@ -6,5 +6,6 @@ examples/http/http
 *.ll
 *.bc
 *.o
+*.h
 main
 1
