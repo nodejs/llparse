@@ -6,7 +6,15 @@
     "lint": "eslint test/*.js test/**/*.js lib/*.js lib/**/*.js lib/**/**/*.js lib/**/**/**/*.js",
     "test": "mocha --reporter=spec test/*-test.js && npm run lint"
   },
-  "keywords": [],
+  "files": [
+    "lib"
+  ],
+  "keywords": [
+    "llparse",
+    "llvm",
+    "ir",
+    "dfa"
+  ],
   "author": "Fedor Indutny <fedor@indutny.com> (http://darksi.de/)",
   "license": "MIT",
   "dependencies": {
@@ -15,6 +23,7 @@
   "devDependencies": {
     "async": "^2.6.0",
     "eslint": "^4.18.1",
+    "llparse-test-fixture": "^1.0.0-beta1",
     "mocha": "^5.0.1"
   },
   "directories": {

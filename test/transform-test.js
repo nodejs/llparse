@@ -20,7 +20,7 @@ describe('LLParse/transform', () => {
       .match('close', fixtures.printOff(p, start))
       .otherwise(p.error(1, 'error'));
 
-    const binary = fixtures.build('transform-lower', p.build(start));
+    const binary = fixtures.build(p, start, 'transform-lower');
 
     binary('connectCLOSEcOnNeCt', 'off=7\noff=12\noff=19\n', callback);
   });

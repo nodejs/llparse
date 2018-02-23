@@ -5,8 +5,8 @@ const llparse = require('../');
 
 const fixtures = require('./fixtures');
 
-const printMatch = fixtures.printMatch;
 const printOff = fixtures.printOff;
+const printMatch = fixtures.printMatch;
 
 describe('LLParse', () => {
   let p;
@@ -29,7 +29,7 @@ describe('LLParse', () => {
 
     start.otherwise(p.error(3, 'Invalid word'));
 
-    const binary = fixtures.build('simple', p.build(start));
+    const binary = fixtures.build(p, start, 'simple');
 
     binary('GET', 'off=3 match=1\n', callback);
   });
@@ -44,7 +44,7 @@ describe('LLParse', () => {
 
     start.otherwise(p.error(3, 'Invalid word'));
 
-    const binary = fixtures.build('shallow', p.build(start));
+    const binary = fixtures.build(p, start, 'shallow');
 
     binary('012', 'off=1 match=0\noff=2 match=1\noff=3 match=2\n', callback);
   });
@@ -58,7 +58,7 @@ describe('LLParse', () => {
 
     start.otherwise(p.error(3, 'Invalid word'));
 
-    const binary = fixtures.build('kv-select', p.build(start));
+    const binary = fixtures.build(p, start, 'kv-select');
 
     binary('012', 'off=1 match=0\noff=2 match=1\noff=3 match=2\n', callback);
   });
@@ -75,7 +75,7 @@ describe('LLParse', () => {
 
     start.otherwise(p.error(3, 'Invalid word'));
 
-    const binary = fixtures.build('multi-match', p.build(start));
+    const binary = fixtures.build(p, start, 'multi-match');
     binary(
       'A B\t\tA\r\nA',
       'off=1 match=0\noff=3 match=1\noff=6 match=0\noff=9 match=0\n',
@@ -94,7 +94,7 @@ describe('LLParse', () => {
 
     start.otherwise(p.error(3, 'Invalid word'));
 
-    const binary = fixtures.build('multi-match', p.build(start));
+    const binary = fixtures.build(p, start, 'multi-match');
     binary(
       'A B  A  A',
       'off=1 match=0\noff=3 match=1\noff=6 match=0\noff=9 match=0\n',
@@ -108,8 +108,8 @@ describe('LLParse', () => {
     p.property('i8', 'custom');
 
     const second = p.invoke(p.code.load('custom'), {
-      0: p.invoke(p.code.match('print_zero'), { 0: start }, error),
-      1: p.invoke(p.code.match('print_one'), { 0: start }, error)
+      0: p.invoke(p.code.match('llparse__print_zero'), { 0: start }, error),
+      1: p.invoke(p.code.match('llparse__print_one'), { 0: start }, error)
     }, error);
 
     start
@@ -119,9 +119,9 @@ describe('LLParse', () => {
       }, p.invoke(p.code.store('custom'), second))
       .otherwise(error);
 
-    const binary = fixtures.build('custom-prop', p.build(start));
+    const binary = fixtures.build(p, start, 'custom-prop');
 
-    binary('0110', 'zero\none\none\nzero\n', callback);
+    binary('0110', 'off=1 0\noff=2 1\noff=3 1\noff=4 0\n', callback);
   });
 
   describe('`.peek()`', () => {
@@ -138,7 +138,7 @@ describe('LLParse', () => {
         .match([ 'a', 'b' ], printOff(p, start))
         .otherwise(error);
 
-      const binary = fixtures.build('peek', p.build(start));
+      const binary = fixtures.build(p, start, 'peek');
 
       binary('ab', 'off=1\noff=2\n', callback);
     });
@@ -159,7 +159,7 @@ describe('LLParse', () => {
         .match('B', printOff(p, b))
         .otherwise(a);
 
-      const binary = fixtures.build('otherwise-noadvance', p.build(a));
+      const binary = fixtures.build(p, a, 'otherwise-noadvance');
 
       binary('AABAB', 'off=3\noff=5\n', callback);
     });
@@ -173,7 +173,7 @@ describe('LLParse', () => {
         .match(' ', printOff(p, start))
         .skipTo(start);
 
-      const binary = fixtures.build('otherwise-skip', p.build(start));
+      const binary = fixtures.build(p, start, 'otherwise-skip');
 
       binary('HELLO WORLD', 'off=6\n', callback);
     });
@@ -186,9 +186,9 @@ describe('LLParse', () => {
       start
         .skipTo(start);
 
-      const binary = fixtures.build('all-skip', p.build(start));
+      const binary = fixtures.build(p, start, 'all-skip');
 
-      binary('HELLO WORLD', '', callback);
+      binary('HELLO WORLD', '\n', callback);
     });
   });
 });

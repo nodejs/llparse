@@ -20,9 +20,9 @@ describe('LLParse/span', () => {
     const underscore = p.node('underscore');
 
     const span = {
-      dot: p.span(p.code.span('on_dot')),
-      dash: p.span(p.code.span('on_dash')),
-      underscore: p.span(p.code.span('on_underscore'))
+      dot: p.span(p.code.span('llparse__on_dot')),
+      dash: p.span(p.code.span('llparse__on_dash')),
+      underscore: p.span(p.code.span('llparse__on_underscore'))
     };
 
     start.otherwise(span.dot.start(dot));
@@ -41,9 +41,7 @@ describe('LLParse/span', () => {
       .match('_', underscore)
       .otherwise(span.underscore.end(dot));
 
-    const binary = fixtures.build('span', p.build(start), {
-      normalize: 'span'
-    });
+    const binary = fixtures.build(p, start, 'span');
 
     binary(
       '..--..__..',
@@ -55,7 +53,7 @@ describe('LLParse/span', () => {
 
   it('should throw on loops', () => {
     const start = p.node('start');
-    const span = p.span(p.code.span('on_data'));
+    const span = p.span(p.code.span('llparse__on_data'));
 
     start.otherwise(span.start().otherwise(start));
 
@@ -64,7 +62,7 @@ describe('LLParse/span', () => {
 
   it('should throw on unmatched ends', () => {
     const start = p.node('start');
-    const span = p.span(p.code.span('on_data'));
+    const span = p.span(p.code.span('llparse__on_data'));
 
     start.otherwise(span.end().otherwise(start));
 
@@ -73,7 +71,7 @@ describe('LLParse/span', () => {
 
   it('should propagate through the Invoke map', () => {
     const start = p.node('start');
-    const span = p.span(p.code.span('on_data'));
+    const span = p.span(p.code.span('llparse__on_data'));
 
     p.property('i8', 'custom');
 
