@@ -1,8 +1,6 @@
 'use strict';
 /* global describe it beforeEach */
 
-const assert = require('assert');
-
 const llparse = require('../');
 
 const fixtures = require('./fixtures');
