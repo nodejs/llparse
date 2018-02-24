@@ -7,5 +7,6 @@ examples/http/http
 *.bc
 *.o
 *.h
+*.s
 main
 1
