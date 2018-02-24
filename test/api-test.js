@@ -8,7 +8,9 @@ const fixtures = require('./fixtures');
 const printOff = fixtures.printOff;
 const printMatch = fixtures.printMatch;
 
-describe('LLParse', () => {
+describe('LLParse', function() {
+  this.timeout(fixtures.TIMEOUT);
+
   let p;
   beforeEach(() => {
     p = llparse.create('llparse');

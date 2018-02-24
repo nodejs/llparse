@@ -20,3 +20,6 @@ exports.printOff = (p, next) => {
 
   return p.invoke(code, next);
 };
+
+// Reasonable timeout for CI
+exports.TIMEOUT = 10000;

@@ -5,7 +5,9 @@ const llparse = require('../');
 
 const fixtures = require('./fixtures');
 
-describe('LLParse/transform', () => {
+describe('LLParse/transform', function() {
+  this.timeout(fixtures.TIMEOUT);
+
   let p;
   beforeEach(() => {
     p = llparse.create('llparse');
