@@ -22,7 +22,7 @@ describe('LLParse/Code', function() {
       p.property('i64', 'counter');
 
       const is1337 = p.invoke(p.code.load('counter'), {
-        1337: printOff(p, start)
+        1337: printOff(p, p.invoke(p.code.update('counter', 0), start))
       }, p.error(1, 'Invalid result'));
 
       const count = p.invoke(p.code.mulAdd('counter', { base: 10 }), start);
@@ -30,9 +30,6 @@ describe('LLParse/Code', function() {
       start
         .select(fixtures.NUM, count)
         .match('.', is1337)
-        // TODO(indutny): replace with `code.reset()`
-        // Just for benchmarks
-        .select({ 'r': 0 }, p.invoke(p.code.store('counter'), start))
         .otherwise(p.error(1, 'Unexpected'));
 
       const binary = fixtures.build(p, start, 'mul-add');
@@ -77,6 +74,28 @@ describe('LLParse/Code', function() {
       const binary = fixtures.build(p, start, 'mul-add-max-overflow');
 
       binary('1111', 'off=4\n', callback);
+    });
+  });
+
+  describe('`.update()`', () => {
+    it('should operate normally', (callback) => {
+      const start = p.node('start');
+
+      p.property('i64', 'counter');
+
+      const update = p.invoke(p.code.update('counter', 42));
+
+      start
+        .skipTo(update);
+
+      update
+        .otherwise(p.invoke(p.code.load('counter'), {
+          42: printOff(p, start)
+        }, p.error(1, 'Unexpected')));
+
+      const binary = fixtures.build(p, start, 'update');
+
+      binary('.', 'off=1\n', callback);
     });
   });
 });
