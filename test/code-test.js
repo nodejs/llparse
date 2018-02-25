@@ -30,6 +30,9 @@ describe('LLParse/Code', function() {
       start
         .select(fixtures.NUM, count)
         .match('.', is1337)
+        // TODO(indutny): replace with `code.reset()`
+        // Just for benchmarks
+        .select({ 'r': 0 }, p.invoke(p.code.store('counter'), start))
         .otherwise(p.error(1, 'Unexpected'));
 
       const binary = fixtures.build(p, start, 'mul-add');
