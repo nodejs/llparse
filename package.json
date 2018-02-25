@@ -18,7 +18,7 @@
   "author": "Fedor Indutny <fedor@indutny.com> (http://darksi.de/)",
   "license": "MIT",
   "dependencies": {
-    "llvm-ir": "^1.4.2"
+    "llvm-ir": "^1.6.1"
   },
   "devDependencies": {
     "async": "^2.6.0",
