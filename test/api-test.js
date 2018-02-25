@@ -159,7 +159,7 @@ describe('LLParse', function() {
 
       b
         .match('B', printOff(p, b))
-        .otherwise(a);
+        .skipTo(a);
 
       const binary = fixtures.build(p, a, 'otherwise-noadvance');
 

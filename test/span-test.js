@@ -57,7 +57,7 @@ describe('LLParse/span', function() {
     const start = p.node('start');
     const span = p.span(p.code.span('llparse__on_data'));
 
-    start.otherwise(span.start().otherwise(start));
+    start.otherwise(span.start().skipTo(start));
 
     assert.throws(() => p.build(start), /loop.*on_data/);
   });
@@ -66,7 +66,7 @@ describe('LLParse/span', function() {
     const start = p.node('start');
     const span = p.span(p.code.span('llparse__on_data'));
 
-    start.otherwise(span.end().otherwise(start));
+    start.otherwise(span.end().skipTo(start));
 
     assert.throws(() => p.build(start), /unmatched.*on_data/i);
   });
@@ -78,8 +78,8 @@ describe('LLParse/span', function() {
     p.property('i8', 'custom');
 
     start.otherwise(p.invoke(p.code.load('custom'), {
-      0: span.end().otherwise(start)
-    }, span.end().otherwise(start)));
+      0: span.end().skipTo(start)
+    }, span.end().skipTo(start)));
 
     assert.doesNotThrow(() => p.build(span.start(start)));
   });
