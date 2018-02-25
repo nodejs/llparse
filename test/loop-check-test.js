@@ -50,4 +50,19 @@ describe('LLParse/node-loop-checker', function() {
 
     assert.doesNotThrow(() => p.build(start));
   });
+
+  it('should ignore irrelevant `peek`s', () => {
+    const start = p.node('start');
+    const a = p.node('a');
+
+    start
+      .peek('a', a)
+      .otherwise(p.error(1, 'error'));
+
+    a
+      .peek('b', start)
+      .otherwise(p.error(1, 'error'));
+
+    assert.doesNotThrow(() => p.build(start));
+  });
 });
