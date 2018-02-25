@@ -18,6 +18,7 @@ describe('LLParse/Code', function() {
   describe('`.mulAdd()`', () => {
     it('should operate normally', (callback) => {
       const start = p.node('start');
+      const dot = p.node('dot');
 
       p.property('i64', 'counter');
 
@@ -29,6 +30,9 @@ describe('LLParse/Code', function() {
 
       start
         .select(fixtures.NUM, count)
+        .otherwise(dot);
+
+      dot
         .match('.', is1337)
         .otherwise(p.error(1, 'Unexpected'));
 
