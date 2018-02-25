@@ -4,6 +4,10 @@
 
 An API for generating parser in LLVM IR.
 
+**NOTE: `clang` 5.0.0 and later crashes on some of the generated output. The
+fixes were [submitted][0] [to][1] [upstream][2]. Please use -O0 if compilation
+is crashing/failing until these fixes are landed.**
+
 ## Usage
 
 ```js
@@ -82,3 +86,7 @@ NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+[0]: https://reviews.llvm.org/D43729
+[1]: https://reviews.llvm.org/D43708
+[2]: https://reviews.llvm.org/D43695
