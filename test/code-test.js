@@ -98,4 +98,25 @@ describe('LLParse/Code', function() {
       binary('.', 'off=1\n', callback);
     });
   });
+
+  describe('`.isEqual()`', () => {
+    it('should operate normally', (callback) => {
+      const start = p.node('start');
+
+      p.property('i64', 'counter');
+
+      const check = p.invoke(p.code.isEqual('counter', 1), {
+        0: fixtures.printOff(p, start),
+        1: start
+      }, p.error(1, 'Unexpected'));
+
+      start
+        .select(fixtures.NUM, p.invoke(p.code.store('counter'), check))
+        .otherwise(p.error(1, 'Unexpected'));
+
+      const binary = fixtures.build(p, start, 'update');
+
+      binary('010', 'off=1\noff=3\n', callback);
+    });
+  });
 });
