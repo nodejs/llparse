@@ -98,7 +98,7 @@ describe('LLParse/span', function() {
       .match('.', dot)
       .skipTo(span.pleaseFail.end(start));
 
-    const binary = fixtures.build(p, start, 'span');
+    const binary = fixtures.build(p, start, 'span-error');
 
     binary(
       '....a',

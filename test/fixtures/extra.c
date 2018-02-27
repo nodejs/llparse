@@ -64,7 +64,7 @@ int llparse__please_fail(llparse_state_t* s, const char* p, const char* endp) {
 
 
 /* A span callback, really */
-static llparse__pause_once_counter;
+static int llparse__pause_once_counter;
 
 int llparse__pause_once(llparse_state_t* s, const char* p, const char* endp) {
   if (!llparse__in_bench)
