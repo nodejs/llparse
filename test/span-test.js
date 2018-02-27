@@ -83,4 +83,26 @@ describe('LLParse/span', function() {
 
     assert.doesNotThrow(() => p.build(span.start(start)));
   });
+
+  it('should return error', (callback) => {
+    const start = p.node('start');
+    const dot = p.node('dot');
+
+    const span = {
+      pleaseFail: p.span(p.code.span('llparse__please_fail'))
+    };
+
+    start.otherwise(span.pleaseFail.start(dot));
+
+    dot
+      .match('.', dot)
+      .skipTo(span.pleaseFail.end(start));
+
+    const binary = fixtures.build(p, start, 'span');
+
+    binary(
+      '....a',
+      /off=\d+ error code=1 reason="Span callback error"\n/,
+      callback);
+  });
 });

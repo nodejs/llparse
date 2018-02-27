@@ -53,3 +53,11 @@ int llparse__on_underscore(llparse_state_t* s, const char* p,
     return 0;
   return llparse__print_span("underscore", p, endp);
 }
+
+
+/* A span callback, really */
+int llparse__please_fail(llparse_state_t* s, const char* p, const char* endp) {
+  if (llparse__in_bench)
+    return 1;
+  return 1;
+}

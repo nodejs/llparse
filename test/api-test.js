@@ -126,6 +126,17 @@ describe('LLParse', function() {
     binary('0110', 'off=1 0\noff=2 1\noff=3 1\noff=4 0\n', callback);
   });
 
+  it('should return error code/reason', (callback) => {
+    const start = p.node('start');
+
+    start.match('a', start);
+    start.otherwise(p.error(42, 'some reason'));
+
+    const binary = fixtures.build(p, start, 'error');
+
+    binary('aab', 'off=2 error code=42 reason="some reason"\n', callback);
+  });
+
   describe('`.peek()`', () => {
     it('should not advance position', (callback) => {
       const start = p.node('start');
