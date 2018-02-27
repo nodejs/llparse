@@ -13,18 +13,6 @@ describe('LLParse/resumption', function() {
     p = llparse.create('llparse');
   });
 
-  it('should resume after error', (callback) => {
-    const start = p.node('start');
-
-    start
-      .match('a', start)
-      .skipTo(p.error(fixtures.ERROR_PAUSE, 'pause'));
-
-    const binary = fixtures.build(p, start, 'resume-error');
-
-    binary('abab', 'off=2 pause\noff=4 pause\n', callback);
-  });
-
   it('should resume after span end pause', (callback) => {
     const start = p.node('start');
     const a = p.node('a');
