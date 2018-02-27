@@ -38,4 +38,22 @@ describe('LLParse/resumption', function() {
         , 'g'),
       callback);
   });
+
+  it('should resume after `pause` node', (callback) => {
+    const start = p.node('start');
+    const pause = p.pause(fixtures.ERROR_PAUSE, 'paused');
+
+    start
+      .match('p', pause)
+      .skipTo(start);
+
+    pause
+      .otherwise(fixtures.printOff(p, start));
+
+    const binary = fixtures.build(p, start, 'resume-pause');
+
+    binary('..p....p..',
+      'off=3 pause\noff=3\noff=8 pause\noff=8\n',
+      callback);
+  });
 });
