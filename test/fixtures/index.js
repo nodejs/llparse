@@ -2,7 +2,9 @@
 
 const path = require('path');
 
-const fixtures = require('llparse-test-fixture').create({
+const Fixture = require('llparse-test-fixture');
+
+const fixtures = Fixture.create({
   buildDir: path.join(__dirname, '..', 'tmp'),
   extra: [ path.join(__dirname, 'extra.c') ]
 });
@@ -24,6 +26,8 @@ exports.printOff = (p, next) => {
 exports.NUM = {
   '0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9
 };
+
+exports.ERROR_PAUSE = Fixture.ERROR_PAUSE;
 
 // Reasonable timeout for CI
 exports.TIMEOUT = 10000;
