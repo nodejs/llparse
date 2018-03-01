@@ -1,9 +1,4 @@
 #include <stdint.h>
-#include <stdio.h>
-#include <string.h>
-#include <sys/time.h>
-
-uint8_t llparse__bench_switch(const char* p, const char* endp);
 
 static const uint8_t normal_url_char[32] = {
 /*   0 nul    1 soh    2 stx    3 etx    4 eot    5 enq    6 ack    7 bel  */
@@ -46,7 +41,7 @@ static const uint8_t normal_url_char[32] = {
 #endif
 
 
-static uint8_t llparse__bench_bitmap(const char* p, const char* endp) {
+uint8_t llparse__bench_bitmap(const char* p, const char* endp) {
   for (; p != endp; p++) {
     unsigned char c;
 
@@ -55,59 +50,4 @@ static uint8_t llparse__bench_bitmap(const char* p, const char* endp) {
       return 0;
   }
   return 1;
-}
-
-
-/* 8 gb */
-static const int64_t kBytes = 8589934592LL;
-
-
-static void bench(int llvm, const char* input) {
-  const char* endp;
-  int len;
-
-  struct timeval start;
-  struct timeval end;
-  double bw;
-  double time;
-  int64_t i;
-  int64_t iterations;
-  uint8_t res;
-
-  len = strlen(input);
-  endp = input + len;
-  iterations = kBytes / (int64_t) len;
-
-  res = 0;
-  gettimeofday(&start, NULL);
-  if (llvm) {
-    for (i = 0; i < iterations; i++)
-      res |= llparse__bench_switch(input, endp);
-  } else {
-    for (i = 0; i < iterations; i++)
-      res |= llparse__bench_bitmap(input, endp);
-  }
-
-  gettimeofday(&end, NULL);
-
-  time = (end.tv_sec - start.tv_sec);
-  time += (double) (end.tv_usec - start.tv_usec) * 1e-6;
-  bw = (double) kBytes / time;
-
-  fprintf(stdout, "%s[%d]: %.2f mb | %.2f mb/s | %.2f s\n",
-      llvm ? "switch" : "bitmap",
-      res,
-      (double) kBytes / (1024 * 1024),
-      bw / (1024 * 1024),
-      time);
-}
-
-
-int main(int argc, const char** argv) {
-  if (argc < 2)
-    return -1;
-
-  bench(0, argv[1]);
-  bench(1, argv[1]);
-  return 0;
 }
