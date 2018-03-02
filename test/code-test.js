@@ -29,7 +29,7 @@ describe('LLParse/Code', function() {
       const count = p.invoke(p.code.mulAdd('counter', { base: 10 }), start);
 
       start
-        .select(fixtures.NUM, count)
+        .select(fixtures.NUM_SELECT, count)
         .otherwise(dot);
 
       dot
@@ -51,7 +51,7 @@ describe('LLParse/Code', function() {
       }, start);
 
       start
-        .select(fixtures.NUM, count)
+        .select(fixtures.NUM_SELECT, count)
         .otherwise(p.error(1, 'Unexpected'));
 
       const binary = fixtures.build(p, start, 'mul-add-overflow');
@@ -72,7 +72,7 @@ describe('LLParse/Code', function() {
       }, start);
 
       start
-        .select(fixtures.NUM, count)
+        .select(fixtures.NUM_SELECT, count)
         .otherwise(p.error(1, 'Unexpected'));
 
       const binary = fixtures.build(p, start, 'mul-add-max-overflow');
@@ -115,7 +115,7 @@ describe('LLParse/Code', function() {
       }, p.error(1, 'Unexpected'));
 
       start
-        .select(fixtures.NUM, p.invoke(p.code.store('counter'), check))
+        .select(fixtures.NUM_SELECT, p.invoke(p.code.store('counter'), check))
         .otherwise(p.error(1, 'Unexpected'));
 
       const binary = fixtures.build(p, start, 'update');

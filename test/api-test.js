@@ -138,7 +138,7 @@ describe('LLParse', function() {
   });
 
   describe('`.match()`', () => {
-    it('should compile to a bit-check node', (callback) => {
+    it('should compile to a single-bit bit-check node', (callback) => {
       const start = p.node('start');
 
       start
@@ -149,6 +149,25 @@ describe('LLParse', function() {
       const binary = fixtures.build(p, start, 'match-bit-check');
 
       binary('pecan.is.dead.', 'off=6\noff=9\noff=14\n', callback);
+    });
+
+    it('should compile to a multi-bit bit-check node', (callback) => {
+      const start = p.node('start');
+      const another = p.node('another');
+
+      start
+        .match(fixtures.ALPHA, start)
+        .peek(fixtures.NUM, another)
+        .skipTo(printOff(p, start));
+
+      another
+        .match(fixtures.NUM, another)
+        .otherwise(start);
+
+      // TODO(indutny): validate compilation result?
+      const binary = fixtures.build(p, start, 'match-multi-bit-check');
+
+      binary('pecan.135.is.dead.', 'off=6\noff=10\noff=13\noff=18\n', callback);
     });
   });
 
