@@ -138,7 +138,7 @@ describe('LLParse', function() {
   });
 
   describe('`.match()`', () => {
-    it('should compile to a check node', (callback) => {
+    it('should compile to a bit-check node', (callback) => {
       const start = p.node('start');
 
       start
@@ -146,7 +146,7 @@ describe('LLParse', function() {
         .skipTo(printOff(p, start));
 
       // TODO(indutny): validate compilation result?
-      const binary = fixtures.build(p, start, 'match-check');
+      const binary = fixtures.build(p, start, 'match-bit-check');
 
       binary('pecan.is.dead.', 'off=6\noff=9\noff=14\n', callback);
     });
