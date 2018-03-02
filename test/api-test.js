@@ -137,6 +137,21 @@ describe('LLParse', function() {
     binary('aab', 'off=2 error code=42 reason="some reason"\n', callback);
   });
 
+  describe('`.match()`', () => {
+    it('should compile to a check node', (callback) => {
+      const start = p.node('start');
+
+      start
+        .match(fixtures.ALPHA, start)
+        .skipTo(printOff(p, start));
+
+      // TODO(indutny): validate compilation result?
+      const binary = fixtures.build(p, start, 'match-check');
+
+      binary('pecan.is.dead.', 'off=6\noff=9\noff=14\n', callback);
+    });
+  });
+
   describe('`.peek()`', () => {
     it('should not advance position', (callback) => {
       const start = p.node('start');
