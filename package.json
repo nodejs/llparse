@@ -1,6 +1,6 @@
 {
   "name": "llparse",
-  "version": "2.4.0",
+  "version": "2.4.1",
   "main": "lib/llparse.js",
   "scripts": {
     "lint": "eslint test/*.js test/**/*.js lib/*.js lib/**/*.js lib/**/**/*.js lib/**/**/**/*.js",
