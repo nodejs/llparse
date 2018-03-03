@@ -154,18 +154,22 @@ describe('LLParse/Code', function() {
           0: test,
           1: printOff(p, test)
         }, p.error(4, 'test-3')))
+        .match('7', p.invoke(p.code.test('flag', 7), {
+          0: test,
+          1: printOff(p, test)
+        }, p.error(5, 'test-7')))
         // Restart
         .match('.', start)
-        .otherwise(p.error(5, 'test'));
+        .otherwise(p.error(6, 'test'));
 
       const binary = fixtures.build(p, start, 'or-test');
 
-      binary('1-124.2-124.4-124.r4-124.',
-        'off=3\n' +
-          'off=9\noff=10\n' +
-          'off=15\noff=16\noff=17\n' +
-          'off=24\n',
-        callback);
+      binary('1-124.2-1247.4-1247.r4-124.', [
+        'off=3',
+        'off=9', 'off=10',
+        'off=16', 'off=17', 'off=18', 'off=19',
+        'off=26'
+      ], callback);
     });
   });
 });
