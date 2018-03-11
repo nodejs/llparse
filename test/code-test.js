@@ -118,7 +118,7 @@ describe('LLParse/Code', function() {
         .select(fixtures.NUM_SELECT, p.invoke(p.code.store('counter'), check))
         .otherwise(p.error(1, 'Unexpected'));
 
-      const binary = fixtures.build(p, start, 'update');
+      const binary = fixtures.build(p, start, 'is-equal');
 
       binary('010', 'off=1\noff=3\n', callback);
     });
