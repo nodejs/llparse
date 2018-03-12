@@ -2,11 +2,11 @@
 [![Build Status](https://secure.travis-ci.org/indutny/llparse.svg)](http://travis-ci.org/indutny/llparse)
 [![NPM version](https://badge.fury.io/js/llparse.svg)](https://badge.fury.io/js/llparse)
 
-An API for generating parser in LLVM IR.
+An API for compiling an incremental parser into [LLVM bitcode][3].
 
-**NOTE: `clang` 5.0.0 and later crashes on some of the generated output. The
-fixes were [submitted][0] [to][1] [upstream][2]. Please use -O0 if compilation
-is crashing/failing until these fixes are landed.**
+**NOTE: The resulting bitcode works only on a trunk version of `clang` now,
+other versions are broken. The required fixes will be released in
+`clang` 6.0.1**
 
 ## Usage
 
@@ -54,9 +54,9 @@ http
   .otherwise(p.error(6, 'Expected HTTP/1.1 and two newlines'));
 
 const artifacts = p.build(method);
-console.log('----- LLVM -----');
-console.log(artifacts.llvm);
-console.log('----- LLVM END -----');
+console.log('----- BITCODE -----');
+console.log(artifacts.bitcode);  // buffer
+console.log('----- BITCODE END -----');
 console.log('----- HEADER -----');
 console.log(artifacts.header);
 console.log('----- HEADER END -----');
@@ -90,3 +90,4 @@ USE OR OTHER DEALINGS IN THE SOFTWARE.
 [0]: https://reviews.llvm.org/D43729
 [1]: https://reviews.llvm.org/D43708
 [2]: https://reviews.llvm.org/D43695
+[3]: https://llvm.org/docs/LangRef.html
