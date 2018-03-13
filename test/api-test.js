@@ -137,6 +137,22 @@ describe('LLParse', function() {
     binary('aab', 'off=2 error code=42 reason="some reason"\n', callback);
   });
 
+  it('should not merge `.match()` with `.peek()`', (callback) => {
+    const maybeCr = p.node('maybeCr');
+    const lf = p.node('lf');
+
+    maybeCr.peek('\n', lf);
+    maybeCr.match('\r', lf);
+    maybeCr.otherwise(p.error(1, 'error'));
+
+    lf.match('\n', printOff(p, maybeCr));
+    lf.otherwise(p.error(2, 'error'));
+
+    const binary = fixtures.build(p, maybeCr, 'no-merge');
+
+    binary('\r\n\n', 'off=2\noff=3\n', callback);
+  });
+
   describe('`.match()`', () => {
     it('should compile to a single-bit bit-check node', (callback) => {
       const start = p.node('start');
