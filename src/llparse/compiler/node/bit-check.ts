@@ -1,13 +1,10 @@
-'use strict';
-
-const node = require('./');
-const llparse = require('../../');
+import { Node } from './base';
 
 const CHAR_WIDTH = 8;
 const WORD_WIDTH = 5;
 
-class BitCheck extends node.Node {
-  constructor(id) {
+class BitCheck extends Node {
+  constructor(id: string) {
     super('bit-check', id);
 
     this.map = null;
