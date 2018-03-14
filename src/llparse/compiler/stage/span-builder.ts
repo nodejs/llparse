@@ -1,26 +1,20 @@
-'use strict';
+import * as assert from 'assert';
 
-const assert = require('assert');
-
-const Stage = require('./').Stage;
-const llparse = require('../../');
-
-const constants = llparse.constants;
-
-const INT = constants.INT;
-const TYPE_INPUT = constants.TYPE_INPUT;
-const TYPE_OUTPUT = constants.TYPE_OUTPUT;
-const TYPE_ERROR = constants.TYPE_ERROR;
-
-const SPAN_START_PREFIX = constants.SPAN_START_PREFIX;
-const SPAN_CB_PREFIX = constants.SPAN_CB_PREFIX;
+import { Code } from '../code';
+import {
+  INT, TYPE_INPUT, TYPE_OUTPUT, TYPE_ERROR,
+  SPAN_START_PREFIX, SPAN_CB_PREFIX
+} from '../../constants';
+import { INodePosition, Compilation, Func, BasicBlock } from '../compilation';
+import { Node } from '../node';
+import { Stage } from './base';
 
 class Builder extends Stage {
-  constructor(ctx) {
+  constructor(ctx: Compilation) {
     super(ctx, 'span-builder');
   }
 
-  build() {
+  public build(): any {
     this.buildFields();
 
     return {
@@ -32,7 +26,7 @@ class Builder extends Stage {
     };
   }
 
-  buildFields() {
+  private buildFields(): void {
     const colors = this.ctx.stageResults['span-allocator'];
 
     const callbackType = this.ctx.signature.callback.span.ptr();
@@ -52,7 +46,7 @@ class Builder extends Stage {
 
   // Nodes
 
-  buildSpanStart(fn, body, code) {
+  private buildSpanStart(fn: Func, body: BasicBlock, code: Code): BasicBlock {
     const colors = this.ctx.stageResults['span-allocator'];
     const index = colors.map.get(code);
 
@@ -69,7 +63,7 @@ class Builder extends Stage {
     return body;
   }
 
-  buildSpanEnd(fn, body, code) {
+  private buildSpanEnd(fn: Func, body: BasicBlock, code: Code): BasicBlock {
     const colors = this.ctx.stageResults['span-allocator'];
     const index = colors.map.get(code);
 
@@ -117,7 +111,8 @@ class Builder extends Stage {
     };
   }
 
-  buildError(fn, body, pos, code) {
+  private buildError(fn: Func, body: BasicBlock, pos: INodePositon,
+                     code: Code): void {
     const reason = this.ctx.cstring('Span callback error');
 
     const cast = body.getelementptr(reason, INT.val(0), INT.val(0), true);
@@ -132,7 +127,7 @@ class Builder extends Stage {
 
   // ${prefix}_execute
 
-  buildPrologue(fn, body) {
+  private buildPrologue(fn: Func, body: BasicBlock): BasicBlock {
     const colors = this.ctx.stageResults['span-allocator'];
 
     colors.concurrency.forEach((_, index) => {
@@ -156,7 +151,7 @@ class Builder extends Stage {
     return body;
   }
 
-  buildEpilogue(fn, body) {
+  private buildEpilogue(fn: Func, body: BasicBlock): BasicBlock {
     const colors = this.ctx.stageResults['span-allocator'];
 
     const callbackType = this.ctx.signature.callback.span.ptr();
@@ -224,12 +219,12 @@ class Builder extends Stage {
     return body;
   }
 
-  startField(fn, body, index) {
+  private startField(fn: Func, body: BasicBlock, index: number): values.Value {
     return this.ctx.stateField(fn, body, SPAN_START_PREFIX + index);
   }
 
-  callbackField(fn, body, index) {
+  private callbackField(fn: Func, body: BasicBlock, index: number)
+    : values.Value {
     return this.ctx.stateField(fn, body, SPAN_CB_PREFIX + index);
   }
 }
-module.exports = Builder;

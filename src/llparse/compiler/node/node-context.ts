@@ -1,12 +1,9 @@
 import { Builder } from 'bitcode';
 
-import { Compilation, Func, types, values } from '../compilation';
+import {
+  Compilation, INodePosition, Func, types, values,
+} from '../compilation';
 import { Node } from './base';
-
-export interface INodePosition {
-  current: values.Value;
-  next?: values.Value;
-}
 
 export class NodeContext {
   // Some generally useful types (to avoid unnecessary includes)

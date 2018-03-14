@@ -3,8 +3,10 @@ import { Buffer } from 'buffer';
 
 import { Transform } from '../../transform';
 import * as node from './node';
-import { INodePosition, NodeContext } from './node-context';
-import { Compilation, INodeID, BasicBlock, Func, values } from './compilation';
+import { NodeContext } from './node-context';
+import {
+  Compilation, INodeID, INodePosition, BasicBlock, Func, values
+} from './compilation';
 
 interface ITrampoline {
   block: BasicBlock;

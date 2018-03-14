@@ -1,33 +1,31 @@
-'use strict';
+import {
+  CCONV,
+  INT, TYPE_INPUT, TYPE_INDEX, TYPE_STATUS,
+  ATTR_STATE, ATTR_POS, ATTR_ENDPOS, ATTR_SEQUENCE,
 
-const Stage = require('./').Stage;
-const llparse = require('../../');
-const constants = llparse.constants;
+  ARG_STATE, ARG_POS, ARG_ENDPOS, ARG_SEQUENCE, ARG_SEQUENCE_LEN,
 
-const CCONV = constants.CCONV;
+  SEQUENCE_COMPLETE, SEQUENCE_PAUSE, SEQUENCE_MISMATCH
+} from '../../constants';
+import { Transform } from '../../transform';
+import {
+  Compilation, BasicBlock, INodePosition, Func, values,
+} from '../compilation';
+import { Stage } from './base';
 
-const INT = constants.INT;
-const TYPE_INPUT = constants.TYPE_INPUT;
-const TYPE_INDEX = constants.TYPE_INDEX;
-const TYPE_STATUS = constants.TYPE_STATUS;
+interface IIterationResult {
+  index: values.Value;
+  pos: INodePosition;
+  complete: BasicBlock;
+  mismatch: BasicBlock;
+  loop: BasicBlock;
+  pause: BasicBlock;
+}
 
-const ATTR_STATE = constants.ATTR_STATE;
-const ATTR_POS = constants.ATTR_POS;
-const ATTR_ENDPOS = constants.ATTR_ENDPOS;
-const ATTR_SEQUENCE = constants.ATTR_SEQUENCE;
+export class MatchSequence extends Stage {
+  private readonly cache: Map<string, Func> = new Map();
 
-const ARG_STATE = constants.ARG_STATE;
-const ARG_POS = constants.ARG_POS;
-const ARG_ENDPOS = constants.ARG_ENDPOS;
-const ARG_SEQUENCE = constants.ARG_SEQUENCE;
-const ARG_SEQUENCE_LEN = constants.ARG_SEQUENCE_LEN;
-
-const SEQUENCE_COMPLETE = constants.SEQUENCE_COMPLETE;
-const SEQUENCE_PAUSE = constants.SEQUENCE_PAUSE;
-const SEQUENCE_MISMATCH = constants.SEQUENCE_MISMATCH;
-
-class MatchSequence extends Stage {
-  constructor(ctx) {
+  constructor(ctx: Compilation) {
     super(ctx, 'match-sequence');
 
     this.returnType = this.ctx.ir.struct('match_sequence_ret');
@@ -42,20 +40,19 @@ class MatchSequence extends Stage {
       TYPE_INPUT,
       TYPE_INDEX
     ]);
-
-    this.cache = new Map();
   }
 
-  build() {
+  public build(): any {
     return {
       get: transform => this.get(transform)
     };
   }
 
-  get(transform = null) {
-    const cacheKey = transform === null ? null : transform.name;
-    if (this.cache.has(cacheKey))
-      return this.cache.get(cacheKey);
+  public get(transform?: Transform): Func {
+    const cacheKey = transform === undefined ? undefined : transform.name;
+    if (this.cache.has(cacheKey)) {
+      return this.cache.get(cacheKey)!;
+    }
 
     const postfix = cacheKey ? '_' + cacheKey.toLowerCase() : '';
 
@@ -79,8 +76,7 @@ class MatchSequence extends Stage {
     return fn;
   }
 
-  // TODO(indutny): initialize `state.index` before calling matcher?
-  buildBody(fn, transform) {
+  private buildBody(fn: Func, transform?: Transform): void {
     const body = fn.body;
 
     const maxSeqLen = this.ctx.stageResults['node-translator'].maxSequenceLen;
@@ -124,7 +120,9 @@ class MatchSequence extends Stage {
     this.ret(iteration.mismatch, iteration.pos, SEQUENCE_MISMATCH);
   }
 
-  buildIteration(fn, body, indexField, pos, index, transform) {
+  private buildIteration(fn: Func, body: BasicBlock, indexField: values.Value,
+                         pos: values.Value, index: values.Value,
+                         transform?: Transform): IIterationResult {
     const seq = fn.getArgument(ARG_SEQUENCE);
     const seqLen = fn.getArgument(ARG_SEQUENCE_LEN);
 
@@ -182,7 +180,7 @@ class MatchSequence extends Stage {
     };
   }
 
-  ret(body, pos, status) {
+  private ret(body: BasicBlock, pos: INodePosition, status: number): void {
     const create = body.insertvalue(this.returnType.undef(), pos.current,
       this.returnType.lookupField('current').index);
 
@@ -192,10 +190,8 @@ class MatchSequence extends Stage {
     body.ret(amend);
   }
 
-  reset(body, field) {
+  private reset(body: BasicBlock, field: values.Value): void {
     const store = body.store(TYPE_INDEX.val(0), field);
     store.metadata.set('invariant.group', this.ctx.INVARIANT_GROUP);
-    return store;
   }
 }
-module.exports = MatchSequence;

@@ -1,20 +1,35 @@
-'use strict';
+import { Code } from '../code';
+import { Compilation } from '../compilation';
+import { Node } from '../node';
+import { Stage } from './base';
 
-const assert = require('assert');
+type SpanID = Code;
 
-const Stage = require('./').Stage;
-const compiler = require('../');
+interface IActiveResult {
+  active: activeMap;
+  spans: ReadonlyArray<SpanID>;
+}
 
-class Allocator extends Stage {
-  constructor(ctx) {
+type OverlapMap = Map<SpanID, Set<SpanID> >;
+
+export type ColoringMap = ReadonlyMap<SpanID, number>;
+
+export interface IColoringResult {
+  map: ColoringMap;
+  concurrency: ReadonlyArray<number>;
+  max: number;
+}
+
+export class Allocator extends Stage {
+  constructor(ctx: Compilation) {
     super(ctx, 'span-allocator');
   }
 
-  id(node) {
+  private id(node): SpanID {
     return node.code;
   }
 
-  build() {
+  public build(): any {
     const root = this.ctx.stageResults['node-translator'].root;
     const nodes = this.getNodes(root);
     const info = this.computeActive(nodes);
@@ -24,7 +39,7 @@ class Allocator extends Stage {
     return color;
   }
 
-  getNodes(root) {
+  private getNodes(root: Node): ReadonlyArray<Node> {
     const res = new Set();
     const queue = [ root ];
     while (queue.length !== 0) {
@@ -38,7 +53,7 @@ class Allocator extends Stage {
     return Array.from(res);
   }
 
-  computeActive(nodes) {
+  private computeActive(nodes: ReadonlyArray<Node>): IActiveResult {
     const activeMap = new Map();
     nodes.forEach(node => activeMap.set(node, new Set()));
 
@@ -91,9 +106,9 @@ class Allocator extends Stage {
     return { active: activeMap, spans: Array.from(spans) };
   }
 
-  computeOverlap(info) {
+  private computeOverlap(info: IActiveResult): OverlapMap {
     const active = info.active;
-    const overlap = new Map();
+    const overlap: OverlapMap = new Map();
 
     info.spans.forEach(span => overlap.set(span, new Set()));
 
@@ -113,7 +128,8 @@ class Allocator extends Stage {
     return overlap;
   }
 
-  color(spans, overlapMap) {
+  private color(spans: ReadonlyArray<SpanID>, overlapMap: OverlapMap)
+    : IColoringResult {
     let max = -1;
     const colors = new Map();
 
@@ -142,7 +158,7 @@ class Allocator extends Stage {
       return i;
     };
 
-    const res = new Map();
+    const res: Map<SpanID, number> = new Map();
 
     spans.forEach(span => res.set(span, allocate(span)));
 
@@ -155,4 +171,3 @@ class Allocator extends Stage {
     return { map: res, concurrency, max };
   }
 }
-module.exports = Allocator;

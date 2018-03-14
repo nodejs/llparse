@@ -6,15 +6,15 @@ import { Invoke } from './invoke';
 import { Node } from './node';
 
 export class Match extends Node {
-  private privTransformation: Transform | undefined;
+  private privTransform: Transform | undefined;
   private privCases: Case[] = [];
 
   constructor(name: strings) {
     super(name, 'match');
   }
 
-  public get transformation(): Transform | undefined {
-    return this.privTransformation;
+  public getTransform(): Transform | undefined {
+    return this.privTransform;
   }
 
   public get cases(): ReadonlyArray<Case> {
@@ -22,10 +22,10 @@ export class Match extends Node {
   }
 
   public transform(t: Transform): this {
-    assert.strictEqual(this.privTransformation, undefined,
+    assert.strictEqual(this.privTransform, undefined,
       'Can\'t apply transform twice');
 
-    this.privTransformation = t;
+    this.privTransform = t;
     return this;
   }
 

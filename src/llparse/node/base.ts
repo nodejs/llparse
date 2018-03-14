@@ -5,13 +5,11 @@ import * as code from '../code';
 import * as node from './';
 
 export abstract class Node {
-  private privOtherwise: Node | undefinded;
+  private privOtherwise: cases.Otherwise | undefinded;
 
   constructor(public readonly name: string,
               public readonly signature: code.Signature) {
   }
-
-  public get otherwise(): Node | undefined { return this.privOtherwise; }
 
   public otherwise(next: Node): this {
     this.checkIsMatch(next, '.otherwise()');
@@ -31,6 +29,12 @@ export abstract class Node {
     this.privOtherwise = new cases.Otherwise(next, true);
 
     return this;
+  }
+
+  // Internal API below
+
+  public getOtherwise(): cases.Otherwise | undefined {
+    return this.privOtherwise;
   }
 
   protected checkIsMatch(next: Node, method: string): void {

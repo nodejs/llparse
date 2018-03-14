@@ -27,6 +27,12 @@ const ARG_POS = constants.ARG_POS;
 const ARG_ENDPOS = constants.ARG_ENDPOS;
 const ARG_MATCH = constants.ARG_MATCH;
 
+export interface INodePosition {
+  current: values.Value;
+  next?: values.Value;
+}
+
+
 class Compilation {
   constructor(options) {
     this.options = Object.assign({}, options);
