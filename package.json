@@ -3,8 +3,12 @@
   "version": "3.0.0",
   "main": "lib/llparse.js",
   "scripts": {
-    "lint": "eslint test/*.js test/**/*.js lib/*.js lib/**/*.js lib/**/**/*.js lib/**/**/**/*.js",
-    "test": "mocha --reporter=spec test/*-test.js && npm run lint"
+    "build": "tsc",
+    "clean": "rm -rf lib",
+    "prepare": "npm run clean && npm run build",
+    "lint": "tslint -c tslint.json src/*.ts src/**/*.ts src/**/**/*.ts src/**/**/**/*.ts test/*.ts",
+    "mocha": "mocha -r ts-node/register/type-check --reporter spec test/*-test.ts",
+    "test": "npm run mocha && npm run lint"
   },
   "files": [
     "lib"
@@ -22,10 +26,15 @@
     "debug": "^3.1.0"
   },
   "devDependencies": {
+    "@types/mocha": "^2.2.48",
+    "@types/node": "^9.4.7",
     "async": "^2.6.0",
     "eslint": "^4.18.2",
     "llparse-test-fixture": "git://github.com/indutny/llparse-test-fixture.git",
-    "mocha": "^5.0.4"
+    "mocha": "^5.0.4",
+    "ts-node": "^5.0.1",
+    "tslint": "^5.9.1",
+    "typescript": "^2.7.2"
   },
   "directories": {
     "lib": "lib",
