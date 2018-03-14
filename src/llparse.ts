@@ -1,151 +1,92 @@
-'use strict';
+import * as assert from 'assert';
 
-const assert = require('assert');
+import { TransformAPI, CodeAPI } from './api';
+import * as internal from './llparse/';
 
-const internal = require('./llparse/');
-
-const kCode = Symbol('code');
-const kTransform = Symbol('transform');
-const kPrefix = Symbol('prefix');
-const kProperties = Symbol('properties');
-
-// API, really
-
-class CodeAPI {
-  constructor(prefix) {
-    this[kPrefix] = prefix;
-  }
-
-  // TODO(indutny): should we allow custom bodies here?
-  match(name) {
-    return new internal.code.Match(name, null);
-  }
-
-  // TODO(indutny): should we allow custom bodies here?
-  value(name) {
-    return new internal.code.Value(name, null);
-  }
-
-  span(name) {
-    return new internal.code.Span(name, null);
-  }
-
-  // Helpers
-
-  store(field) {
-    return new internal.code.Store(field);
-  }
-
-  load(field) {
-    return new internal.code.Load(field);
-  }
-
-  mulAdd(field, options) {
-    return new internal.code.MulAdd(field, options);
-  }
-
-  update(field, value) {
-    return new internal.code.Update(field, value);
-  }
-
-  isEqual(field, value) {
-    return new internal.code.IsEqual(field, value);
-  }
-
-  or(field, value) {
-    return new internal.code.Or(field, value);
-  }
-
-  test(field, value) {
-    return new internal.code.Test(field, value);
-  }
+interface IProperty {
+  ty: string;
+  name: string;
 }
 
-class TransformAPI {
-  toLowerUnsafe() {
-    return new internal.transform.Transform('to_lower_unsafe');
-  }
+export interface ILLParseOptions {
+  debug?: boolean;
 }
 
-class LLParse {
-  constructor(prefix) {
-    this[kPrefix] = prefix || 'llparse';
+export class LLParse {
+  public readonly code = new CodeAPI();
+  public readonly transform = new TransformAPI();
+  private readonly properties: { set: Set<IProperty>, list: IProperty[] };
 
-    this[kCode] = new CodeAPI(this[kPrefix]);
-    this[kTransform] = new TransformAPI();
+  public static create(public readonly prefix: string): LLparse {
+    return new LLParse(prefix);
+  }
 
-    this[kProperties] = {
+  constructor(private readonly prefix: string = 'llparse') {
+    this.properties = {
       set: new Set(),
       list: []
     };
   }
 
-  static create(prefix) {
-    return new LLParse(prefix);
-  }
-
-  get prefix() { return this[kPrefix]; }
-  get code() { return this[kCode]; }
-  get transform() { return this[kTransform]; }
-
-  node(name) {
+  public node(name: string): internal.node.Match {
     return new internal.node.Match(name);
   }
 
-  error(code, reason) {
+  public error(code: number, reason: string): internal.node.Error {
     return new internal.node.Error(code, reason);
   }
 
-  invoke(name, map, otherwise) {
-    return new internal.node.Invoke(name, map, otherwise);
+  public invoke(code: internal.code.Code,
+                map: { [key: number]: Node } | Node | undefined,
+                otherwise?: Node): internal.node.Invoke {
+    if (map === undefined) {
+      return new internal.node.Invoke(code, {});
+    } else if (map instanceof Node) {
+      return new internal.node.Invoke(code, {}, map);
+    } else {
+      return new internal.node.Invoke(code, map, otherwise);
+    }
   }
 
-  property(type, name) {
-    assert.strictEqual(typeof type, 'string',
-      'The first argument of `.property()` must be a type name');
-    assert.strictEqual(typeof name, 'string',
-      'The second argument of `.property()` must be a property name');
-
-    if (/^_/.test(name))
-      throw new Error(`Can't use internal property name: "${name}"`);
-
-    const props = this[kProperties];
-    if (props.set.has(name))
-      throw new Error(`Duplicate property with a name: "${name}"`);
-
-    if (!internal.constants.USER_TYPES.hasOwnProperty(type))
-      throw new Error(`Unknown property type: "${type}"`);
-    type = internal.constants.USER_TYPES[type];
-
-    props.set.add(name);
-    props.list.push({ type, name });
-  }
-
-  span(callback) {
+  public span(callback: internal.Code): internal.node.Span {
     return new internal.Span(callback);
   }
 
-  consume(code) {
-    return new internal.node.Consume(code);
+  public consume(field: string): internal.node.Consume {
+    return new internal.node.Consume(field);
   }
 
-  pause(code, reason) {
+  public pause(code: number, reason: string): internal.node.Pause {
     return new internal.node.Pause(code, reason);
   }
 
-  build(root, options) {
-    assert(root, 'Missing required argument for `.build(root)`');
-    assert(root instanceof internal.node.Node,
-      'Invalid value of `root` in `.build(root)');
+  public property(ty: string, name: string): void {
+    if (/^_/.test(name)) {
+      throw new Error(`Can't use internal property name: "${name}"`);
+    }
 
+    if (this.properties.set.has(name)) {
+      throw new Error(`Duplicate property with a name: "${name}"`);
+    }
+
+    if (!internal.constants.USER_TYPES.hasOwnProperty(ty)) {
+      throw new Error(`Unknown property type: "${ty}"`);
+    }
+    const bitcodeTy = internal.constants.USER_TYPES[ty];
+
+    props.set.add(name);
+    props.list.push({ ty: bitcodeTy, name });
+  }
+
+  public build(root: internal.node.Node, options?: ILLParseOptions)
+    : internal.compiler.IBuildResult {
     options = options || {};
 
     const c = new internal.compiler.Compiler({
       prefix: this.prefix,
-      properties: this[kProperties].list,
-      debug: options.debug || false
+      properties: this.properties.list,
+      debug: options.debug === undefined ? false : options.debug
     });
     return c.build(root);
   }
 }
-module.exports = LLParse;

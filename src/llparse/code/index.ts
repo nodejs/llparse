@@ -10,7 +10,7 @@ export { FieldValue } from './field-value';
 
 export { Store } from './store';
 export { Load } from './load';
-export { MulAdd } from './mul-add';
+export { IMulAddOptions, MulAdd } from './mul-add';
 export { Update } from './update';
 export { IsEqual } from './is-equal';
 export { Or } from './or';
