@@ -1,17 +1,15 @@
-'use strict';
+import { Compilation } from '../compilation';
+import { Code, Func } from './base';
 
-const code = require('./');
-
-class IsEqual extends code.Code {
-  constructor(name, field, value) {
+class IsEqual extends Code {
+  constructor(name: string, private readonly field: string,
+              private readonly value: number) {
     super('is-equal', 'match', name);
 
-    this.field = field;
-    this.value = value;
-    this.cacheKey = `is_equal_${this.field}_${this.numKey(this.value)}`;
+    this.privCacheKey = `is_equal_${this.field}_${this.numKey(this.value)}`;
   }
 
-  build(ctx, fn) {
+  public build(ctx: Compilation, fn: Func): void {
     const body = fn.body;
     const field = this.field;
     const value = this.value;
@@ -23,4 +21,3 @@ class IsEqual extends code.Code {
     body.ret(ctx.truncate(body, cmp, returnType));
   }
 }
-module.exports = IsEqual;

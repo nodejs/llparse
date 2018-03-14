@@ -1,17 +1,15 @@
-'use strict';
+import { Compilation } from '../compilation';
+import { Code, Func } from './base';
 
-const code = require('./');
-
-class Test extends code.Code {
-  constructor(name, field, value) {
+class Test extends Code {
+  constructor(name: string, private readonly field: string,
+              private readonly value: string) {
     super('test', 'match', name);
 
-    this.field = field;
-    this.value = value;
-    this.cacheKey = `test_${this.field}_${this.numKey(this.value)}`;
+    this.privCacheKey = `test_${this.field}_${this.numKey(this.value)}`;
   }
 
-  build(ctx, fn) {
+  build(ctx: Compilation, fn: Func): void {
     const body = fn.body;
     const field = this.field;
     const value = this.value;
@@ -26,4 +24,3 @@ class Test extends code.Code {
     body.ret(ctx.truncate(body, bool, returnType));
   }
 }
-module.exports = Test;

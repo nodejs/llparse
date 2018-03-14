@@ -1,16 +1,14 @@
-'use strict';
+import { Compilation } from '../compilation';
+import { Code, Func } from './base';
 
-const code = require('./');
-
-class Store extends code.Code {
-  constructor(name, field) {
+export class Store extends Code {
+  constructor(name: string, private readonly field: string) {
     super('store', 'value', name);
 
-    this.field = field;
-    this.cacheKey = `store_${this.field}`;
+    this.privCacheKey = `store_${this.field}`;
   }
 
-  build(ctx, fn) {
+  public build(ctx: Compilation, fn: Func): void {
     const body = fn.body;
     const field = this.field;
 
@@ -24,4 +22,3 @@ class Store extends code.Code {
     body.ret(returnType.val(0));
   }
 }
-module.exports = Store;

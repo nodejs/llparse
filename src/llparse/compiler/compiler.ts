@@ -1,7 +1,10 @@
-'use strict';
+import { builder } from 'bitcode';
+import { Buffer } from 'buffer';
 
-const llparse = require('../');
-const constants = llparse.constants;
+import * as constants from '../constants';
+import * as node from '../node';
+import { Compilation } from './compilation';
+import * as stage from './stage';
 
 const TYPE_INPUT = constants.TYPE_INPUT;
 const TYPE_MATCH = constants.TYPE_MATCH;
@@ -15,37 +18,47 @@ const ATTR_STATE = constants.ATTR_STATE;
 const ATTR_POS = constants.ATTR_POS;
 const ATTR_ENDPOS = constants.ATTR_ENDPOS;
 
-class Compiler {
-  constructor(options) {
-    this.options = Object.assign({}, options);
+export interface ICompilerStateProperty {
+  name: string;
+  ty: builder.types.Type;
+}
 
+export interface ICompilerOptions {
+  prefix: string;
+  properties: ReadonlyArray<ICompilerStateProperty>;
+  debug: options.debug === undefined ? false : options.debug
+}
+
+export interface ICompilerBuildResult {
+  bitcode: Buffer;
+  header: string;
+}
+
+export class Compiler {
+  private readonly prefix: string;
+
+  constructor(private readonly options: ICompilerOptions) {
     this.prefix = this.options.prefix;
-
-    this.nodeMap = new Map();
-    this.codeMap = new Map();
-    this.counter = new Map();
-
-    // redirect blocks by `fn` and `target`
-    this.redirectCache = new Map();
   }
 
-  build(root) {
+  public build(root: node.Node): ICompilerBuildResult {
     const compOpts = Object.assign({}, this.options, {
       root,
       stages: {
         before: [
-          llparse.compiler.stage.NodeTranslator,
-          llparse.compiler.stage.MatchSequence,
-          llparse.compiler.stage.NodeLoopChecker,
-          llparse.compiler.stage.SpanAllocator,
-          llparse.compiler.stage.SpanBuilder
+          stage.NodeTranslator,
+          stage.MatchSequence,
+          stage.NodeLoopChecker,
+          stage.SpanAllocator,
+          stage.SpanBuilder
         ],
         after: [
-          llparse.compiler.stage.NodeBuilder
+          stage.NodeBuilder
         ]
       }
     });
-    const ctx = new llparse.compiler.Compilation(compOpts);
+
+    const ctx = new Compilation(compOpts);
 
     ctx.build();
 
@@ -77,7 +90,7 @@ class Compiler {
     return out;
   }
 
-  buildInit(ctx) {
+  private buildInit(ctx: Compilation): string {
     const sig = ctx.ir.signature(ctx.ir.void(), [ ctx.state.ptr() ]);
     const init = ctx.defineFunction(sig, this.prefix + '_init', [ ARG_STATE ]);
     init.paramAttrs[0].add(ATTR_STATE);
@@ -89,7 +102,7 @@ class Compiler {
     return `void ${this.prefix}_init(${this.prefix}_state_t* s);`;
   }
 
-  buildExecute(ctx) {
+  private buildExecute(ctx: Compilation): string {
     // TODO(indutny): change signature to (state*, start*, len)?
     const sig = ctx.ir.signature(TYPE_ERROR, [
       ctx.state.ptr(),

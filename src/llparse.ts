@@ -1,12 +1,8 @@
 import * as assert from 'assert';
+import { builder } from 'bitcode';
 
 import { TransformAPI, CodeAPI } from './api';
 import * as internal from './llparse/';
-
-interface IProperty {
-  ty: string;
-  name: string;
-}
 
 export interface ILLParseOptions {
   debug?: boolean;
@@ -15,7 +11,10 @@ export interface ILLParseOptions {
 export class LLParse {
   public readonly code = new CodeAPI();
   public readonly transform = new TransformAPI();
-  private readonly properties: { set: Set<IProperty>, list: IProperty[] };
+  private readonly properties: {
+    set: Set<string>,
+    list: internal.compiler.ICompilerStateProperty[],
+  };
 
   public static create(public readonly prefix: string): LLparse {
     return new LLParse(prefix);
@@ -79,7 +78,7 @@ export class LLParse {
   }
 
   public build(root: internal.node.Node, options?: ILLParseOptions)
-    : internal.compiler.IBuildResult {
+    : internal.compiler.ICompilerBuildResult {
     options = options || {};
 
     const c = new internal.compiler.Compiler({

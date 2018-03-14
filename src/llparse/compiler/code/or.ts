@@ -1,17 +1,14 @@
-'use strict';
+import { Compilation } from '../compilation';
+import { Code, Func } from './base';
 
-const code = require('./');
-
-class Or extends code.Code {
-  constructor(name, field, value) {
+export class Or extends Code {
+  constructor(name, private readonly field: string,
+              private readonly value: number) {
     super('or', 'match', name);
-
-    this.field = field;
-    this.value = value;
-    this.cacheKey = `or_${this.field}_${this.numKey(this.value)}`;
+    this.privCacheKey = `or_${this.field}_${this.numKey(this.value)}`;
   }
 
-  build(ctx, fn) {
+  public build(ctx: Compilation, fn: Func): void {
     const body = fn.body;
     const field = this.field;
     const value = this.value;
@@ -24,4 +21,3 @@ class Or extends code.Code {
     body.ret(returnType.val(0));
   }
 }
-module.exports = Or;

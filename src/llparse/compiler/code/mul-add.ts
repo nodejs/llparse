@@ -1,20 +1,17 @@
-'use strict';
+import { IMulAddOptions } from '../../code';
+import { BOOL } from '../../constants';
+import { Compilation } from '../compilation';
+import { Code, Func } from './base';
 
-const code = require('./');
-const llparse = require('../../');
-
-const BOOL = llparse.constants.BOOL;
-
-class MulAdd extends code.Code {
-  constructor(name, field, options) {
+export class MulAdd extends Code {
+  constructor(name: string, private readonly field: string,
+              private readonly options: IMulAddOptions) {
     super('mulAdd', 'value', name);
 
-    this.field = field;
-    this.options = options;
-    this.cacheKey = `mul_add_${this.field}_${JSON.stringify(this.options)}`;
+    this.privCacheKey = `mul_add_${this.field}_${JSON.stringify(this.options)}`;
   }
 
-  build(ctx, fn) {
+  public build(ctx: Compilation, fn: Func): void {
     const ir = ctx.ir;
     const body = fn.body;
     const match = ctx.matchArg(fn);
@@ -94,4 +91,3 @@ class MulAdd extends code.Code {
     store.ret(returnType.val(0));
   }
 }
-module.exports = MulAdd;
