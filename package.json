@@ -18,7 +18,7 @@
   "author": "Fedor Indutny <fedor@indutny.com> (http://darksi.de/)",
   "license": "MIT",
   "dependencies": {
-    "bitcode": "^1.0.3",
+    "bitcode": "^1.0.4",
     "debug": "^3.1.0"
   },
   "devDependencies": {
