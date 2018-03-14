@@ -1,40 +1,44 @@
-'use strict';
+import * as asert from 'assert';
+import * as bitcode from 'bitcode';
+import { Buffer } from 'buffer';
 
-const assert = require('assert');
-const bitcode = require('bitcode');
+import {
+  CCONV,
 
-const llparse = require('../');
-const compiler = require('./');
-const constants = llparse.constants;
+  INT, TYPE_INPUT, TYPE_OUTPUT, TYPE_MATCH, TYPE_INDEX, TYPE_ERROR, TYPE_REASON,
+  TYPE_DATA,
 
-const CCONV = constants.CCONV;
+  ATTR_STATE, ATTR_POS, ATTR_ENDPOS,
 
-const INT = constants.INT;
-const TYPE_INPUT = constants.TYPE_INPUT;
-const TYPE_OUTPUT = constants.TYPE_OUTPUT;
-const TYPE_MATCH = constants.TYPE_MATCH;
-const TYPE_INDEX = constants.TYPE_INDEX;
-const TYPE_ERROR = constants.TYPE_ERROR;
-const TYPE_REASON = constants.TYPE_REASON;
-const TYPE_DATA = constants.TYPE_DATA;
+  ARG_STATE, ARG_POS, ARG_ENDPOS, ARG_MATCH,
+} from '../constants';
 
-const ATTR_STATE = constants.ATTR_STATE;
-const ATTR_POS = constants.ATTR_POS;
-const ATTR_ENDPOS = constants.ATTR_ENDPOS;
+import * as code from '../code';
+import * as compilerCode from './code';
 
-const ARG_STATE = constants.ARG_STATE;
-const ARG_POS = constants.ARG_POS;
-const ARG_ENDPOS = constants.ARG_ENDPOS;
-const ARG_MATCH = constants.ARG_MATCH;
+import builder = bitcode.builder;
+import Declaration = builder.values.constants.Declaration;
+import Func = builder.values.constants.Func;
+import BasicBlock = builder.values.constants.Func;
+import Value = builder.values.Value;
+import Type = builder.types.Type;
 
-export interface INodePosition {
-  current: values.Value;
-  next?: values.Value;
+export { bitcode.values as values, Func, BasicBlock };
+
+export interface INodeID {
+  name: string;
+  sourceName: string;
 }
 
+export interface INodePosition {
+  current: Value;
+  next?: Value;
+}
 
-class Compilation {
-  constructor(options) {
+export type Weight = 'likely' | 'unlikely' | number;
+
+export class Compilation {
+  constructor(options: any) {
     this.options = Object.assign({}, options);
 
     this.bitcode = new bitcode.Module();
@@ -79,7 +83,7 @@ class Compilation {
     this.stageResults = {};
   }
 
-  id(name, prefix = '', postfix = '') {
+  public id(name, prefix = '', postfix = ''): INodeID {
     let res = prefix + name + postfix;
     if (this.namespace.has(res)) {
       let i;
@@ -93,7 +97,7 @@ class Compilation {
     return { name: res, sourceName: name };
   }
 
-  build() {
+  public build(): void {
     // Private fields
     this.declareField(this.signature.node.ptr(), '_current',
       (type, ctx) => ctx.stageResults['node-builder'].entry);
@@ -126,11 +130,11 @@ class Compilation {
     this.buildStages(this.options.stages.after);
   }
 
-  end() {
+  public end(): Buffer {
     return this.bitcode.build(this.ir);
   }
 
-  buildCState() {
+  public buildCState(): string {
     const out = [];
 
     out.push(`typedef struct ${this.prefix}_state_s ${this.prefix}_state_t;`);
@@ -165,36 +169,38 @@ class Compilation {
     return out.join('\n');
   }
 
-  buildStages(stages) {
+  private buildStages(stages): void {
     stages.forEach(Stage => this.buildStage(Stage));
   }
 
-  buildStage(Stage) {
+  private buildStage(Stage): void {
     const stage = new Stage(this);
     this.stageResults[stage.name] = stage.build();
   }
 
-  declareFunction(signature, name) {
+  public declareFunction(signature: builder.types.Signature,
+                         name: string): Func {
     const res = signature.declareFunction(name);
     this.bitcode.add(res);
     return res;
   }
 
-  defineFunction(signature, name, paramNames) {
+  public defineFunction(signature: builder.types.Signature, name: string,
+                        paramNames: ReadonlyArray<string>): Func {
     const res = signature.defineFunction(name, paramNames);
     this.bitcode.add(res);
     return res;
   }
 
   // TODO(indutny): find better place for it?
-  translateCode(code) {
+  private translateCode(code: code.Code): compilerCode.Code {
     // User callbacks
-    if (code instanceof llparse.code.Match)
-      return new compiler.code.Match(code.name);
-    else if (code instanceof llparse.code.Value)
-      return new compiler.code.Value(code.name);
-    else if (code instanceof llparse.code.Span)
-      return new compiler.code.Span(code.name);
+    if (code instanceof code.Match)
+      return new compilerCode.Match(code.name);
+    else if (code instanceof code.Value)
+      return new compilerCode.Value(code.name);
+    else if (code instanceof code.Span)
+      return new compilerCode.Span(code.name);
 
     // Internal helpers
     let name = code.name;
@@ -202,25 +208,25 @@ class Compilation {
       name += '_' + code.field;
 
     const id = this.id(name, 'c_').name;
-    if (code instanceof llparse.code.IsEqual)
-      return new compiler.code.IsEqual(id, code.field, code.value);
-    else if (code instanceof llparse.code.Load)
-      return new compiler.code.Load(id, code.field);
-    else if (code instanceof llparse.code.MulAdd)
-      return new compiler.code.MulAdd(id, code.field, code.options);
-    else if (code instanceof llparse.code.Or)
-      return new compiler.code.Or(id, code.field, code.value);
-    else if (code instanceof llparse.code.Store)
-      return new compiler.code.Store(id, code.field);
-    else if (code instanceof llparse.code.Test)
-      return new compiler.code.Test(id, code.field, code.value);
-    else if (code instanceof llparse.code.Update)
-      return new compiler.code.Update(id, code.field, code.value);
+    if (code instanceof code.IsEqual)
+      return new compilerCode.IsEqual(id, code.field, code.value);
+    else if (code instanceof code.Load)
+      return new compilerCode.Load(id, code.field);
+    else if (code instanceof code.MulAdd)
+      return new compilerCode.MulAdd(id, code.field, code.options);
+    else if (code instanceof code.Or)
+      return new compilerCode.Or(id, code.field, code.value);
+    else if (code instanceof code.Store)
+      return new compilerCode.Store(id, code.field);
+    else if (code instanceof code.Test)
+      return new compilerCode.Test(id, code.field, code.value);
+    else if (code instanceof code.Update)
+      return new compilerCode.Update(id, code.field, code.value);
     else
       throw new Error('Unexpected code type of: ' + code.name);
   }
 
-  buildCode(code) {
+  public buildCode(code: compilerCode.Code): Declaration {
     const native = this.translateCode(code);
 
     const signatures = this.signature.callback;
@@ -252,7 +258,8 @@ class Compilation {
     return fn;
   }
 
-  buildCodeWithBody(code, signature) {
+  private buildCodeWithBody(code: compilerCode.Code,
+                            signature: builder.types.Signature): Func {
     const args = [ ARG_STATE, ARG_POS, ARG_ENDPOS ];
 
     if (code.signature === 'value')
@@ -270,21 +277,21 @@ class Compilation {
     return fn;
   }
 
-  cstring(string) {
-    if (this.cstringCache.has(string)) {
-      return this.cstringCache.get(string);
+  public cstring(value: string): builder.values.Global {
+    if (this.cstringCache.has(value)) {
+      return this.cstringCache.get(value)!;
     }
 
-    const res = this.addGlobalConst('cstr', this.ir.cstring(string));
-    this.cstringCache.set(string, res);
+    const res = this.addGlobalConst('cstr', this.ir.cstring(value));
+    this.cstringCache.set(value, res);
     return res;
   }
 
-  blob(data) {
+  public blob(data: Buffer): builder.values.Global {
     return this.addGlobalConst('blob', this.ir.blob(data));
   }
 
-  addGlobalConst(name, value) {
+  private addGlobalConst(name: string, value: Value): builder.values.Global {
     const id = this.id(name, 'g_').name;
     const glob = this.ir.global(value.ty.ptr(), id, value);
     glob.linkage = 'internal';
@@ -293,15 +300,15 @@ class Compilation {
     return glob;
   }
 
-  debug(fn, body, string) {
+  public debug(fn: Func, body: BasicBlock, message: string): BasicBlock {
     if (!this.options.debug)
       return body;
 
-    const str = this.cstring(string);
+    const str = this.cstring(message);
     const cast = body.getelementptr(str, INT.val(0), INT.val(0));
 
     // Lazily declare debug method
-    if (this.debugMethod === null) {
+    if (this.debugMethod === undefined) {
       const sig = this.ir.signature(this.ir.void(),
         [ this.state.ptr(), TYPE_INPUT, TYPE_INPUT, TYPE_INPUT ]);
 
@@ -320,7 +327,7 @@ class Compilation {
     return body;
   }
 
-  fn(signature, name) {
+  public fn(signature: builder.types.Signature, name: string): Func {
     name = this.prefix + '__' + name;
 
     let fn;
@@ -355,7 +362,7 @@ class Compilation {
     return fn;
   }
 
-  toBranchWeight(value) {
+  private toBranchWeight(value: Weight): number {
     if (value === 'likely')
       return 0x10000;
     else if (value === 'unlikely')
@@ -365,7 +372,8 @@ class Compilation {
     return value;
   }
 
-  branch(body, cmp, weights) {
+  // TODO(indutny): return type
+  public branch(body: BasicBlock, cmp: Value, weights: ReadonlyArray<Weight>) {
     const onTrue = body.parent.createBlock('true');
     const onFalse = body.parent.createBlock('false');
     const branch = body.branch(cmp, onTrue, onFalse);
@@ -390,7 +398,9 @@ class Compilation {
     };
   }
 
-  buildSwitch(body, what, values, weights) {
+  // TODO(indutny): return type
+  buildSwitch(body: BasicBlock, what: Value, values: ReadonlyArray<number>,
+              weights: ReadonlyArray<Weight>) {
     const cases = [];
     const blocks = [];
     values.forEach((value, i) => {
@@ -425,7 +435,9 @@ class Compilation {
     };
   }
 
-  buildTransform(transform, body, current) {
+  // TODO(indutny): return type
+  public buildTransform(transform: Transform, body: BasicBlock,
+                        current: Value) {
     if (transform.name === 'to_lower_unsafe') {
       current = body.binop('or', current, TYPE_INPUT.to.val(0x20));
     } else {
@@ -435,7 +447,8 @@ class Compilation {
     return { body, current };
   }
 
-  truncate(body, from, toType, isSigned = false) {
+  public truncate(body: BasicBlock, from: Value, toType: Type,
+                  isSigned: boolean = false): Value {
     const fromTy = from.ty;
     assert(toType.isInt());
     assert(fromTy.isInt());
@@ -460,39 +473,38 @@ class Compilation {
     return res;
   }
 
-  load(fn, body, field) {
+  public load(fn: Func, body: BasicBlock, field: string): Value {
     const lookup = this.stateField(fn, body, field);
     return body.load(lookup);
   }
 
-  store(fn, body, field, value) {
+  public store(fn: Func, body: BasicBlock, field: string, value: Value): Value {
     const lookup = this.stateField(fn, body, field);
     body.store(value, lookup);
   }
 
-  declareField(type, name, init) {
+  public declareField(ty: Type, name: string, init: Value): void {
     this.state.addField(type, name);
 
     this.initializers.push({ type, name, init });
   }
 
-  initFields(fn, body) {
+  public initFields(fn: Func, body: BasicBlock): void {
     this.initializers.forEach((entry) => {
       const field = this.stateField(fn, body, entry.name);
       body.store(entry.init(entry.type, this), field);
     });
   }
 
-  stateField(fn, body, name) {
+  public stateField(fn: Func, body: BasicBlock, name: string): Value {
     const stateArg = this.stateArg(fn);
 
     return body.getelementptr(stateArg, INT.val(0),
       INT.val(this.state.lookupField(name).index), true);
   }
 
-  stateArg(fn) { return fn.getArgument(ARG_STATE); }
-  posArg(fn) { return fn.getArgument(ARG_POS); }
-  endPosArg(fn) { return fn.getArgument(ARG_ENDPOS); }
-  matchArg(fn) { return fn.getArgument(ARG_MATCH); }
+  public stateArg(fn: Func): Value { return fn.getArgument(ARG_STATE); }
+  public posArg(fn: Func): Value { return fn.getArgument(ARG_POS); }
+  public endPosArg(fn: Func): Value { return fn.getArgument(ARG_ENDPOS); }
+  public matchArg(fn: Func): Value { return fn.getArgument(ARG_MATCH); }
 }
-module.exports = Compilation;
