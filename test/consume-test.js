@@ -19,7 +19,7 @@ describe('LLParse/consume', function() {
     p.property('i8', 'to_consume');
 
     const start = p.node('start');
-    const consume = p.consume(p.code.load('to_consume'));
+    const consume = p.consume('to_consume');
 
     start.select({
       '0': 0, '1': 1, '2': 2, '3': 3, '4': 4
