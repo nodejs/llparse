@@ -1,18 +1,14 @@
-'use strict';
+import * as assert from 'assert';
+import { Compilation, BasicBlock, INodeID } from '../compilation';
+import { Node, INodeChild } from './base';
 
-const assert = require('assert');
-
-const node = require('./');
-
-class Consume extends node.Node {
-  constructor(id, fieldName) {
+export class Consume extends Node {
+  constructor(id: INodeID, private readonly fieldName: string) {
     super('consume', id);
-    this.fieldName = fieldName;
-    this.noPrologueCheck = true;
+    this.privNoPrologueCheck = true;
   }
 
-  // TODO(indutny): remove unnecessary load
-  doBuild(ctx, body) {
+  public doBuild(ctx: Compilation, body: BasicBlock): void {
     const INVARIANT_GROUP = ctx.INVARIANT_GROUP;
 
     const pos = ctx.pos.current;
@@ -53,4 +49,3 @@ class Consume extends node.Node {
     this.pause(ctx, noData);
   }
 }
-module.exports = Consume;

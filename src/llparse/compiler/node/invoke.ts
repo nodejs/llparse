@@ -1,28 +1,31 @@
-'use strict';
+import * as assert from 'assert';
 
-const assert = require('assert');
+import { Code } from '../code';
+import { Compilation, BasicBlock, INodeID } from '../compilation';
+import { Node, INodeChild } from './base';
 
-const llparse = require('../../');
-const kSignature = llparse.symbols.kSignature;
+export class Invoke extends Node {
+  private readonly map: Map<number, Node> = new Map();
 
-const node = require('./');
-
-class Invoke extends node.Node {
-  constructor(id, code) {
+  constructor(id: INodeID, private readonly code: Code) {
     super('invoke', id);
 
     this.code = code;
-    this.map = null;
-    this.noPrologueCheck = true;
+    this.privNoPrologueCheck = true;
   }
 
-  getChildren() {
-    return super.getChildren().concat(Object.keys(this.map).map((key) => {
-      return { node: this.map[key], noAdvance: true, key: null };
+  public add(key: number, node: Node): void {
+    assert(!this.map.has(key));
+    this.map.set(key, node);
+  }
+
+  public getChildren(): ReadonlyArray<INodeChild> {
+    return super.getChildren().concat(this.map.forEach((node) => {
+      return { node, noAdvance: true, key: null };
     }));
   }
 
-  doBuild(ctx, body) {
+  protected doBuild(ctx: Compilation, body: BasicBlock): void {
     const code = ctx.compilation.buildCode(this.code);
 
     const args = [
@@ -59,4 +62,3 @@ class Invoke extends node.Node {
     this.doOtherwise(ctx, s.otherwise);
   }
 }
-module.exports = Invoke;

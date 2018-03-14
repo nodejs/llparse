@@ -1,26 +1,25 @@
-'use strict';
+import { Buffer } from 'buffer';
 
-const llparse = require('../../');
-const constants = llparse.constants;
+import { Compilation, BasicBlock, INodeID } from '../compilation';
+import { Node, INodeChild } from './base';
+import {
+  TYPE_INDEX, SEQUENCE_COMPLETE, SEQUENCE_PAUSE, SEQUENCE_MISMATCH,
+} from '../../constants';
 
+export class Sequence extends Node {
+  private next: Node | undefined;
+  private value: number | undefined;
 
-const node = require('./');
-
-const TYPE_INDEX = constants.TYPE_INDEX;
-const SEQUENCE_COMPLETE = constants.SEQUENCE_COMPLETE;
-const SEQUENCE_PAUSE = constants.SEQUENCE_PAUSE;
-const SEQUENCE_MISMATCH = constants.SEQUENCE_MISMATCH;
-
-class Sequence extends node.Node {
-  constructor(id, select) {
+  constructor(id: INodeID, private readonly select: Buffer) {
     super('sequence', id);
-
-    this.select = select;
-    this.next = null;
-    this.value = null;
   }
 
-  getChildren() {
+  public finish(next: Node, value: number) {
+    this.next = next;
+    this.value = value;
+  }
+
+  public getChildren(): ReadonlyArray<INodeChild> {
     return super.getChildren().concat({
       node: this.next,
       noAdvance: false,
@@ -28,7 +27,7 @@ class Sequence extends node.Node {
     });
   }
 
-  doBuild(ctx, body) {
+  protected doBuild(ctx: Compilation, body: BasicBlock): void {
     const INT = ctx.INT;
 
     const seq = ctx.blob(this.select);
@@ -79,11 +78,10 @@ class Sequence extends node.Node {
     pause.name = 'pause';
     mismatch.name = 'mismatch';
 
-    this.tailTo(ctx, complete, next, this.next, this.value);
+    this.tailTo(ctx, complete, next, this.next!, this.value!);
     this.pause(ctx, pause);
 
     // Not equal
     this.doOtherwise(ctx, mismatch, { current, next });
   }
 }
-module.exports = Sequence;

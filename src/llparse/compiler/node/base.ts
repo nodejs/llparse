@@ -4,17 +4,14 @@ import { Buffer } from 'buffer';
 import { Transform } from '../../transform';
 import * as node from './node';
 import { INodePosition, NodeContext } from './node-context';
-import { Compilation, INodeID, values } from './compilation';
-
-import BasicBlock = values.BasicBlock;
-import Func = values.constants.Func;
+import { Compilation, INodeID, BasicBlock, Func, values } from './compilation';
 
 interface ITrampoline {
-  block: values.BasicBlock;
+  block: BasicBlock;
   phi?: values.instructions.Phi;
 }
 
-interface INodeChild {
+export interface INodeChild {
   node: Node;
   noAdvance: boolean;
   key: Buffer;
@@ -28,7 +25,7 @@ export abstract class Node {
   protected skip: boolean = false;
 
   protected transform: Transform | undefined;
-  protected noPrologueCheck: boolean = false;
+  protected privNoPrologueCheck: boolean = false;
   protected hasPause: boolean = false;
   private trampolines: Map<Node, > = new Map();
 
@@ -37,12 +34,14 @@ export abstract class Node {
     this.sourceName = id.sourceName;
   }
 
+  public get noPrologueCheck(): boolean { return this.privNoPrologueCheck; }
+
   public setOtherwise(otherwise: Node, skip: boolean) {
     this.otherwise = otherwise;
     this.skip = skip;
   }
 
-  public getChildren(): INodeChild[] {
+  public getChildren(): ReadonlyArray<INodeChild> {
     return [ { node: this.otherwise, noAdvance: !this.skip, key: undefined } ];
   }
 
@@ -84,7 +83,7 @@ export abstract class Node {
   }
 
   protected prologue(ctx: Compilation, body: BasicBlock): BasicBlock {
-    if (this.noPrologueCheck) {
+    if (this.privNoPrologueCheck) {
       return body;
     }
 

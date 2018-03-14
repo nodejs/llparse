@@ -1,21 +1,19 @@
-'use strict';
+import { Compilation, BasicBlock, INodeID } from '../compilation';
+import { Node, INodeChild } from './base';
 
-const node = require('./');
-
-class Error extends node.Node {
-  constructor(id, code, reason) {
+export class Error extends Node {
+  constructor(id: NodeID, private readonly code: number,
+              private readonly reason: string) {
     super('error', id);
 
-    this.code = code;
-    this.reason = reason;
-    this.noPrologueCheck = true;
+    this.privNoPrologueCheck = true;
   }
 
-  getChildren() {
+  public getChildren(): ReadonlyArray<INodeChild> {
     return [];
   }
 
-  buildStoreError(ctx, body) {
+  private buildStoreError(ctx: Compilation, body: BasicBlock): BasicBlock {
     const INT = ctx.INT;
 
     const reason = ctx.cstring(this.reason);
@@ -33,7 +31,7 @@ class Error extends node.Node {
     return body;
   }
 
-  doBuild(ctx, body) {
+  protected doBuild(ctx: Compilation, body: BasicBlock): void {
     body = this.buildStoreError(ctx, body);
 
     const currentPtr = ctx.stateField(body, '_current');
@@ -46,4 +44,3 @@ class Error extends node.Node {
     body.ret(retType.val(null));
   }
 }
-module.exports = Error;

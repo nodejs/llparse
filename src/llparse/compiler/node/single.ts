@@ -1,21 +1,22 @@
-'use strict';
+import { Compilation, BasicBlock, INodeID } from '../compilation';
+import { Node, INodeChild } from './base';
 
-const node = require('./');
+export class Single extends Node {
+  private readonly children: INodeChild[] = [];
 
-class Single extends node.Node {
-  constructor(...args) {
-    super('single', ...args);
-
-    this.children = null;
+  constructor(id: NodeID) {
+    super('single', id);
   }
 
-  getChildren() {
-    return super.getChildren().concat(this.children.map((child) => {
-      return { node: child.next, noAdvance: child.noAdvance, key: child.key };
-    }));
+  public add(child: INodeChild): void {
+    this.children.push(child);
   }
 
-  doBuild(ctx, body) {
+  public getChildren(): ReadonlyArray<INodeChild> {
+    return super.getChildren().concat(this.children);
+  }
+
+  protected doBuild(ctx: Compilation, body: BasicBlock): void {
     const pos = ctx.pos.current;
 
     // Load the character
@@ -33,7 +34,7 @@ class Single extends node.Node {
 
     // Mark error branches as unlikely
     this.children.forEach((child, i) => {
-      if (child.next instanceof node.Error)
+      if (child.node instanceof node.Error)
         weights[i + 1] = 'unlikely';
     });
 
@@ -47,10 +48,9 @@ class Single extends node.Node {
       const child = this.children[i];
 
       this.tailTo(ctx, body, child.noAdvance ? ctx.pos.current : ctx.pos.next,
-        child.next, child.value);
+        child.node, child.value);
     });
 
     this.doOtherwise(ctx, s.otherwise);
   }
 }
-module.exports = Single;

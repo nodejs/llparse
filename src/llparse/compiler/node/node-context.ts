@@ -1,9 +1,7 @@
 import { Builder } from 'bitcode';
 
-import { Compilation, types, values } from '../compilation';
+import { Compilation, Func, types, values } from '../compilation';
 import { Node } from './base';
-
-import Func = values.constants.Func;
 
 export interface INodePosition {
   current: values.Value;

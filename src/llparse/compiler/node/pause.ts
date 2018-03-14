@@ -1,18 +1,17 @@
-'use strict';
+import { Compilation, BasicBlock, INodeID } from '../compilation';
+import { Node, INodeChild } from './base';
+import { Error } from './error';
 
-const node = require('./');
-
-class Pause extends node.Error {
-  constructor(id, code, reason) {
+export class Pause extends Error {
+  constructor(id: INodeID, code: number, reason: string) {
     super(id, code, reason);
-    this.type = 'pause';
   }
 
-  getResumptionTargets() {
+  public getResumptionTargets(): ReadonlyArray<Node> {
     return super.getResumptionTargets().concat(this.otherwise);
   }
 
-  doBuild(ctx, body) {
+  protected doBuild(ctx: Compilation, body: BasicBlock): void {
     body = this.buildStoreError(ctx, body);
 
     const currentPtr = ctx.stateField(body, '_current');
@@ -24,4 +23,3 @@ class Pause extends node.Error {
     body.ret(ctx.fn.ty.toSignature().returnType.val(null));
   }
 }
-module.exports = Pause;

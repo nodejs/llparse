@@ -1,18 +1,30 @@
-import { Node } from './base';
+import { Buffer } from 'buffer';
+import { Compilation, BasicBlock, INodeID } from '../compilation';
+import { Node, INodeChild } from './base';
 
 const CHAR_WIDTH = 8;
 const WORD_WIDTH = 5;
 
-class BitCheck extends Node {
-  constructor(id: string) {
-    super('bit-check', id);
+export interface IBitCheckEntry {
+  node: Node;
+  noAdvance: boolean;
+  keys: Buffer[];
+}
 
-    this.map = null;
+export class BitCheck extends Node {
+  public readonly entries: IBitCheckEntry[] = [];
+
+  constructor(id: INodeID) {
+    super('bit-check', id);
   }
 
-  getChildren() {
+  public add(entry: IBitCheckEntry): void {
+    this.entries.push(entry);
+  }
+
+  public getChildren(): ReadonlyArray<INodeChild> {
     const res = super.getChildren();
-    this.map.forEach((entry) => {
+    this.entries.forEach((entry) => {
       entry.keys.forEach((key) => {
         res.push({ node: entry.node, noAdvance: entry.noAdvance, key });
       });
@@ -20,9 +32,9 @@ class BitCheck extends Node {
     return res;
   }
 
-  buildTable(ctx) {
+  private buildTable(ctx: Compilation) {
     const table = llparse.utils.buildLookupTable(WORD_WIDTH, CHAR_WIDTH,
-      this.map.map(entry => entry.keys));
+      this.entries.map(entry => entry.keys));
 
     const cellTy = ctx.ir.i(1 << WORD_WIDTH);
     const arrayTy = ctx.ir.array(table.table.length, cellTy);
@@ -41,7 +53,7 @@ class BitCheck extends Node {
     };
   }
 
-  doBuild(ctx, body) {
+  protected doBuild(ctx: Compilation, body: BasicBlock): void {
     const pos = ctx.pos.current;
 
     // Load the character
@@ -79,9 +91,9 @@ class BitCheck extends Node {
     const shr = body.binop('lshr', load, shift);
     const masked = body.binop('and', shr, cellTy.val(table.valueMask));
 
-    const weights = new Array(this.map.length + 1).fill('likely');
+    const weights = new Array(this.entries.length + 1).fill('likely');
 
-    this.map.forEach((entry, i) => {
+    this.entries.forEach((entry, i) => {
       if (entry.node instanceof node.Error)
         weights[i + 1] = 'unlikely';
     });
@@ -89,11 +101,11 @@ class BitCheck extends Node {
     if (this.otherwise instanceof node.Error)
       weights[0] = 'unlikely';
 
-    const keys = this.map.map((entry, i) => i + 1);
+    const keys = this.entries.map((entry, i) => i + 1);
     const s = ctx.buildSwitch(body, masked, keys, weights);
 
     s.cases.forEach((body, i) => {
-      const child = this.map[i];
+      const child = this.entries[i];
 
       this.tailTo(ctx, body, child.noAdvance ? ctx.pos.current : ctx.pos.next,
         child.node, null);
@@ -102,4 +114,3 @@ class BitCheck extends Node {
     this.doOtherwise(ctx, s.otherwise);
   }
 }
-module.exports = BitCheck;
