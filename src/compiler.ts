@@ -1,6 +1,7 @@
 import { Buffer } from 'buffer';
 import {
   Builder,
+  LoopChecker,
   node as apiNode,
   Property as APIProperty,
 } from 'llparse-builder';
@@ -26,13 +27,19 @@ export class Compiler {
 
   public compile(apiRoot: apiNode.Node,
                  properties: ReadonlyArray<APIProperty>): ICompilerResult {
+    // Check if loops are present
+    const lc = new LoopChecker();
+    lc.check(apiRoot);
+
+    // Translate to compiler nodes
     const t = new Translator();
-
     const root = t.translate(apiRoot);
-    const compilation = new Compilation(root, properties, this.options);
 
+    // Compile to bitcode
+    const compilation = new Compilation(root, properties, this.options);
     const bitcode = compilation.buildBitcode();
     const headers = compilation.buildHeaders();
+
     return { bitcode, headers };
   }
 
