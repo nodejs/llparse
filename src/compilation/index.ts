@@ -236,6 +236,20 @@ export class Compilation {
     return this.addGlobalConst('blob', this.ir.blob(value));
   }
 
+  public declareFunction(signature: irTypes.Signature, name: string)
+    : IRDeclaration {
+    const decl = signature.declareFunction(name);
+    this.bitcode.add(decl);
+    return decl;
+  }
+
+  public defineFunction(signature: irTypes.Signature, name: string,
+                        paramNames: ReadonlyArray<string>): IRFunc {
+    const fn = signature.defineFunction(name, paramNames);
+    this.bitcode.add(fn);
+    return fn;
+  }
+
   // Internals
 
   private stateField(fn: IRFunc, body: IRBasicBlock, name: string): IRValue {
