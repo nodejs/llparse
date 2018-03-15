@@ -32,6 +32,7 @@ export const TYPE_ERROR = INT;
 export const TYPE_REASON = CSTR;
 export const TYPE_ERROR_POS = TYPE_POS;
 export const TYPE_DATA = PTR;
+export const TYPE_SPAN_POS = TYPE_POS;
 
 export const STATE_INDEX = '_index';
 export const STATE_CURRENT = '_current';

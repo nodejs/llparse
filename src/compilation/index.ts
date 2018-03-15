@@ -7,6 +7,7 @@ import { Buffer } from 'buffer';
 
 import * as constants from '../constants';
 import * as node from '../node';
+import { ISpanAllocatorResult } from '../span';
 
 import irTypes = bitcodeBuilderNS.types;
 import irValues = bitcodeBuilderNS.values;
@@ -47,6 +48,7 @@ export class Compilation {
   constructor(public readonly prefix: string,
               public readonly root: node.Node,
               private readonly properties: ReadonlyArray<ICompilationProperty>,
+              spans: ISpanAllocatorResult,
               public readonly options: ICompilationOptions) {
     this.ir = this.bitcode.createBuilder();
 
@@ -85,6 +87,15 @@ export class Compilation {
     this.state.addField(constants.TYPE_REASON, constants.STATE_REASON);
     this.state.addField(constants.TYPE_ERROR_POS, constants.STATE_ERROR_POS);
     this.state.addField(constants.TYPE_DATA, constants.STATE_DATA);
+
+    spans.concurrency.forEach((concurrent, index) => {
+      this.state.addField(constants.TYPE_SPAN_POS,
+        constants.STATE_SPAN_POS + index);
+      if (concurrent.length > 1) {
+        this.state.addField(this.signature.callback.span.ptr(),
+          constants.STATE_SPAN_CB + index);
+      }
+    });
 
     for (const property of properties) {
       let ty: IRType;

@@ -42,7 +42,7 @@ export class Compiler {
     const root = t.translate(apiRoot);
 
     // Compile to bitcode
-    const compilation = new Compilation(this.prefix, root, properties,
+    const compilation = new Compilation(this.prefix, root, properties, spans,
       this.options);
     const bitcode = compilation.buildBitcode();
     const headers = compilation.buildHeaders();
