@@ -1,2 +1,10 @@
 export { Node } from './base';
+export { Consume } from './consume';
 export { Empty } from './empty';
+export { Error } from './error';
+export { Invoke } from './invoke';
+export { Pause } from './pause';
+export { Sequence } from './sequence';
+export { Single } from './single';
+export { SpanEnd } from './span-end';
+export { SpanStart } from './span-start';
