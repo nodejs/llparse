@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 import { Buffer } from 'buffer';
-import { code as apiCode, node as api } from 'llparse-builder';
+import { code as apiCode, node as api, Span as APISpan } from 'llparse-builder';
 
 import * as compilerCode from '../code';
 import * as compiler from '../node';
@@ -10,9 +10,19 @@ import { Identifier, IUniqueName } from '../utils';
 export class Translator {
   private readonly id: Identifier = new Identifier(this.prefix + '_n_');
   private readonly map: Map<api.Node, compiler.Node> = new Map();
+  private readonly spanMap: Map<APISpan, Span> = new Map();
 
   constructor(private readonly prefix: string,
               private readonly spans: ISpanAllocatorResult) {
+    spans.concurrency.forEach((concurrent, index) => {
+      const span = new Span(index, concurrent.map((apiSpan) => {
+        return this.translateCode(apiSpan.callback);
+      }));
+
+      for (const apiSpan of concurrent) {
+        this.spanMap.set(apiSpan, span);
+      }
+    });
   }
 
   public translate(node: api.Node): compiler.Node {
@@ -31,11 +41,9 @@ export class Translator {
     } else if (node instanceof api.Consume) {
       result = new compiler.Consume(id, node.field);
     } else if (node instanceof api.SpanStart) {
-      result = new compiler.SpanStart(id, node.span,
-        this.translateCode(node.span.callback) as compilerCode.Span);
+      result = new compiler.SpanStart(id, this.spanMap.get(node.span)!);
     } else if (node instanceof api.SpanEnd) {
-      result = new compiler.SpanEnd(id, node.span,
-        this.translateCode(node.span.callback) as compilerCode.Span);
+      result = new compiler.SpanEnd(id, this.spanMap.get(node.span)!);
     } else if (node instanceof api.Invoke) {
       result = new compiler.Invoke(id, this.translateCode(node.code));
     } else if (node instanceof api.Match) {
