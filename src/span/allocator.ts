@@ -1,23 +1,22 @@
 import * as assert from 'assert';
-import { node as api } from 'llparse-builder';
+import { node as api, Span } from 'llparse-builder';
 
-export type SpanID = any;
-type SpanIDSet = Set<SpanID>;
+type SpanSet = Set<Span>;
 
 interface ISpanActiveInfo {
-  readonly active: Map<api.Node, SpanIDSet>;
-  readonly spans: ReadonlyArray<SpanID>;
+  readonly active: Map<api.Node, SpanSet>;
+  readonly spans: ReadonlyArray<Span>;
 }
 
-type SpanOverlap = Map<SpanID, SpanIDSet>;
+type SpanOverlap = Map<Span, SpanSet>;
 
 export interface ISpanAllocatorResult {
-  readonly colors: ReadonlyMap<SpanID, number>;
-  readonly concurrency: ReadonlyArray<ReadonlyArray<SpanID> >;
+  readonly colors: ReadonlyMap<Span, number>;
+  readonly concurrency: ReadonlyArray<ReadonlyArray<Span> >;
   readonly max: number;
 }
 
-function id(node: api.SpanStart | api.SpanEnd): SpanID {
+function id(node: api.SpanStart | api.SpanEnd): Span {
   return node.span;
 }
 
@@ -52,11 +51,11 @@ export class SpanAllocator {
   }
 
   private computeActive(nodes: ReadonlyArray<api.Node>): ISpanActiveInfo {
-    const activeMap: Map<api.Node, SpanIDSet> = new Map();
+    const activeMap: Map<api.Node, SpanSet> = new Map();
     nodes.forEach((node) => activeMap.set(node, new Set()));
 
     const queue: Set<api.Node> = new Set(nodes);
-    const spans: SpanIDSet = new Set();
+    const spans: SpanSet = new Set();
     for (const node of queue) {
       queue.delete(node);
 
@@ -86,7 +85,7 @@ export class SpanAllocator {
           // Disallow loops
           if (edgeNode instanceof api.SpanStart) {
             assert.notStrictEqual(id(edgeNode), span,
-              `Detected loop in span "${span.name}"`);
+              `Detected loop in span "${span.callback.name}"`);
           }
 
           const edgeActive = activeMap.get(edgeNode)!;
@@ -107,7 +106,7 @@ export class SpanAllocator {
     ends.forEach((end) => {
       const active = activeMap.get(end)!;
       assert(active.has(id(end)),
-        `Unmatched span end for "${id(end).name}"`);
+        `Unmatched span end for "${id(end).callback.name}"`);
     });
 
     return { active: activeMap, spans: Array.from(spans) };
@@ -133,12 +132,12 @@ export class SpanAllocator {
     return overlap;
   }
 
-  private color(spans: ReadonlyArray<SpanID>, overlapMap: SpanOverlap)
+  private color(spans: ReadonlyArray<Span>, overlapMap: SpanOverlap)
     : ISpanAllocatorResult {
     let max = -1;
-    const colors: Map<SpanID, number> = new Map();
+    const colors: Map<Span, number> = new Map();
 
-    const allocate = (span: SpanID): number => {
+    const allocate = (span: Span): number => {
       if (colors.has(span)) {
         return colors.get(span)!;
       }
@@ -165,11 +164,11 @@ export class SpanAllocator {
       return i;
     };
 
-    const map: Map<SpanID, number> = new Map();
+    const map: Map<Span, number> = new Map();
 
     spans.forEach((span) => map.set(span, allocate(span)));
 
-    const concurrency: SpanID[][] = new Array(max + 1);
+    const concurrency: Span[][] = new Array(max + 1);
     for (let i = 0; i < concurrency.length; i++) {
       concurrency[i] = [];
     }

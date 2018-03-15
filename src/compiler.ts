@@ -7,7 +7,7 @@ import {
 } from 'llparse-builder';
 
 import { Compilation } from './compilation';
-import { SpanAllocator } from './span-allocator';
+import { SpanAllocator } from './span';
 import { Translator } from './translator';
 
 export { Builder };
@@ -38,7 +38,7 @@ export class Compiler {
     const spans = sa.allocate(apiRoot);
 
     // Translate to compiler nodes
-    const t = new Translator(this.prefix);
+    const t = new Translator(this.prefix, spans);
     const root = t.translate(apiRoot);
 
     // Compile to bitcode

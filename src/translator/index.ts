@@ -4,13 +4,15 @@ import { code as apiCode, node as api } from 'llparse-builder';
 
 import * as compilerCode from '../code';
 import * as compiler from '../node';
+import { ISpanAllocatorResult, Span } from '../span';
 import { Identifier, IUniqueName } from '../utils';
 
 export class Translator {
   private readonly id: Identifier = new Identifier(this.prefix + '_n_');
   private readonly map: Map<api.Node, compiler.Node> = new Map();
 
-  constructor(private readonly prefix: string) {
+  constructor(private readonly prefix: string,
+              private readonly spans: ISpanAllocatorResult) {
   }
 
   public translate(node: api.Node): compiler.Node {
@@ -30,10 +32,10 @@ export class Translator {
       result = new compiler.Consume(id, node.field);
     } else if (node instanceof api.SpanStart) {
       result = new compiler.SpanStart(id, node.span,
-        this.translateCode(node.callback) as compilerCode.Span);
+        this.translateCode(node.span.callback) as compilerCode.Span);
     } else if (node instanceof api.SpanEnd) {
       result = new compiler.SpanEnd(id, node.span,
-        this.translateCode(node.callback) as compilerCode.Span);
+        this.translateCode(node.span.callback) as compilerCode.Span);
     } else if (node instanceof api.Invoke) {
       result = new compiler.Invoke(id, this.translateCode(node.code));
     } else if (node instanceof api.Match) {
