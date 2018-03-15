@@ -10,7 +10,7 @@ export class Invoke extends Node {
               map: { [key: number]: Node }, otherwise?: Node) {
     super('invoke_' + code.name, code.signature);
 
-    const storedMap: Map<number, Node> = new Map():
+    const storedMap: Map<number, Node> = new Map();
     Object.keys(map).forEach((key) => {
       assert.strictEqual(key, key | 0,
         'Only integer keys are allowed in `.invoke()`\'s map');

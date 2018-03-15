@@ -9,7 +9,7 @@ export class Match extends Node {
   private privTransform: Transform | undefined;
   private privCases: Case[] = [];
 
-  constructor(name: strings) {
+  constructor(name: string) {
     super(name, 'match');
   }
 

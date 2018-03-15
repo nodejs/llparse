@@ -5,7 +5,8 @@ import { Node } from './node';
 
 export function toBuffer(value: number | string): Buffer {
   if (typeof value === 'number') {
-    assert(0 <= value <= 255, 'Invalid char value, must be between 0 and 255');
+    assert(0 <= value && value <= 255,
+      'Invalid char value, must be between 0 and 255');
     assert.strictEqual(value, value | 0, 'Invalid char value, must be integer');
     return Buffer.from([ value ]);
   } else {
@@ -32,7 +33,8 @@ export interface ILookupResult {
 }
 
 export function buildLookupTable(wordWidth: number, charWidth: number,
-  list: Readonly<ILookupListEntry>): ILookupTableResult {
+                                 list: ReadonlyArray<ILookupListEntry>)
+  : ILookupResult {
   // Entry values:
   //   0 - no hit
   //   1 - map[0]
@@ -55,7 +57,7 @@ export function buildLookupTable(wordWidth: number, charWidth: number,
   list.forEach((entry, i) => {
     const val = i + 1;
 
-    entry.forEach((key) => {
+    entry.keys.forEach((key) => {
       const index = key >> indexShift;
       const shift = (key & shiftMask) * shiftMul;
 

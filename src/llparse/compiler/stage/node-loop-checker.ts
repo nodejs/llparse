@@ -8,7 +8,7 @@ interface IQueueElem {
 }
 
 export class NodeLoopChecker extends Stage {
-  private readonly reachableMap<Node, Set<Node> > = new Map();
+  private readonly reachable: Map<Node, Set<Node> > = new Map();
 
   constructor(ctx: Compilation) {
     super(ctx, 'node-loop-checker');

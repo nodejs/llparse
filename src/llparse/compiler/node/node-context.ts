@@ -1,7 +1,7 @@
 import { Builder } from 'bitcode';
 
 import {
-  Compilation, INodePosition, Func, types, values,
+  BasicBlock, Compilation, INodePosition, Func, types, values,
 } from '../compilation';
 import { Node } from './base';
 
@@ -43,20 +43,22 @@ export class NodeContext {
     this.INVARIANT_GROUP = ctx.INVARIANT_GROUP;
   }
 
-  debug(body, message) {
+  public debug(body: BasicBlock, message: string): void {
     this.compilation.debug(this.fn, body, `${this.name}: ${message}`);
   }
 
   // Just proxy
-  stateField(body, name) {
+  public stateField(body: BasicBlock, name: string): values.Value {
     return this.compilation.stateField(this.fn, body, name);
   }
 
-  cstring(...args) { return this.compilation.cstring(...args); }
-  blob(...args) { return this.compilation.blob(...args); }
-  addGlobalConst(...args) { return this.compilation.addGlobalConst(...args); }
-  truncate(...args) { return this.compilation.truncate(...args); }
-  call(...args) { return this.compilation.call(...args); }
-  buildSwitch(...args) { return this.compilation.buildSwitch(...args); }
-  branch(...args) { return this.compilation.branch(...args); }
+  public cstring(...args) { return this.compilation.cstring(...args); }
+  public blob(...args) { return this.compilation.blob(...args); }
+  public addGlobalConst(...args) {
+    return this.compilation.addGlobalConst(...args);
+  }
+  public truncate(...args) { return this.compilation.truncate(...args); }
+  public call(...args) { return this.compilation.call(...args); }
+  public buildSwitch(...args) { return this.compilation.buildSwitch(...args); }
+  public branch(...args) { return this.compilation.branch(...args); }
 }

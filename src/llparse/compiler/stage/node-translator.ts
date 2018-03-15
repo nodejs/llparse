@@ -21,7 +21,7 @@ export interface INodeTranslatorOptions {
 }
 
 export class NodeTranslator extends Stage {
-  private readonly INodeTranslatorOptions options;
+  private readonly options: INodeTranslatorOptions;
   private readonly nodes: Map<node.Node, compilerNode.Node> = new Map();
   private readonly errorCache: Map<string, compilerNode.Error> = new Map();
   private maxSequenceLen: number = 0;
@@ -55,7 +55,7 @@ export class NodeTranslator extends Stage {
     }
 
     let res;
-    let list: TrieOutputList || undefined;
+    let list: TrieOutputList | undefined;
     let last;
     if (node instanceof node.Invoke) {
       res = new compilerNode.Invoke(this.id(node), node.code);

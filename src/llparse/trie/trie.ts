@@ -8,7 +8,7 @@ import { TrieSequence } from './sequence';
 import { TrieSingle } from './single';
 
 type LinearizeList = ReadonlyArray<ICaseLinearizeResult>;
-type Path = ReadonlyArray<string>;
+type Path = ReadonlyArray<number | Buffer>;
 
 export class Trie {
   constructor(private readonly name: string) {
@@ -93,7 +93,7 @@ export class Trie {
       const key = item.key[0];
 
       if (keys.has(key))
-        keys.get(key).push(item);
+        keys.get(key)!.push(item);
       else
         keys.set(key, [ item ]);
     }

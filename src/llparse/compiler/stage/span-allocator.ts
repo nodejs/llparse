@@ -3,7 +3,7 @@ import { Compilation } from '../compilation';
 import { Node } from '../node';
 import { Stage } from './base';
 
-type SpanID = Code;
+export type SpanID = Code;
 
 interface IActiveResult {
   active: activeMap;

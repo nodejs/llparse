@@ -26,7 +26,7 @@ export interface ICompilerStateProperty {
 export interface ICompilerOptions {
   prefix: string;
   properties: ReadonlyArray<ICompilerStateProperty>;
-  debug: options.debug === undefined ? false : options.debug
+  debug: boolean;
 }
 
 export interface ICompilerBuildResult {

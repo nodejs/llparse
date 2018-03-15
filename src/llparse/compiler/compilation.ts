@@ -12,18 +12,20 @@ import {
 
   ARG_STATE, ARG_POS, ARG_ENDPOS, ARG_MATCH,
 } from '../constants';
+import { Transform } from './transform';
 
 import * as code from '../code';
 import * as compilerCode from './code';
 
 import builder = bitcode.builder;
-import Declaration = builder.values.constants.Declaration;
-import Func = builder.values.constants.Func;
-import BasicBlock = builder.values.constants.Func;
-import Value = builder.values.Value;
+import values = builder.values;
+import Declaration = values.constants.Declaration;
+import Func = values.constants.Func;
+import BasicBlock = values.constants.Func;
+import Value = values.Value;
 import Type = builder.types.Type;
 
-export { bitcode.values as values, Func, BasicBlock };
+export { values, Func, BasicBlock };
 
 export interface INodeID {
   name: string;

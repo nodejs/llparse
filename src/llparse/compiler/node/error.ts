@@ -2,7 +2,7 @@ import { Compilation, BasicBlock, INodeID } from '../compilation';
 import { Node, INodeChild } from './base';
 
 export class Error extends Node {
-  constructor(id: NodeID, private readonly code: number,
+  constructor(id: INodeID, private readonly code: number,
               private readonly reason: string) {
     super('error', id);
 

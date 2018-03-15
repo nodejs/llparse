@@ -68,10 +68,10 @@ export class LLParse {
       throw new Error(`Duplicate property with a name: "${name}"`);
     }
 
-    if (!internal.constants.USER_TYPES.hasOwnProperty(ty)) {
+    if (!internal.constants.USER_TYPES.has(ty)) {
       throw new Error(`Unknown property type: "${ty}"`);
     }
-    const bitcodeTy = internal.constants.USER_TYPES[ty];
+    const bitcodeTy = internal.constants.USER_TYPES.get(ty)!;
 
     props.set.add(name);
     props.list.push({ ty: bitcodeTy, name });

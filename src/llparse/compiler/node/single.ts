@@ -4,7 +4,7 @@ import { Node, INodeChild } from './base';
 export class Single extends Node {
   private readonly children: INodeChild[] = [];
 
-  constructor(id: NodeID) {
+  constructor(id: INodeID) {
     super('single', id);
   }
 
