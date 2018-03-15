@@ -7,6 +7,7 @@ import {
 } from 'llparse-builder';
 
 import { Compilation } from './compilation';
+import { SpanAllocator } from './span-allocator';
 import { Translator } from './translator';
 
 export { Builder };
@@ -31,6 +32,10 @@ export class Compiler {
     // Check if loops are present
     const lc = new LoopChecker();
     lc.check(apiRoot);
+
+    // Allocate spans
+    const sa = new SpanAllocator();
+    const spans = sa.allocate(apiRoot);
 
     // Translate to compiler nodes
     const t = new Translator(this.prefix);
