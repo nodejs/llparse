@@ -8,6 +8,7 @@ import { Buffer } from 'buffer';
 import * as constants from '../constants';
 import * as node from '../node';
 import { ISpanAllocatorResult } from '../span';
+import { Identifier } from '../utils';
 
 import irTypes = bitcodeBuilderNS.types;
 import irValues = bitcodeBuilderNS.values;
@@ -44,6 +45,8 @@ export class Compilation {
   public readonly signature: ISignatureMap;
   private readonly bitcode: Bitcode = new Bitcode();
   private readonly state: irTypes.Struct;
+  private readonly cstringCache: Map<string, IRValue> = new Map();
+  private readonly globalId: Identifier = new Identifier('g_');
 
   constructor(public readonly prefix: string,
               public readonly root: node.Node,
@@ -217,6 +220,22 @@ export class Compilation {
     return this.stateField(fn, body, constants.STATE_SPAN_CB + index);
   }
 
+  // Globals
+
+  public cstring(value: string): IRValue {
+    if (this.cstringCache.has(value)) {
+      return this.cstringCache.get(value)!;
+    }
+
+    const res = this.addGlobalConst('cstr', this.ir.cstring(value));
+    this.cstringCache.set(value, res);
+    return res;
+  }
+
+  public blob(value: Buffer): IRValue {
+    return this.addGlobalConst('blob', this.ir.blob(value));
+  }
+
   // Internals
 
   private stateField(fn: IRFunc, body: IRBasicBlock, name: string): IRValue {
@@ -224,5 +243,16 @@ export class Compilation {
     const GEP_OFF = constants.GEP_OFF;
     const index = this.state.lookupField(name).index;
     return body.getelementptr(state, GEP_OFF.val(0), GEP_OFF.val(index), true);
+  }
+
+  private addGlobalConst(name: string, init: irValues.constants.Constant)
+    : IRValue {
+    const uniqueName = this.globalId.id(name).name;
+
+    const glob = this.ir.global(init.ty.ptr(), uniqueName, init);
+    glob.linkage = 'internal';
+    glob.markConstant();
+    this.bitcode.add(glob);
+    return glob;
   }
 }
