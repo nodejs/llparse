@@ -29,18 +29,74 @@ export interface ICompilationProperty {
   ty: string;
 }
 
+export interface ISignatureMap {
+  readonly callback: {
+    readonly match: irTypes.Signature;
+    readonly value: irTypes.Signature;
+  };
+  readonly node: irTypes.Signature;
+}
+
 export class Compilation {
   public readonly ir: BitcodeBuilder;
+  public readonly signature: ISignatureMap;
   private readonly bitcode: Bitcode = new Bitcode();
+  private readonly state: irTypes.Struct;
 
   constructor(public readonly root: node.Node,
-              properties: ReadonlyArray<ICompilationProperty>,
+              private readonly properties: ReadonlyArray<ICompilationProperty>,
               public readonly options: ICompilationOptions) {
     this.ir = this.bitcode.createBuilder();
+
+    this.state = this.ir.struct('state');
+
+    this.signature = {
+      callback: {
+        match: this.ir.signature(constants.TYPE_OUTPUT, [
+          this.state,
+          constants.TYPE_POS,
+          constants.TYPE_ENDPOS,
+        ]),
+        value: this.ir.signature(constants.TYPE_OUTPUT, [
+          this.state,
+          constants.TYPE_POS,
+          constants.TYPE_ENDPOS,
+          constants.TYPE_MATCH,
+        ]),
+      },
+      node: this.ir.signature(constants.TYPE_OUTPUT, [
+        this.state,
+        constants.TYPE_POS,
+        constants.TYPE_ENDPOS,
+        constants.TYPE_MATCH,
+      ]),
+    };
+
+    this.state.addField(this.signature.node.ptr(), constants.STATE_CURRENT);
+    this.state.addField(constants.TYPE_ERROR, constants.STATE_ERROR);
+    this.state.addField(constants.TYPE_REASON, constants.STATE_REASON);
+    this.state.addField(constants.TYPE_ERROR_POS, constants.STATE_ERROR_POS);
+    this.state.addField(constants.TYPE_DATA, constants.STATE_DATA);
+
+    for (const property of properties) {
+      let ty: IRType;
+      switch (property.ty) {
+        case 'i8': ty = constants.I8; break;
+        case 'i16': ty = constants.I16; break;
+        case 'i32': ty = constants.I32; break;
+        case 'i64': ty = constants.I64; break;
+        case 'ptr': ty = constants.PTR; break;
+        default: throw new Error(`Unsupported user type: "${property.ty}"`);
+      }
+
+      this.state.addField(ty, property.name);
+    }
+
+    this.state.finalize();
   }
 
   public buildBitcode(): Buffer {
-    return Buffer.alloc(1);
+    return this.bitcode.build();
   }
 
   public buildHeaders(): string {
