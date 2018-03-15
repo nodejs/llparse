@@ -22,7 +22,8 @@ export interface ICompilerResult {
 }
 
 export class Compiler {
-  constructor(private readonly options: ICompilerOptions) {
+  constructor(private readonly prefix: string,
+              private readonly options: ICompilerOptions) {
   }
 
   public compile(apiRoot: apiNode.Node,
@@ -32,11 +33,12 @@ export class Compiler {
     lc.check(apiRoot);
 
     // Translate to compiler nodes
-    const t = new Translator();
+    const t = new Translator(this.prefix);
     const root = t.translate(apiRoot);
 
     // Compile to bitcode
-    const compilation = new Compilation(root, properties, this.options);
+    const compilation = new Compilation(this.prefix, root, properties,
+      this.options);
     const bitcode = compilation.buildBitcode();
     const headers = compilation.buildHeaders();
 

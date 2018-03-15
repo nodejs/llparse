@@ -7,8 +7,11 @@ import * as compiler from '../node';
 import { Identifier, IUniqueName } from '../utils';
 
 export class Translator {
-  private readonly id: Identifier = new Identifier('n_');
+  private readonly id: Identifier = new Identifier(this.prefix + '_n_');
   private readonly map: Map<api.Node, compiler.Node> = new Map();
+
+  constructor(private readonly prefix: string) {
+  }
 
   public translate(node: api.Node): compiler.Node {
     if (this.map.has(node)) {

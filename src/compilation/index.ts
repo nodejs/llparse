@@ -44,7 +44,8 @@ export class Compilation {
   private readonly bitcode: Bitcode = new Bitcode();
   private readonly state: irTypes.Struct;
 
-  constructor(public readonly root: node.Node,
+  constructor(public readonly prefix: string,
+              public readonly root: node.Node,
               private readonly properties: ReadonlyArray<ICompilationProperty>,
               public readonly options: ICompilationOptions) {
     this.ir = this.bitcode.createBuilder();
@@ -78,6 +79,7 @@ export class Compilation {
       ]),
     };
 
+    this.state.addField(constants.TYPE_INDEX, constants.STATE_INDEX);
     this.state.addField(this.signature.node.ptr(), constants.STATE_CURRENT);
     this.state.addField(constants.TYPE_ERROR, constants.STATE_ERROR);
     this.state.addField(constants.TYPE_REASON, constants.STATE_REASON);
@@ -106,7 +108,54 @@ export class Compilation {
   }
 
   public buildHeaders(): string {
-    return '';
+    let res = '';
+    const PREFIX = this.prefix.toUpperCase().replace(/[^a-z]/gi, '_');
+    const DEFINE = `INCLUDE_${PREFIX}_H_`;
+
+    res += `#ifndef ${DEFINE}\n`;
+    res += `#define ${DEFINE}\n`;
+    res += '\n';
+
+    res += '#include <stdint.h>\n';
+    res += '\n';
+
+    // Structure
+    res += `typedef struct ${this.prefix}_s ${this.prefix}_t;\n`;
+    res += `struct ${this.prefix}_s {\n`;
+    for (const field of this.state.fields) {
+      let ty: string;
+      if (field.name === constants.STATE_REASON ||
+          field.name === constants.STATE_ERROR_POS) {
+        ty = 'const char*';
+      } else if (field.ty.isEqual(constants.I8)) {
+        ty = 'int8_t';
+      } else if (field.ty.isEqual(constants.I16)) {
+        ty = 'int16_t';
+      } else if (field.ty.isEqual(constants.I32)) {
+        ty = 'int32_t';
+      } else if (field.ty.isEqual(constants.I64)) {
+        ty = 'int32_t';
+      } else if (field.name === constants.STATE_CURRENT ||
+                 field.ty.isEqual(constants.PTR)) {
+        ty = 'void*';
+      } else {
+        throw new Error(
+          `Unknown state property type: "${field.ty.typeString}"`);
+      }
+      res += `  ${ty} ${field.name};\n`;
+    }
+    res += '};\n';
+
+    res += '\n';
+
+    res += `int ${this.prefix}_init(${this.prefix}_t* s);\n`;
+    res += `int ${this.prefix}_execute(${this.prefix}_t* s, ` +
+      'const char* p, const char* endp);\n';
+
+    res += '\n';
+    res += `#endif  /* ${DEFINE} */\n`;
+
+    return res;
   }
 
   // Arguments

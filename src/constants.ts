@@ -26,11 +26,13 @@ export const ARG_MATCH = 'match';
 
 // State
 
+export const TYPE_INDEX = INT;
 export const TYPE_ERROR = INT;
 export const TYPE_REASON = CSTR;
 export const TYPE_ERROR_POS = TYPE_POS;
 export const TYPE_DATA = PTR;
 
+export const STATE_INDEX = '_index';
 export const STATE_CURRENT = '_current';
 export const STATE_ERROR = 'error';
 export const STATE_REASON = 'reason';

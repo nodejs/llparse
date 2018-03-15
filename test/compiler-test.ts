@@ -4,7 +4,7 @@ describe('llparse/Compiler', () => {
   let c: Compiler;
 
   beforeEach(() => {
-    c = new Compiler({});
+    c = new Compiler('llparse', {});
   });
 
   it('should compile sample parser', () => {
