@@ -175,4 +175,43 @@ export class Compilation {
   public matchArg(fn: IRFunc): IRValue {
     return fn.getArgument(constants.ARG_MATCH);
   }
+
+  // State fields
+
+  public indexField(fn: IRFunc, body: IRBasicBlock): IRValue {
+    return this.stateField(fn, body, constants.STATE_INDEX);
+  }
+
+  public currentField(fn: IRFunc, body: IRBasicBlock): IRValue {
+    return this.stateField(fn, body, constants.STATE_CURRENT);
+  }
+
+  public errorField(fn: IRFunc, body: IRBasicBlock): IRValue {
+    return this.stateField(fn, body, constants.STATE_ERROR);
+  }
+
+  public reasonField(fn: IRFunc, body: IRBasicBlock): IRValue {
+    return this.stateField(fn, body, constants.STATE_REASON);
+  }
+
+  public errorPosField(fn: IRFunc, body: IRBasicBlock): IRValue {
+    return this.stateField(fn, body, constants.STATE_ERROR_POS);
+  }
+
+  public spanPosField(fn: IRFunc, body: IRBasicBlock, index: number): IRValue {
+    return this.stateField(fn, body, constants.STATE_SPAN_POS + index);
+  }
+
+  public spanCbField(fn: IRFunc, body: IRBasicBlock, index: number): IRValue {
+    return this.stateField(fn, body, constants.STATE_SPAN_CB + index);
+  }
+
+  // Internals
+
+  private stateField(fn: IRFunc, body: IRBasicBlock, name: string): IRValue {
+    const state = this.stateArg(fn);
+    const GEP_OFF = constants.GEP_OFF;
+    const index = this.state.lookupField(name).index;
+    return body.getelementptr(state, GEP_OFF.val(0), GEP_OFF.val(index), true);
+  }
 }

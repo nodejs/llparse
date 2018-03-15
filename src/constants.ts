@@ -11,6 +11,7 @@ export const BOOL = IR.i(1);
 export const INT = I32;
 export const CSTR = IR.i(8).ptr();
 export const PTR = IR.i(8).ptr();
+export const GEP_OFF = INT;
 
 // Arguments
 
@@ -38,3 +39,6 @@ export const STATE_ERROR = 'error';
 export const STATE_REASON = 'reason';
 export const STATE_ERROR_POS = 'error_pos';
 export const STATE_DATA = 'data';
+
+export const STATE_SPAN_POS = '_span_pos';
+export const STATE_SPAN_CB = '_span_cb';
