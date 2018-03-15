@@ -38,6 +38,7 @@
     "typescript": "^2.7.2"
   },
   "dependencies": {
+    "bitcode": "^1.1.0",
     "llparse-builder": "^1.0.0-beta0"
   }
 }
