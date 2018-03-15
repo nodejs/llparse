@@ -32,6 +32,7 @@ export interface ICompilationProperty {
 export interface ISignatureMap {
   readonly callback: {
     readonly match: irTypes.Signature;
+    readonly span: irTypes.Signature;
     readonly value: irTypes.Signature;
   };
   readonly node: irTypes.Signature;
@@ -53,6 +54,11 @@ export class Compilation {
     this.signature = {
       callback: {
         match: this.ir.signature(constants.TYPE_OUTPUT, [
+          this.state,
+          constants.TYPE_POS,
+          constants.TYPE_ENDPOS,
+        ]),
+        span: this.ir.signature(constants.TYPE_OUTPUT, [
           this.state,
           constants.TYPE_POS,
           constants.TYPE_ENDPOS,
