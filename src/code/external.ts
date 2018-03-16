@@ -4,9 +4,15 @@ import { Code } from './base';
 
 export abstract class External extends Code {
   public build(ctx: Compilation): IRDeclaration {
+    const cache = ctx.codeCache;
+    if (cache.has(this)) {
+      return cache.get(this)!;
+    }
+
     const sig = this.getSignature(ctx);
     const decl = ctx.declareFunction(sig, this.name);
     this.setAttributes(decl);
+    cache.set(this, decl);
     return decl;
   }
 

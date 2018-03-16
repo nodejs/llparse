@@ -9,11 +9,17 @@ export abstract class Field extends Code {
   }
 
   public build(ctx: Compilation): IRDeclaration {
+    const cache = ctx.codeCache;
+    if (cache.has(this)) {
+      return cache.get(this)!;
+    }
+
     const sig = this.getSignature(ctx);
     const fn = ctx.defineFunction(sig, this.name, this.getParams());
     this.setAttributes(fn);
 
     this.doBuild(ctx, fn.body);
+    cache.set(this, fn);
 
     return fn;
   }

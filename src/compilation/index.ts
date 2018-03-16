@@ -5,6 +5,7 @@ import {
 } from 'bitcode';
 import { Buffer } from 'buffer';
 
+import * as code from '../code';
 import * as constants from '../constants';
 import * as node from '../node';
 import { ISpanAllocatorResult } from '../span';
@@ -45,6 +46,8 @@ export interface ISignatureMap {
 export class Compilation {
   public readonly ir: BitcodeBuilder;
   public readonly signature: ISignatureMap;
+  public readonly codeCache: Map<code.Code, IRDeclaration> = new Map();
+
   private readonly bitcode: Bitcode = new Bitcode();
   private readonly state: irTypes.Struct;
   private readonly cstringCache: Map<string, IRValue> = new Map();
