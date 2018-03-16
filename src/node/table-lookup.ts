@@ -1,5 +1,6 @@
 import { IUniqueName } from '../utils';
 import { Node } from './base';
+import { Match } from './match';
 
 export interface ITableEdge {
   readonly keys: ReadonlyArray<number>;
@@ -7,7 +8,7 @@ export interface ITableEdge {
   readonly noAdvance: boolean;
 }
 
-export class TableLookup extends Node {
+export class TableLookup extends Match {
   protected readonly edges: ITableEdge[] = [];
 
   constructor(id: IUniqueName) {

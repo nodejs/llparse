@@ -3,6 +3,7 @@ export { Consume } from './consume';
 export { Empty } from './empty';
 export { Error } from './error';
 export { Invoke } from './invoke';
+export { Match } from './match';
 export { Pause } from './pause';
 export { Sequence } from './sequence';
 export { ISingleEdge, Single } from './single';

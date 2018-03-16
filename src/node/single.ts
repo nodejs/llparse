@@ -1,5 +1,6 @@
 import { IUniqueName } from '../utils';
 import { Node } from './base';
+import { Match } from './match';
 
 export interface ISingleEdge {
   readonly key: number;
@@ -7,7 +8,7 @@ export interface ISingleEdge {
   readonly noAdvance: boolean;
 }
 
-export class Single extends Node {
+export class Single extends Match {
   protected readonly edges: ISingleEdge[] = [];
 
   constructor(id: IUniqueName) {

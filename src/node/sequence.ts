@@ -3,8 +3,9 @@ import { Buffer } from 'buffer';
 
 import { IUniqueName } from '../utils';
 import { Node } from './base';
+import { Match } from './match';
 
-export class Sequence extends Node {
+export class Sequence extends Match {
   private onMatch: Node | undefined;
 
   constructor(id: IUniqueName, private readonly select: Buffer) {

@@ -1,6 +1,11 @@
 import * as assert from 'assert';
 import { Buffer } from 'buffer';
-import { code as apiCode, node as api, Span as APISpan } from 'llparse-builder';
+import {
+  code as apiCode,
+  node as api,
+  Span as APISpan,
+  transform as apiTransform,
+} from 'llparse-builder';
 
 import * as compilerCode from '../code';
 import {
@@ -9,13 +14,11 @@ import {
 } from '../constants';
 import * as compiler from '../node';
 import { ISpanAllocatorResult, Span } from '../span';
+import * as compilerTransform from '../transform';
 import { Identifier, IUniqueName } from '../utils';
 import { Trie, TrieEmpty, TrieNode, TrieSequence, TrieSingle } from './trie';
 
-interface IMatchResult {
-  readonly children: ReadonlyArray<compiler.Node>;
-  readonly result: compiler.Node;
-}
+type IMatchResult = compiler.Node | ReadonlyArray<compiler.Match>;
 
 interface ITableLookupTarget {
   readonly keys: number[];
@@ -68,8 +71,7 @@ export class Translator {
       return this.map.get(node)!;
     }
 
-    let result: compiler.Node;
-    let children: ReadonlyArray<compiler.Node> | undefined;
+    let result: compiler.Node | ReadonlyArray<compiler.Match>;
 
     const id = (): IUniqueName => this.id.id(node.name);
 
@@ -87,39 +89,58 @@ export class Translator {
     } else if (node instanceof api.Invoke) {
       result = new compiler.Invoke(id(), this.translateCode(node.code));
     } else if (node instanceof api.Match) {
-      const match = this.translateMatch(node);
-      result = match.result;
-      children = match.children;
+      result = this.translateMatch(node);
     } else {
       throw new Error(`Unknown node type for "${node.name}"`);
     }
 
-    // Break loops
-    this.map.set(node, result);
-
     // Initialize result
     const otherwise = node.getOtherwiseEdge();
-    if (otherwise !== undefined) {
-      result.setOtherwise(this.translate(otherwise.node), otherwise.noAdvance);
-    }
 
-    if (node instanceof api.Match) {
+    if (Array.isArray(result)) {
+      assert(node instanceof api.Match);
+      const match = node as api.Match;
+
       // Assign otherwise to every node of Trie
       if (otherwise !== undefined) {
-        for (const child of children!) {
-          result.setOtherwise(this.translate(otherwise.node),
+        for (const child of result) {
+          child.setOtherwise(this.translate(otherwise.node),
             otherwise.noAdvance);
         }
       }
-    } else if (result instanceof compiler.Invoke) {
-      for (const edge of node) {
-        result.addEdge(this.translate(edge.node), edge.key as number);
-      }
-    } else {
-      assert.strictEqual(Array.from(node).length, 0);
-    }
 
-    return result;
+      // Assign transform to every node of Trie
+      const transform = match.getTransform();
+      if (transform !== undefined) {
+        const translated = this.translateTransform(transform);
+        for (const child of result) {
+          child.setTransform(translated);
+        }
+      }
+
+      assert(result.length >= 1);
+      return result[0];
+    } else if (result instanceof compiler.Node) {
+      // Break loops
+      this.map.set(node, result);
+
+      if (otherwise !== undefined) {
+        result.setOtherwise(this.translate(otherwise.node),
+          otherwise.noAdvance);
+      }
+
+      if (result instanceof compiler.Invoke) {
+        for (const edge of node) {
+          result.addEdge(this.translate(edge.node), edge.key as number);
+        }
+      } else {
+        assert.strictEqual(Array.from(node).length, 0);
+      }
+
+      return result;
+    } else {
+      throw new Error('Unreachable');
+    }
   }
 
   private translateMatch(node: api.Match): IMatchResult {
@@ -128,20 +149,18 @@ export class Translator {
     const otherwise = node.getOtherwiseEdge();
     const trieNode = trie.build(Array.from(node));
     if (trieNode === undefined) {
-      return {
-        children: [],
-        result: new compiler.Empty(this.id.id(node.name)),
-      };
+      return new compiler.Empty(this.id.id(node.name));
     }
 
-    const children: compiler.Node[] = [];
-    const result = this.translateTrie(node, trieNode, children);
+    const children: compiler.Match[] = [];
+    this.translateTrie(node, trieNode, children);
+    assert(children.length >= 1);
 
-    return { result, children };
+    return children;
   }
 
-  private translateTrie(node: api.Node, trie: TrieNode,
-                        children: compiler.Node[]): compiler.Node {
+  private translateTrie(node: api.Match, trie: TrieNode,
+                        children: compiler.Match[]): compiler.Node {
     if (trie instanceof TrieEmpty) {
       assert(this.map.has(node));
       return this.translate(trie.node);
@@ -154,16 +173,16 @@ export class Translator {
     }
   }
 
-  private translateSingle(node: api.Node, trie: TrieSingle,
-                          children: compiler.Node[]): compiler.Node {
+  private translateSingle(node: api.Match, trie: TrieSingle,
+                          children: compiler.Match[]): compiler.Match {
     // See if we can apply TableLookup optimization
     const maybeTable = this.maybeTableLookup(node, trie, children);
     if (maybeTable !== undefined) {
       return maybeTable;
     }
 
-    // TODO(indutny): transform
     const single = new compiler.Single(this.id.id(node.name));
+    children.push(single);
 
     // Break the loop
     if (!this.map.has(node)) {
@@ -171,7 +190,6 @@ export class Translator {
     }
     for (const child of trie.children) {
       const childNode = this.translateTrie(node, child.node, children);
-      children.push(childNode);
 
       single.addEdge({
         key: child.key,
@@ -182,9 +200,9 @@ export class Translator {
     return single;
   }
 
-  private maybeTableLookup(node: api.Node, trie: TrieSingle,
-                           children: compiler.Node[])
-    : compiler.Node | undefined {
+  private maybeTableLookup(node: api.Match, trie: TrieSingle,
+                           children: compiler.Match[])
+    : compiler.Match | undefined {
     if (trie.children.length < this.options.minTableSize) {
       return undefined;
     }
@@ -235,6 +253,7 @@ export class Translator {
 
     // TODO(indutny): transform
     const table = new compiler.TableLookup(this.id.id(node.name));
+    children.push(table);
 
     // Break the loop
     if (!this.map.has(node)) {
@@ -243,7 +262,6 @@ export class Translator {
 
     targets.forEach((target) => {
       const next = this.translateTrie(node, target.trie, children);
-      children.push(next);
 
       table.addEdge({
         keys: target.keys,
@@ -255,10 +273,11 @@ export class Translator {
     return table;
   }
 
-  private translateSequence(node: api.Node, trie: TrieSequence,
-                            children: compiler.Node[]): compiler.Node {
+  private translateSequence(node: api.Match, trie: TrieSequence,
+                            children: compiler.Match[]): compiler.Match {
     // TODO(indutny): transform
     const sequence = new compiler.Sequence(this.id.id(node.name), trie.select);
+    children.push(sequence);
 
     // Break the loop
     if (!this.map.has(node)) {
@@ -266,7 +285,6 @@ export class Translator {
     }
 
     const childNode = this.translateTrie(node, trie.child, children);
-    children.push(childNode);
 
     sequence.setOnMatch(childNode);
 
@@ -299,6 +317,15 @@ export class Translator {
       return new compilerCode.Value(name);
     } else {
       throw new Error(`Unsupported code: "${name}"`);
+    }
+  }
+
+  private translateTransform(transform: apiTransform.Transform)
+    : compilerTransform.Transform {
+    if (transform.name === 'to_lower_unsafe') {
+      return new compilerTransform.ToLowerUnsafe();
+    } else {
+      throw new Error(`Unsupported transform: "${transform.name}"`);
     }
   }
 }
