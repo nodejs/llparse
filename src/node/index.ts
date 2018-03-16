@@ -8,3 +8,4 @@ export { Sequence } from './sequence';
 export { ISingleEdge, Single } from './single';
 export { SpanEnd } from './span-end';
 export { SpanStart } from './span-start';
+export { TableLookup } from './table-lookup';

@@ -8,13 +8,16 @@ import {
 
 import { Compilation } from './compilation';
 import { SpanAllocator } from './span';
-import { Translator } from './translator';
+import { ITranslatorLazyOptions, Translator } from './translator';
 
 export { Builder };
 
 export interface ICompilerOptions {
   // Debug method name, if present
-  debug?: string;
+  readonly debug?: string;
+
+  // Translator options, if present
+  readonly translator?: ITranslatorLazyOptions;
 }
 
 export interface ICompilerResult {
@@ -38,7 +41,7 @@ export class Compiler {
     const spans = sa.allocate(apiRoot);
 
     // Translate to compiler nodes
-    const t = new Translator(this.prefix, spans);
+    const t = new Translator(this.prefix, this.options.translator || {}, spans);
     const root = t.translate(apiRoot);
 
     // Compile to bitcode

@@ -43,3 +43,12 @@ export const STATE_DATA = 'data';
 
 export const STATE_SPAN_POS = '_span_pos';
 export const STATE_SPAN_CB = '_span_cb';
+
+// Translator
+
+// Minimum number of cases of `single` node to make it eligable for
+// `TableLookup` optimization
+export const DEFAULT_TRANSLATOR_MIN_TABLE_SIZE = 32;
+
+// Maximum width of entry in a table for a `TableLookup` optimization
+export const DEFAULT_TRANSLATOR_MAX_TABLE_WIDTH = 4;

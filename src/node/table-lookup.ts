@@ -1,20 +1,20 @@
 import { IUniqueName } from '../utils';
 import { Node } from './base';
 
-export interface ISingleEdge {
-  readonly key: number;
+export interface ITableEdge {
+  readonly keys: ReadonlyArray<number>;
   readonly node: Node;
   readonly noAdvance: boolean;
 }
 
-export class Single extends Node {
-  protected readonly edges: ISingleEdge[] = [];
+export class TableLookup extends Node {
+  protected readonly edges: ITableEdge[] = [];
 
   constructor(id: IUniqueName) {
     super(id);
   }
 
-  public addEdge(edge: ISingleEdge): void {
+  public addEdge(edge: ITableEdge): void {
     this.edges.push(edge);
   }
 }
