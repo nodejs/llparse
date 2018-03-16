@@ -7,13 +7,13 @@ import { TrieNode } from './node';
 import { TrieSequence } from './sequence';
 import { ITrieSingleChild, TrieSingle } from './single';
 
-export { TrieEmpty, TrieSequence, TrieSingle };
+export { TrieEmpty, TrieNode, TrieSequence, TrieSingle };
 
 interface IEdge {
-  key: Buffer;
-  node: api.Node;
-  noAdvance: boolean;
-  value: number | undefined;
+  readonly key: Buffer;
+  readonly node: api.Node;
+  readonly noAdvance: boolean;
+  readonly value: number | undefined;
 }
 
 type Path = ReadonlyArray<Buffer>;

@@ -23,12 +23,12 @@ export {
 };
 
 export interface ICompilationOptions {
-  debug?: string;
+  readonly debug?: string;
 }
 
 export interface ICompilationProperty {
-  name: string;
-  ty: string;
+  readonly name: string;
+  readonly ty: string;
 }
 
 export interface ISignatureMap {

@@ -6,7 +6,12 @@ import * as compilerCode from '../code';
 import * as compiler from '../node';
 import { ISpanAllocatorResult, Span } from '../span';
 import { Identifier, IUniqueName } from '../utils';
-import { Trie, TrieEmpty, TrieSequence, TrieSingle } from './trie';
+import { Trie, TrieEmpty, TrieNode, TrieSequence, TrieSingle } from './trie';
+
+interface IMatchResult {
+  readonly children: ReadonlyArray<compiler.Node>;
+  readonly result: compiler.Node;
+}
 
 export class Translator {
   private readonly id: Identifier = new Identifier(this.prefix + '_n_');
@@ -32,23 +37,27 @@ export class Translator {
     }
 
     let result: compiler.Node;
-    const id = this.id.id(node.name);
+    let children: ReadonlyArray<compiler.Node> | undefined;
+
+    const id = (): IUniqueName => this.id.id(node.name);
 
     // Instantiate target class
     if (node instanceof api.Error) {
-      result = new compiler.Error(id, node.code, node.reason);
+      result = new compiler.Error(id(), node.code, node.reason);
     } else if (node instanceof api.Pause) {
-      result = new compiler.Pause(id, node.code, node.reason);
+      result = new compiler.Pause(id(), node.code, node.reason);
     } else if (node instanceof api.Consume) {
-      result = new compiler.Consume(id, node.field);
+      result = new compiler.Consume(id(), node.field);
     } else if (node instanceof api.SpanStart) {
-      result = new compiler.SpanStart(id, this.spanMap.get(node.span)!);
+      result = new compiler.SpanStart(id(), this.spanMap.get(node.span)!);
     } else if (node instanceof api.SpanEnd) {
-      result = new compiler.SpanEnd(id, this.spanMap.get(node.span)!);
+      result = new compiler.SpanEnd(id(), this.spanMap.get(node.span)!);
     } else if (node instanceof api.Invoke) {
-      result = new compiler.Invoke(id, this.translateCode(node.code));
+      result = new compiler.Invoke(id(), this.translateCode(node.code));
     } else if (node instanceof api.Match) {
-      result = this.translateMatch(id, node);
+      const match = this.translateMatch(node);
+      result = match.result;
+      children = match.children;
     } else {
       throw new Error(`Unknown node type for "${node.name}"`);
     }
@@ -63,7 +72,13 @@ export class Translator {
     }
 
     if (node instanceof api.Match) {
-      // Should be handled by `translateMatch`
+      // Assign otherwise to every node of Trie
+      if (otherwise !== undefined) {
+        for (const child of children!) {
+          result.setOtherwise(this.translate(otherwise.node),
+            otherwise.noAdvance);
+        }
+      }
     } else if (result instanceof compiler.Invoke) {
       for (const edge of node) {
         result.addEdge(this.translate(edge.node), edge.key as number);
@@ -75,12 +90,74 @@ export class Translator {
     return result;
   }
 
-  private translateMatch(id: IUniqueName, node: api.Match): compiler.Node {
-    const trie = new Trie(id.originalName);
+  private translateMatch(node: api.Match): IMatchResult {
+    const trie = new Trie(node.name);
 
+    const otherwise = node.getOtherwiseEdge();
     const trieNode = trie.build(Array.from(node));
+    if (trieNode === undefined) {
+      return {
+        children: [],
+        result: new compiler.Empty(this.id.id(node.name)),
+      };
+    }
 
-    return new compiler.Empty(id);
+    const children: compiler.Node[] = [];
+    const result = this.translateTrie(node, trieNode, children);
+
+    return { result, children };
+  }
+
+  private translateTrie(node: api.Node, trie: TrieNode,
+                        children: compiler.Node[]): compiler.Node {
+    if (trie instanceof TrieEmpty) {
+      assert(this.map.has(node));
+      return this.translate(trie.node);
+    } else if (trie instanceof TrieSingle) {
+      return this.translateSingle(node, trie, children);
+    } else if (trie instanceof TrieSequence) {
+      return this.translateSequence(node, trie, children);
+    } else {
+      throw new Error('Unknown trie node');
+    }
+  }
+
+  private translateSingle(node: api.Node, trie: TrieSingle,
+                          children: compiler.Node[]): compiler.Node {
+    const single = new compiler.Single(this.id.id(node.name));
+
+    // Break the loop
+    if (!this.map.has(node)) {
+      this.map.set(node, single);
+    }
+    for (const child of trie.children) {
+      const childNode = this.translateTrie(node, child.node, children);
+      children.push(childNode);
+
+      single.addEdge({
+        key: child.key,
+        noAdvance: child.noAdvance,
+        node: childNode,
+      });
+    }
+    return single;
+  }
+
+  private translateSequence(node: api.Node, trie: TrieSequence,
+                            children: compiler.Node[]): compiler.Node {
+    const sequence = new compiler.Sequence(this.id.id(node.name), trie.select);
+
+    // Break the loop
+    if (!this.map.has(node)) {
+      this.map.set(node, sequence);
+    }
+
+    const childNode = this.translateTrie(node, trie.child, children);
+    children.push(childNode);
+
+    sequence.setOnMatch(childNode);
+
+    return sequence;
   }
 
   private translateCode(code: apiCode.Code): compilerCode.Code {
