@@ -252,6 +252,13 @@ export class Compilation {
     return this.stateField(bb, constants.STATE_SPAN_CB + index);
   }
 
+  public stateField(bb: IRBasicBlock, name: string): IRValue {
+    const state = this.stateArg(bb);
+    const GEP_OFF = constants.GEP_OFF;
+    const index = this.state.lookupField(name).index;
+    return bb.getelementptr(state, GEP_OFF.val(0), GEP_OFF.val(index), true);
+  }
+
   // Globals
 
   public cstring(value: string): IRValue {
@@ -349,13 +356,6 @@ export class Compilation {
   }
 
   // Internals
-
-  private stateField(bb: IRBasicBlock, name: string): IRValue {
-    const state = this.stateArg(bb);
-    const GEP_OFF = constants.GEP_OFF;
-    const index = this.state.lookupField(name).index;
-    return bb.getelementptr(state, GEP_OFF.val(0), GEP_OFF.val(index), true);
-  }
 
   private toProfWeight(weight: IProfWeight): number {
     // Completely ad-hoc
