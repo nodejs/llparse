@@ -1,3 +1,4 @@
+import { Compilation, IRBasicBlock } from '../compilation';
 import { IUniqueName } from '../utils';
 import { Node } from './base';
 import { Match } from './match';
@@ -17,5 +18,9 @@ export class Single extends Match {
 
   public addEdge(edge: ISingleEdge): void {
     this.edges.push(edge);
+  }
+
+  protected doBuild(ctx: Compilation, bb: IRBasicBlock): void {
+    // TODO(indutny): implement me
   }
 }

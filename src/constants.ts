@@ -35,6 +35,11 @@ export const ATTR_ENDPOS: AttributeList = [ 'noalias', 'nonnull', 'readnone' ];
 export const ATTR_MATCH: AttributeList = [];
 export const ATTR_SEQUENCE: AttributeList = ATTR_POS;
 
+export const FN_ATTR_NODE: AttributeList = [
+  // TODO(indutny): reassess `minsize`. Looks like it gives best performance
+  // results right now, though.
+  'nounwind', 'minsize', 'ssp', 'uwtable',
+];
 export const FN_ATTR_CODE: AttributeList = [
   'nounwind', 'norecurse', 'ssp', 'uwtable',
 ];

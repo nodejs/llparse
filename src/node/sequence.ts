@@ -1,6 +1,7 @@
 import * as assert from 'assert';
 import { Buffer } from 'buffer';
 
+import { Compilation, IRBasicBlock } from '../compilation';
 import { IUniqueName } from '../utils';
 import { Node } from './base';
 import { Match } from './match';
@@ -15,5 +16,9 @@ export class Sequence extends Match {
   public setOnMatch(node: Node) {
     assert.strictEqual(this.onMatch, undefined);
     this.onMatch = node;
+  }
+
+  protected doBuild(ctx: Compilation, bb: IRBasicBlock): void {
+    // TODO(indutny): implement me
   }
 }
