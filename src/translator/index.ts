@@ -161,6 +161,31 @@ export class Translator {
   }
 
   private translateCode(code: apiCode.Code): compilerCode.Code {
-    return new compilerCode.Match('todo');
+    const name = code.name;
+    if (code instanceof apiCode.IsEqual) {
+      return new compilerCode.IsEqual(name, code.field, code.value);
+    } else if (code instanceof apiCode.Load) {
+      return new compilerCode.Load(name, code.field);
+    } else if (code instanceof apiCode.MulAdd) {
+      return new compilerCode.MulAdd(name, code.field, code.options);
+    } else if (code instanceof apiCode.Or) {
+      return new compilerCode.Or(name, code.field, code.value);
+    } else if (code instanceof apiCode.Store) {
+      return new compilerCode.Store(name, code.field);
+    } else if (code instanceof apiCode.Test) {
+      return new compilerCode.Test(name, code.field, code.value);
+    } else if (code instanceof apiCode.Update) {
+      return new compilerCode.Update(name, code.field, code.value);
+
+    // External callbacks
+    } else if (code instanceof apiCode.Match) {
+      return new compilerCode.Match(name);
+    } else if (code instanceof apiCode.Span) {
+      return new compilerCode.Span(name);
+    } else if (code instanceof apiCode.Value) {
+      return new compilerCode.Value(name);
+    } else {
+      throw new Error(`Unsupported code: "${name}"`);
+    }
   }
 }
