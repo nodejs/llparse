@@ -6,6 +6,7 @@ import * as compilerCode from '../code';
 import * as compiler from '../node';
 import { ISpanAllocatorResult, Span } from '../span';
 import { Identifier, IUniqueName } from '../utils';
+import { Trie, TrieEmpty, TrieSequence, TrieSingle } from './trie';
 
 export class Translator {
   private readonly id: Identifier = new Identifier(this.prefix + '_n_');
@@ -75,6 +76,10 @@ export class Translator {
   }
 
   private translateMatch(id: IUniqueName, node: api.Match): compiler.Node {
+    const trie = new Trie(id.originalName);
+
+    const trieNode = trie.build(Array.from(node));
+
     return new compiler.Empty(id);
   }
 
