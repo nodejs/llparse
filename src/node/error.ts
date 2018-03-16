@@ -1,6 +1,6 @@
 import { IRBasicBlock } from '../compilation';
 import { IUniqueName } from '../utils';
-import { Node } from './base';
+import { INodePosition, Node } from './base';
 
 class ErrorNode extends Node {
   constructor(id: IUniqueName, private readonly code: number,
@@ -8,8 +8,9 @@ class ErrorNode extends Node {
     super(id);
   }
 
-  protected doBuild(bb: IRBasicBlock): void {
+  protected doBuild(bb: IRBasicBlock, pos: INodePosition): void {
     // TODO(indutny): implement me
+    this.pause(bb);
   }
 }
 

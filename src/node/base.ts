@@ -72,6 +72,16 @@ export abstract class Node {
     return this.privCompilation!;
   }
 
+  protected pause(bb: IRBasicBlock) {
+    const ctx = this.compilation;
+    const fn = bb.parent;
+
+    const self = bb.cast('bitcast', fn, fn.ty.toSignature().returnType);
+    bb.ret(self);
+
+    ctx.addResumptionTarget(fn);
+  }
+
   protected tailTo(bb: IRBasicBlock, edge: INodeEdge, pos: INodePosition)
     : void {
     const ctx = this.compilation;

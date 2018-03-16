@@ -1,7 +1,7 @@
 import { Code } from '../code';
 import { IRBasicBlock } from '../compilation';
 import { IUniqueName } from '../utils';
-import { Node } from './base';
+import { INodePosition, Node } from './base';
 
 export class Invoke extends Node {
   constructor(id: IUniqueName, private readonly code: Code) {
@@ -12,7 +12,8 @@ export class Invoke extends Node {
     // TODO(indutny): implement me
   }
 
-  protected doBuild(bb: IRBasicBlock): void {
+  protected doBuild(bb: IRBasicBlock, pos: INodePosition): void {
     // TODO(indutny): implement me
+    this.pause(bb);
   }
 }

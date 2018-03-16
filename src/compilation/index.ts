@@ -51,6 +51,7 @@ export class Compilation {
   private readonly state: irTypes.Struct;
   private readonly cstringCache: Map<string, IRValue> = new Map();
   private readonly globalId: Identifier = new Identifier('g_');
+  private readonly resumptionTargets: Set<IRDeclaration> = new Set();
 
   constructor(public readonly prefix: string,
               public readonly root: node.Node,
@@ -262,6 +263,11 @@ export class Compilation {
     const fn = signature.defineFunction(name, paramNames);
     this.bitcode.add(fn);
     return fn;
+  }
+
+  // Miscellaneous
+  public addResumptionTarget(decl: IRDeclaration): void {
+    this.resumptionTargets.add(decl);
   }
 
   // Internals

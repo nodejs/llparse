@@ -8,8 +8,4 @@ export abstract class Match extends Node {
   public setTransform(transform: Transform): void {
     this.transform = transform;
   }
-
-  protected doBuild(bb: IRBasicBlock): void {
-    // TODO(indutny): implement me
-  }
 }

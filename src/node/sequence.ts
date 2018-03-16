@@ -3,7 +3,7 @@ import { Buffer } from 'buffer';
 
 import { IRBasicBlock } from '../compilation';
 import { IUniqueName } from '../utils';
-import { Node } from './base';
+import { INodePosition, Node } from './base';
 import { Match } from './match';
 
 export class Sequence extends Match {
@@ -18,7 +18,8 @@ export class Sequence extends Match {
     this.onMatch = node;
   }
 
-  protected doBuild(bb: IRBasicBlock): void {
+  protected doBuild(bb: IRBasicBlock, pos: INodePosition): void {
     // TODO(indutny): implement me
+    this.pause(bb);
   }
 }
