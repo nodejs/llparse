@@ -47,7 +47,6 @@ export class Compilation {
   public readonly ir: BitcodeBuilder;
   public readonly signature: ISignatureMap;
   public readonly codeCache: Map<code.Code, IRDeclaration> = new Map();
-  public readonly nodeCache: Map<node.Node, IRDeclaration> = new Map();
 
   private readonly bitcode: Bitcode = new Bitcode();
   private readonly state: irTypes.Struct;

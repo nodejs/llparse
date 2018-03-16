@@ -1,4 +1,4 @@
-import { Compilation, IRBasicBlock } from '../compilation';
+import { IRBasicBlock } from '../compilation';
 import { IUniqueName } from '../utils';
 import { Node } from './base';
 import { Match } from './match';
@@ -20,7 +20,7 @@ export class TableLookup extends Match {
     this.edges.push(edge);
   }
 
-  protected doBuild(ctx: Compilation, bb: IRBasicBlock): void {
+  protected doBuild(bb: IRBasicBlock): void {
     // TODO(indutny): implement me
   }
 }

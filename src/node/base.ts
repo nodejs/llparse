@@ -15,6 +15,8 @@ export interface INodeOtherwise {
 
 export abstract class Node {
   private privOtherwise: INodeOtherwise | undefined;
+  private privCompilation: Compilation | undefined;
+  private cachedDecl: IRDeclaration | undefined;
 
   constructor(public readonly id: IUniqueName) {
   }
@@ -30,11 +32,11 @@ export abstract class Node {
   // Building
 
   public build(ctx: Compilation): IRDeclaration {
-    const cache = ctx.nodeCache;
-    if (cache.has(this)) {
-      return cache.get(this)!;
+    if (this.cachedDecl !== undefined) {
+      return this.cachedDecl;
     }
 
+    this.privCompilation = ctx;
     const fn = ctx.defineFunction(ctx.signature.node, this.id.name, [
       ARG_STATE, ARG_POS, ARG_ENDPOS, ARG_MATCH,
     ]);
@@ -48,13 +50,32 @@ export abstract class Node {
     fn.paramAttrs[3].add(ATTR_MATCH);
     fn.attrs.add(FN_ATTR_NODE);
 
-    this.doBuild(ctx, fn.body);
+    this.doBuild(fn.body);
 
-    cache.set(this, fn);
+    this.cachedDecl = fn;
     return fn;
   }
 
-  protected abstract doBuild(ctx: Compilation, bb: IRBasicBlock): void;
+  protected abstract doBuild(bb: IRBasicBlock): void;
 
   // Helpers
+
+  protected get compilation(): Compilation {
+    return this.privCompilation!;
+  }
+
+  protected tailTo(bb: IRBasicBlock, noAdvance: boolean, target: Node): void {
+    const ctx = this.compilation;
+    const targetDecl = target.build(ctx);
+
+    const args = [
+      ctx.stateArg(bb),
+      ctx.posArg(bb).ty.undef(),
+      ctx.endPosArg(bb),
+      ctx.matchArg(bb).ty.undef(),
+    ];
+
+    const res = bb.call(targetDecl, args, 'musttail');
+    bb.ret(res);
+  }
 }
