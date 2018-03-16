@@ -2,6 +2,8 @@ import { Builder as IR, builder as ir } from 'bitcode';
 
 import Type = ir.types.Type;
 
+export type AttributeList = ReadonlyArray<ir.Attribute>;
+
 export const I8 = IR.i(8);
 export const I16 = IR.i(16);
 export const I32 = IR.i(32);
@@ -19,11 +21,24 @@ export const TYPE_OUTPUT = PTR;
 export const TYPE_POS = CSTR;
 export const TYPE_ENDPOS = TYPE_POS;
 export const TYPE_MATCH = INT;
+export const TYPE_SEQUENCE = TYPE_POS;
 
 export const ARG_STATE = 'state';
 export const ARG_POS = 'pos';
 export const ARG_ENDPOS = 'endpos';
 export const ARG_MATCH = 'match';
+export const ARG_SEQUENCE = 'seq';
+
+export const ATTR_STATE: AttributeList = [ 'noalias', 'nonnull' ];
+export const ATTR_POS: AttributeList = [ 'noalias', 'nonnull', 'readonly' ];
+export const ATTR_ENDPOS: AttributeList = [ 'noalias', 'nonnull', 'readnone' ];
+export const ATTR_MATCH: AttributeList = [];
+export const ATTR_SEQUENCE: AttributeList = ATTR_POS;
+
+export const FN_ATTR_CODE: AttributeList = [
+  'nounwind', 'norecurse', 'ssp', 'uwtable',
+];
+export const FN_ATTR_CODE_EXTERNAL: AttributeList = [ 'alwaysinline' ];
 
 // State
 

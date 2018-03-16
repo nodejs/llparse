@@ -57,7 +57,7 @@ export class Translator {
 
     spans.concurrency.forEach((concurrent, index) => {
       const span = new Span(index, concurrent.map((apiSpan) => {
-        return this.translateCode(apiSpan.callback);
+        return this.translateCode(apiSpan.callback) as compilerCode.Span;
       }));
 
       for (const apiSpan of concurrent) {

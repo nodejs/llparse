@@ -1,3 +1,4 @@
+import { Compilation, IRBasicBlock } from '../compilation';
 import { Field } from './field';
 
 export interface IMulAddOptions {
@@ -9,6 +10,10 @@ export interface IMulAddOptions {
 export class MulAdd extends Field {
   constructor(name: string, field: string,
               private readonly options: IMulAddOptions) {
-    super(name, field);
+    super('value', name, field);
+  }
+
+  protected doBuild(ctx: Compilation, bb: IRBasicBlock): void {
+    // TODO(indutny): implement me
   }
 }

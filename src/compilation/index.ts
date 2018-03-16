@@ -12,6 +12,7 @@ import { Identifier } from '../utils';
 
 import irTypes = bitcodeBuilderNS.types;
 import irValues = bitcodeBuilderNS.values;
+import IRSignature = irTypes.Signature;
 import IRDeclaration = irValues.constants.Declaration;
 import IRFunc = irValues.constants.Func;
 import IRBasicBlock = irValues.BasicBlock;
@@ -19,7 +20,8 @@ import IRType = irTypes.Type;
 import IRValue = irValues.Value;
 
 export {
-  irTypes, irValues, IRBasicBlock, IRDeclaration, IRFunc, IRType, IRValue,
+  irTypes, irValues, IRBasicBlock, IRDeclaration, IRFunc, IRSignature,
+  IRType, IRValue,
 };
 
 export interface ICompilationOptions {
@@ -33,11 +35,11 @@ export interface ICompilationProperty {
 
 export interface ISignatureMap {
   readonly callback: {
-    readonly match: irTypes.Signature;
-    readonly span: irTypes.Signature;
-    readonly value: irTypes.Signature;
+    readonly match: IRSignature;
+    readonly span: IRSignature;
+    readonly value: IRSignature;
   };
-  readonly node: irTypes.Signature;
+  readonly node: IRSignature;
 }
 
 export class Compilation {
@@ -236,14 +238,13 @@ export class Compilation {
     return this.addGlobalConst('blob', this.ir.blob(value));
   }
 
-  public declareFunction(signature: irTypes.Signature, name: string)
-    : IRDeclaration {
+  public declareFunction(signature: IRSignature, name: string): IRDeclaration {
     const decl = signature.declareFunction(name);
     this.bitcode.add(decl);
     return decl;
   }
 
-  public defineFunction(signature: irTypes.Signature, name: string,
+  public defineFunction(signature: IRSignature, name: string,
                         paramNames: ReadonlyArray<string>): IRFunc {
     const fn = signature.defineFunction(name, paramNames);
     this.bitcode.add(fn);
