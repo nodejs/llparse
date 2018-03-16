@@ -1,3 +1,4 @@
+import * as assert from 'assert';
 import {
   Builder as BitcodeBuilder,
   builder as bitcodeBuilderNS,
@@ -43,9 +44,32 @@ export interface ISignatureMap {
   readonly node: IRSignature;
 }
 
+export type IProfWeight = 'likely' | 'unlikely' | number;
+
+export interface IBranchResult {
+  readonly onFalse: IRBasicBlock;
+  readonly onTrue: IRBasicBlock;
+}
+
+export interface IBranchWeight {
+  readonly onFalse: IProfWeight;
+  readonly onTrue: IProfWeight;
+}
+
+export interface ISwitchResult {
+  readonly cases: ReadonlyArray<IRBasicBlock>;
+  readonly otherwise: IRBasicBlock;
+}
+
+export interface ISwitchWeight {
+  readonly cases: ReadonlyArray<IProfWeight>;
+  readonly otherwise: IProfWeight;
+}
+
 export class Compilation {
   public readonly ir: BitcodeBuilder;
   public readonly signature: ISignatureMap;
+  public readonly invariantGroup: irValues.constants.Metadata;
 
   private readonly bitcode: Bitcode = new Bitcode();
   private readonly state: irTypes.Struct;
@@ -59,6 +83,9 @@ export class Compilation {
               spans: ISpanAllocatorResult,
               public readonly options: ICompilationOptions) {
     this.ir = this.bitcode.createBuilder();
+    this.invariantGroup = this.ir.metadata([
+      this.ir.metadata('llparse.invariant'),
+    ]);
 
     this.state = this.ir.struct('state');
 
@@ -266,8 +293,59 @@ export class Compilation {
   }
 
   // Miscellaneous
+
   public addResumptionTarget(decl: IRDeclaration): void {
     this.resumptionTargets.add(decl);
+  }
+
+  public branch(bb: IRBasicBlock, condition: IRValue,
+                weights?: IBranchWeight): IBranchResult {
+    const onTrue = bb.parent.createBlock('on_true');
+    const onFalse = bb.parent.createBlock('on_false');
+
+    const br = bb.branch(condition, onTrue, onFalse);
+
+    if (weights !== undefined) {
+      const WEIGHT = constants.BRANCH_WEIGHT;
+
+      br.metadata.set('prof', this.ir.metadata([
+        this.ir.metadata('branch_weights'),
+        this.ir.metadata(WEIGHT.val(this.toProfWeight(weights.onTrue))),
+        this.ir.metadata(WEIGHT.val(this.toProfWeight(weights.onFalse))),
+      ]));
+    }
+
+    return { onTrue, onFalse };
+  }
+
+  public switch(bb: IRBasicBlock, value: IRValue, keys: ReadonlyArray<number>,
+                weights?: ISwitchWeight): ISwitchResult {
+    const otherwise = bb.parent.createBlock('otherwise');
+    const cases = keys.map((key) => {
+      return {
+        block: bb.parent.createBlock(`case_${key}`),
+        value: value.ty.toInt().val(key),
+      };
+    });
+
+    const br = bb.switch(value, otherwise, cases);
+
+    if (weights !== undefined) {
+      const WEIGHT = constants.BRANCH_WEIGHT;
+      assert.strictEqual(weights.cases.length, keys.length);
+
+      const list = [
+        this.ir.metadata('branch_weights'),
+        this.ir.metadata(WEIGHT.val(this.toProfWeight(weights.otherwise))),
+      ];
+
+      for (const weight of weights.cases) {
+        list.push(this.ir.metadata(WEIGHT.val(this.toProfWeight(weight))));
+      }
+      br.metadata.set('prof', this.ir.metadata(list));
+    }
+
+    return { otherwise, cases: cases.map((c) => c.block) };
   }
 
   // Internals
@@ -277,5 +355,16 @@ export class Compilation {
     const GEP_OFF = constants.GEP_OFF;
     const index = this.state.lookupField(name).index;
     return bb.getelementptr(state, GEP_OFF.val(0), GEP_OFF.val(index), true);
+  }
+
+  private toProfWeight(weight: IProfWeight): number {
+    // Completely ad-hoc
+    if (weight === 'likely') {
+      return 0x10000;
+    } else if (weight === 'unlikely') {
+      return 1;
+    } else {
+      return weight;
+    }
   }
 }

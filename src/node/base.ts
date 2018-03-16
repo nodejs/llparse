@@ -72,6 +72,21 @@ export abstract class Node {
     return this.privCompilation!;
   }
 
+  protected prologue(bb: IRBasicBlock, pos: INodePosition): IRBasicBlock {
+    const ctx = this.compilation;
+
+    // Check that we have enough chars to do the read
+    const cmp = bb.icmp('ne', pos.current, ctx.endPosArg(bb));
+    const { onTrue, onFalse } = ctx.branch(bb, cmp);
+
+    // Return self when `pos === endpos`
+    onFalse.name = 'no_data';
+    this.pause(onFalse);
+
+    onTrue.name = 'has_data';
+    return onTrue;
+  }
+
   protected pause(bb: IRBasicBlock) {
     const ctx = this.compilation;
     const fn = bb.parent;
