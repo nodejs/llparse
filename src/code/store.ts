@@ -3,7 +3,7 @@ import { Field } from './field';
 
 export class Store extends Field {
   constructor(name: string, field: string) {
-    super('value', name, field);
+    super('value', `store_${field}`, name, field);
   }
 
   protected doBuild(ctx: Compilation, bb: IRBasicBlock): void {

@@ -3,15 +3,14 @@ import { CCONV, FN_ATTR_CODE, LINKAGE } from '../constants';
 import { Code, Signature } from './base';
 
 export abstract class Field extends Code {
-  constructor(signature: Signature, name: string,
+  constructor(signature: Signature, cacheKey: string, name: string,
               private readonly field: string) {
-    super(signature, name);
+    super(signature, cacheKey, name);
   }
 
   public build(ctx: Compilation): IRDeclaration {
-    const cache = ctx.codeCache;
-    if (cache.has(this)) {
-      return cache.get(this)!;
+    if (this.cachedDecl !== undefined) {
+      return this.cachedDecl;
     }
 
     const sig = this.getSignature(ctx);
@@ -19,7 +18,7 @@ export abstract class Field extends Code {
     this.setAttributes(fn);
 
     this.doBuild(ctx, fn.body);
-    cache.set(this, fn);
+    this.cachedDecl = fn;
 
     return fn;
   }

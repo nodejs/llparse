@@ -7,7 +7,7 @@ export class Consume extends Node {
     super(id);
   }
 
-  protected doBuild(ctx: Compilation, bb: IRBasicBlock): void {
+  protected doBuild(bb: IRBasicBlock): void {
     // TODO(indutny): implement me
   }
 }

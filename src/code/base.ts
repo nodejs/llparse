@@ -7,7 +7,10 @@ import {
 export type Signature = 'match' | 'value' | 'span';
 
 export abstract class Code {
+  protected cachedDecl: IRDeclaration | undefined;
+
   constructor(private readonly signature: Signature,
+              public readonly cacheKey: string,
               public readonly name: string) {
   }
 
