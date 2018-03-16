@@ -47,7 +47,8 @@ export class Compiler {
     // Compile to bitcode
     const compilation = new Compilation(this.prefix, root, properties, spans,
       this.options);
-    const bitcode = compilation.buildBitcode();
+
+    const bitcode = compilation.buildBitcode(root);
     const headers = compilation.buildHeaders();
 
     return { bitcode, headers };

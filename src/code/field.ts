@@ -1,5 +1,5 @@
 import { Compilation, IRBasicBlock, IRDeclaration } from '../compilation';
-import { FN_ATTR_CODE } from '../constants';
+import { CCONV, FN_ATTR_CODE, LINKAGE } from '../constants';
 import { Code, Signature } from './base';
 
 export abstract class Field extends Code {
@@ -27,6 +27,9 @@ export abstract class Field extends Code {
   protected setAttributes(decl: IRDeclaration): void {
     super.setAttributes(decl);
     decl.attrs.add(FN_ATTR_CODE);
+
+    decl.cconv = CCONV;
+    decl.linkage = LINKAGE;
   }
 
   protected abstract doBuild(ctx: Compilation, bb: IRBasicBlock): void;

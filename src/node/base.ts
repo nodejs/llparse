@@ -2,7 +2,9 @@ import { Compilation, IRBasicBlock, IRDeclaration } from '../compilation';
 import {
   ARG_ENDPOS, ARG_MATCH, ARG_POS, ARG_STATE,
   ATTR_ENDPOS, ATTR_MATCH, ATTR_POS, ATTR_STATE,
+  CCONV,
   FN_ATTR_NODE,
+  LINKAGE,
 } from '../constants';
 import { IUniqueName } from '../utils';
 
@@ -37,6 +39,9 @@ export abstract class Node {
       ARG_STATE, ARG_POS, ARG_ENDPOS, ARG_MATCH,
     ]);
 
+    fn.cconv = CCONV;
+    fn.linkage = LINKAGE;
+
     fn.paramAttrs[0].add(ATTR_STATE);
     fn.paramAttrs[1].add(ATTR_POS);
     fn.paramAttrs[2].add(ATTR_ENDPOS);
@@ -50,4 +55,6 @@ export abstract class Node {
   }
 
   protected abstract doBuild(ctx: Compilation, bb: IRBasicBlock): void;
+
+  // Helpers
 }

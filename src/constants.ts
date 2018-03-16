@@ -15,6 +15,9 @@ export const CSTR = IR.i(8).ptr();
 export const PTR = IR.i(8).ptr();
 export const GEP_OFF = INT;
 
+export const CCONV: ir.CallingConv = 'fastcc';
+export const LINKAGE: ir.Linkage = 'internal';
+
 // Arguments
 
 export const TYPE_OUTPUT = PTR;

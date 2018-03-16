@@ -123,7 +123,7 @@ export class Compilation {
     this.state.finalize();
   }
 
-  public buildBitcode(): Buffer {
+  public buildBitcode(root: node.Node): Buffer {
     return this.bitcode.build();
   }
 
