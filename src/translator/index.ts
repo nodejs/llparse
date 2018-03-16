@@ -251,7 +251,6 @@ export class Translator {
       return undefined;
     }
 
-    // TODO(indutny): transform
     const table = new compiler.TableLookup(this.id.id(node.name));
     children.push(table);
 
@@ -275,7 +274,6 @@ export class Translator {
 
   private translateSequence(node: api.Match, trie: TrieSequence,
                             children: compiler.Match[]): compiler.Match {
-    // TODO(indutny): transform
     const sequence = new compiler.Sequence(this.id.id(node.name), trie.select);
     children.push(sequence);
 
