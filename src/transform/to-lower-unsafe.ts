@@ -1,4 +1,4 @@
-import { Compilation, IRBasicBlock } from '../compilation';
+import { Compilation, IRBasicBlock, IRValue } from '../compilation';
 import { Transform } from './base';
 
 export class ToLowerUnsafe extends Transform {
@@ -6,7 +6,8 @@ export class ToLowerUnsafe extends Transform {
     super('to_lower_unsafe');
   }
 
-  public build(ctx: Compilation, bb: IRBasicBlock): void {
+  public build(ctx: Compilation, bb: IRBasicBlock, value: IRValue): IRValue {
     // TODO(indutny): implement me
+    return value;
   }
 }
