@@ -1,32 +1,36 @@
-import { Compilation, IRBasicBlock, IRDeclaration } from '../compilation';
+import {
+  Compilation, IRBasicBlock, IRDeclaration, IRValue,
+} from '../compilation';
 import {
   ARG_ENDPOS, ARG_MATCH, ARG_POS, ARG_STATE,
   ATTR_ENDPOS, ATTR_MATCH, ATTR_POS, ATTR_STATE,
   CCONV,
   FN_ATTR_NODE,
+  GEP_OFF,
   LINKAGE,
 } from '../constants';
 import { IUniqueName } from '../utils';
 
-export interface INodeOtherwise {
-  readonly target: Node;
+export interface INodeEdge {
+  readonly node: Node;
   readonly noAdvance: boolean;
 }
 
+export interface INodePosition {
+  readonly current: IRValue;
+  readonly next: IRValue;
+}
+
 export abstract class Node {
-  private privOtherwise: INodeOtherwise | undefined;
+  protected otherwise: INodeEdge | undefined;
   private privCompilation: Compilation | undefined;
   private cachedDecl: IRDeclaration | undefined;
 
   constructor(public readonly id: IUniqueName) {
   }
 
-  public get otherwise(): INodeOtherwise | undefined {
-    return this.privOtherwise;
-  }
-
-  public setOtherwise(target: Node, noAdvance: boolean) {
-    this.privOtherwise = { target, noAdvance };
+  public setOtherwise(node: Node, noAdvance: boolean) {
+    this.otherwise = { node, noAdvance };
   }
 
   // Building
@@ -50,13 +54,17 @@ export abstract class Node {
     fn.paramAttrs[3].add(ATTR_MATCH);
     fn.attrs.add(FN_ATTR_NODE);
 
-    this.doBuild(fn.body);
+    const pos: INodePosition = {
+      current: ctx.posArg(fn.body),
+      next: fn.body.getelementptr(ctx.posArg(fn.body), GEP_OFF.val(1)),
+    };
+    this.doBuild(fn.body, pos);
 
     this.cachedDecl = fn;
     return fn;
   }
 
-  protected abstract doBuild(bb: IRBasicBlock): void;
+  protected abstract doBuild(bb: IRBasicBlock, pos: INodePosition): void;
 
   // Helpers
 
@@ -64,13 +72,14 @@ export abstract class Node {
     return this.privCompilation!;
   }
 
-  protected tailTo(bb: IRBasicBlock, noAdvance: boolean, target: Node): void {
+  protected tailTo(bb: IRBasicBlock, edge: INodeEdge, pos: INodePosition)
+    : void {
     const ctx = this.compilation;
-    const targetDecl = target.build(ctx);
+    const targetDecl = edge.node.build(ctx);
 
     const args = [
       ctx.stateArg(bb),
-      ctx.posArg(bb).ty.undef(),
+      edge.noAdvance ? pos.current : pos.next,
       ctx.endPosArg(bb),
       ctx.matchArg(bb).ty.undef(),
     ];

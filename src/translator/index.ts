@@ -134,7 +134,7 @@ export class Translator {
           otherwise.noAdvance);
       } else {
         // TODO(indutny): move this to llparse-builder?
-        assert(node instanceof api.Error || node instanceof api.Pause,
+        assert(node instanceof api.Error,
           `Node "${node.name}" has no \`.otherwise()\``);
       }
 

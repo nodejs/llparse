@@ -121,7 +121,7 @@ export class Compilation {
     this.state.finalize();
   }
 
-  public buildBitcode(root: node.Node): Buffer {
+  public buildBitcode(init: IRDeclaration): Buffer {
     return this.bitcode.build();
   }
 
@@ -240,6 +240,17 @@ export class Compilation {
     return this.addGlobalConst('blob', this.ir.blob(value));
   }
 
+  public addGlobalConst(name: string, init: irValues.constants.Constant)
+    : IRValue {
+    const uniqueName = this.globalId.id(name).name;
+
+    const glob = this.ir.global(init.ty.ptr(), uniqueName, init);
+    glob.linkage = 'internal';
+    glob.markConstant();
+    this.bitcode.add(glob);
+    return glob;
+  }
+
   public declareFunction(signature: IRSignature, name: string): IRDeclaration {
     const decl = signature.declareFunction(name);
     this.bitcode.add(decl);
@@ -260,16 +271,5 @@ export class Compilation {
     const GEP_OFF = constants.GEP_OFF;
     const index = this.state.lookupField(name).index;
     return bb.getelementptr(state, GEP_OFF.val(0), GEP_OFF.val(index), true);
-  }
-
-  private addGlobalConst(name: string, init: irValues.constants.Constant)
-    : IRValue {
-    const uniqueName = this.globalId.id(name).name;
-
-    const glob = this.ir.global(init.ty.ptr(), uniqueName, init);
-    glob.linkage = 'internal';
-    glob.markConstant();
-    this.bitcode.add(glob);
-    return glob;
   }
 }
