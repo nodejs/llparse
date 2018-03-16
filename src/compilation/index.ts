@@ -22,6 +22,11 @@ export {
   irTypes, irValues, IRBasicBlock, IRDeclaration, IRFunc, IRType, IRValue,
 };
 
+export interface ICompilationState {
+  block: IRBasicBlock;
+  readonly fn: IRFunc;
+}
+
 export interface ICompilationOptions {
   readonly debug?: string;
 }
@@ -174,50 +179,50 @@ export class Compilation {
 
   // Arguments
 
-  public stateArg(fn: IRFunc): IRValue {
-    return fn.getArgument(constants.ARG_STATE);
+  public stateArg(s: ICompilationState): IRValue {
+    return s.fn.getArgument(constants.ARG_STATE);
   }
 
-  public posArg(fn: IRFunc): IRValue {
-    return fn.getArgument(constants.ARG_POS);
+  public posArg(s: ICompilationState): IRValue {
+    return s.fn.getArgument(constants.ARG_POS);
   }
 
-  public endPosArg(fn: IRFunc): IRValue {
-    return fn.getArgument(constants.ARG_ENDPOS);
+  public endPosArg(s: ICompilationState): IRValue {
+    return s.fn.getArgument(constants.ARG_ENDPOS);
   }
 
-  public matchArg(fn: IRFunc): IRValue {
-    return fn.getArgument(constants.ARG_MATCH);
+  public matchArg(s: ICompilationState): IRValue {
+    return s.fn.getArgument(constants.ARG_MATCH);
   }
 
   // State fields
 
-  public indexField(fn: IRFunc, body: IRBasicBlock): IRValue {
-    return this.stateField(fn, body, constants.STATE_INDEX);
+  public indexField(s: ICompilationState): IRValue {
+    return this.stateField(s, constants.STATE_INDEX);
   }
 
-  public currentField(fn: IRFunc, body: IRBasicBlock): IRValue {
-    return this.stateField(fn, body, constants.STATE_CURRENT);
+  public currentField(s: ICompilationState): IRValue {
+    return this.stateField(s, constants.STATE_CURRENT);
   }
 
-  public errorField(fn: IRFunc, body: IRBasicBlock): IRValue {
-    return this.stateField(fn, body, constants.STATE_ERROR);
+  public errorField(s: ICompilationState): IRValue {
+    return this.stateField(s, constants.STATE_ERROR);
   }
 
-  public reasonField(fn: IRFunc, body: IRBasicBlock): IRValue {
-    return this.stateField(fn, body, constants.STATE_REASON);
+  public reasonField(s: ICompilationState): IRValue {
+    return this.stateField(s, constants.STATE_REASON);
   }
 
-  public errorPosField(fn: IRFunc, body: IRBasicBlock): IRValue {
-    return this.stateField(fn, body, constants.STATE_ERROR_POS);
+  public errorPosField(s: ICompilationState): IRValue {
+    return this.stateField(s, constants.STATE_ERROR_POS);
   }
 
-  public spanPosField(fn: IRFunc, body: IRBasicBlock, index: number): IRValue {
-    return this.stateField(fn, body, constants.STATE_SPAN_POS + index);
+  public spanPosField(s: ICompilationState, index: number): IRValue {
+    return this.stateField(s, constants.STATE_SPAN_POS + index);
   }
 
-  public spanCbField(fn: IRFunc, body: IRBasicBlock, index: number): IRValue {
-    return this.stateField(fn, body, constants.STATE_SPAN_CB + index);
+  public spanCbField(s: ICompilationState, index: number): IRValue {
+    return this.stateField(s, constants.STATE_SPAN_CB + index);
   }
 
   // Globals
@@ -244,19 +249,20 @@ export class Compilation {
   }
 
   public defineFunction(signature: irTypes.Signature, name: string,
-                        paramNames: ReadonlyArray<string>): IRFunc {
+                        paramNames: ReadonlyArray<string>): ICompilationState {
     const fn = signature.defineFunction(name, paramNames);
     this.bitcode.add(fn);
-    return fn;
+    return { fn, block: fn.body };
   }
 
   // Internals
 
-  private stateField(fn: IRFunc, body: IRBasicBlock, name: string): IRValue {
-    const state = this.stateArg(fn);
+  private stateField(s: ICompilationState, name: string): IRValue {
+    const state = this.stateArg(s);
     const GEP_OFF = constants.GEP_OFF;
     const index = this.state.lookupField(name).index;
-    return body.getelementptr(state, GEP_OFF.val(0), GEP_OFF.val(index), true);
+    return s.block.getelementptr(state, GEP_OFF.val(0), GEP_OFF.val(index),
+      true);
   }
 
   private addGlobalConst(name: string, init: irValues.constants.Constant)
