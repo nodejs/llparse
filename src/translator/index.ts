@@ -101,6 +101,10 @@ export class Translator {
       assert(node instanceof api.Match);
       const match = node as api.Match;
 
+      // TODO(indutny): move this to llparse-builder?
+      assert.notStrictEqual(otherwise, undefined,
+        `Node "${node.name}" has no \`.otherwise()\``);
+
       // Assign otherwise to every node of Trie
       if (otherwise !== undefined) {
         for (const child of result) {
@@ -127,6 +131,10 @@ export class Translator {
       if (otherwise !== undefined) {
         result.setOtherwise(this.translate(otherwise.node),
           otherwise.noAdvance);
+      } else {
+        // TODO(indutny): move this to llparse-builder?
+        assert(node instanceof api.Error || node instanceof api.Pause,
+          `Node "${node.name}" has no \`.otherwise()\``);
       }
 
       if (result instanceof compiler.Invoke) {
