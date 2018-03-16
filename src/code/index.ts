@@ -13,6 +13,8 @@ export { Update } from './update';
 
 // External callbacks
 
+export { External } from './external';
+
 export { Match } from './match';
 export { Span } from './span';
 export { Value } from './value';

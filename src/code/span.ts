@@ -1,4 +1,4 @@
-import { Code } from './base';
+import { External } from './external';
 
-export class Span extends Code {
+export class Span extends External {
 }

@@ -1,4 +1,4 @@
-import { Code } from './base';
+import { External } from './external';
 
-export class Match extends Code {
+export class Match extends External {
 }

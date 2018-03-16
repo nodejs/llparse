@@ -1,4 +1,4 @@
-import { Code } from './base';
+import { External } from './external';
 
-export class Value extends Code {
+export class Value extends External {
 }
