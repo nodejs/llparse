@@ -355,6 +355,36 @@ export class Compilation {
     return { otherwise, cases: cases.map((c) => c.block) };
   }
 
+  public truncate(bb: IRBasicBlock, value: IRValue, toTy: IRType,
+                  isSigned: boolean = false) {
+    const fromTy = value.ty;
+    assert(toTy.isInt());
+    assert(fromTy.isInt());
+
+    const fromITy = fromTy.toInt();
+    const toITy = toTy.toInt();
+
+    let res: IRValue;
+
+    // Same type!
+    if (fromITy.isEqual(toITy)) {
+      res = value;
+    // Extend
+    } else if (fromITy.width < toITy.width) {
+      if (isSigned) {
+        res = bb.cast('sext', value, toITy);
+      } else {
+        res = bb.cast('zext', value, toITy);
+      }
+    // Truncate
+    } else {
+      assert(fromITy.width > toITy.width);
+      res = bb.cast('trunc', value, toITy);
+    }
+
+    return res;
+  }
+
   // Internals
 
   private toProfWeight(weight: IProfWeight): number {
