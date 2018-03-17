@@ -9,6 +9,7 @@ import {
   GEP_OFF,
   LINKAGE,
 } from '../constants';
+import * as compilerNode from '../node';
 import { IUniqueName } from '../utils';
 
 export interface INodeEdge {
@@ -119,10 +120,20 @@ export abstract class Node {
     const subTailMap = this.tailMap.get(edge.noAdvance)!;
     const matchTy = ctx.matchArg(bb).ty;
 
+    // Skip `noAdvance = true` Empty nodes
+    let edgeTo: Node = edge.node;
+    while (edgeTo instanceof compilerNode.Empty) {
+      if (!edgeTo.otherwise!.noAdvance) {
+        break;
+      }
+
+      edgeTo = edgeTo.otherwise!.node;
+    }
+
     const value = edge.value === undefined ? matchTy.undef() :
       matchTy.val(edge.value);
-    if (subTailMap.has(edge.node)) {
-      const tail = subTailMap.get(edge.node)!;
+    if (subTailMap.has(edgeTo)) {
+      const tail = subTailMap.get(edgeTo)!;
 
       tail.phi.addEdge({ fromBlock: bb, value });
       bb.jmp(tail.block);
@@ -133,7 +144,7 @@ export abstract class Node {
     bb.jmp(tailBB);
 
     const phi = tailBB.phi({ fromBlock: bb, value });
-    subTailMap.set(edge.node, { block: tailBB, phi });
+    subTailMap.set(edgeTo, { block: tailBB, phi });
 
     const args = [
       ctx.stateArg(bb),
@@ -142,7 +153,7 @@ export abstract class Node {
       phi,
     ];
 
-    const res = tailBB.call(edge.node.build(ctx), args, 'musttail');
+    const res = tailBB.call(edgeTo.build(ctx), args, 'musttail');
     tailBB.ret(res);
   }
 }
