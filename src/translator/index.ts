@@ -40,6 +40,7 @@ export interface ITranslatorLazyOptions {
 export class Translator {
   private readonly options: ITranslatorOptions;
   private readonly id: Identifier = new Identifier(this.prefix + '_n_');
+  private readonly codeId: Identifier = new Identifier(this.prefix + '_c_');
   private readonly map: Map<api.Node, compiler.Node> = new Map();
   private readonly spanMap: Map<APISpan, Span> = new Map();
   private readonly codeCache: Map<string, compilerCode.Code> = new Map();
@@ -139,7 +140,7 @@ export class Translator {
 
       if (result instanceof compiler.Invoke) {
         for (const edge of node) {
-          result.addEdge(this.translate(edge.node), edge.key as number);
+          result.addEdge(edge.key as number, this.translate(edge.node));
         }
       } else {
         assert.strictEqual(Array.from(node).length, 0);
@@ -306,32 +307,32 @@ export class Translator {
   }
 
   private translateCode(code: apiCode.Code): compilerCode.Code {
-    const name = code.name;
+    const prefixed = this.codeId.id(code.name).name;
     let res: compilerCode.Code;
     if (code instanceof apiCode.IsEqual) {
-      res = new compilerCode.IsEqual(name, code.field, code.value);
+      res = new compilerCode.IsEqual(prefixed, code.field, code.value);
     } else if (code instanceof apiCode.Load) {
-      res = new compilerCode.Load(name, code.field);
+      res = new compilerCode.Load(prefixed, code.field);
     } else if (code instanceof apiCode.MulAdd) {
-      res = new compilerCode.MulAdd(name, code.field, code.options);
+      res = new compilerCode.MulAdd(prefixed, code.field, code.options);
     } else if (code instanceof apiCode.Or) {
-      res = new compilerCode.Or(name, code.field, code.value);
+      res = new compilerCode.Or(prefixed, code.field, code.value);
     } else if (code instanceof apiCode.Store) {
-      res = new compilerCode.Store(name, code.field);
+      res = new compilerCode.Store(prefixed, code.field);
     } else if (code instanceof apiCode.Test) {
-      res = new compilerCode.Test(name, code.field, code.value);
+      res = new compilerCode.Test(prefixed, code.field, code.value);
     } else if (code instanceof apiCode.Update) {
-      res = new compilerCode.Update(name, code.field, code.value);
+      res = new compilerCode.Update(prefixed, code.field, code.value);
 
     // External callbacks
     } else if (code instanceof apiCode.Match) {
-      res = new compilerCode.Match(name);
+      res = new compilerCode.Match(code.name);
     } else if (code instanceof apiCode.Span) {
-      res = new compilerCode.Span(name);
+      res = new compilerCode.Span(code.name);
     } else if (code instanceof apiCode.Value) {
-      res = new compilerCode.Value(name);
+      res = new compilerCode.Value(code.name);
     } else {
-      throw new Error(`Unsupported code: "${name}"`);
+      throw new Error(`Unsupported code: "${code.name}"`);
     }
 
     // Re-use instances to build them just once

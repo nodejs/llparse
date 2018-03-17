@@ -33,6 +33,6 @@ describe('llparse/Compiler', () => {
     start.otherwise(p.error(3, 'Invalid word'));
 
     const binary = build(c.compile(start, p.properties), 'simple');
-    // await binary.check('GET', 'off=3 match=1\n');
+    await binary.check('GET', 'off=3 match=1\n');
   });
 });

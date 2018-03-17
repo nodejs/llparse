@@ -32,6 +32,8 @@ export class Sequence extends Match {
   }
 
   protected doBuild(bb: IRBasicBlock, pos: INodePosition): void {
+    bb = this.prologue(bb, pos);
+
     const ctx = this.compilation;
     const seq = ctx.blob(this.select);
 

@@ -92,17 +92,17 @@ export class Compilation {
 
     this.signature = {
       callback: {
-        match: this.ir.signature(constants.TYPE_OUTPUT, [
+        match: this.ir.signature(constants.INT, [
           this.state.ptr(),
           constants.TYPE_POS,
           constants.TYPE_ENDPOS,
         ]),
-        span: this.ir.signature(constants.TYPE_OUTPUT, [
+        span: this.ir.signature(constants.INT, [
           this.state.ptr(),
           constants.TYPE_POS,
           constants.TYPE_ENDPOS,
         ]),
-        value: this.ir.signature(constants.TYPE_OUTPUT, [
+        value: this.ir.signature(constants.INT, [
           this.state.ptr(),
           constants.TYPE_POS,
           constants.TYPE_ENDPOS,
