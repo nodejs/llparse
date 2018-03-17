@@ -22,7 +22,7 @@ export interface ICompilerOptions {
 
 export interface ICompilerResult {
   readonly bitcode: Buffer;
-  readonly headers: string;
+  readonly header: string;
 }
 
 export class Compiler {
@@ -51,9 +51,9 @@ export class Compiler {
     const initFn = root.build(compilation);
 
     const bitcode = compilation.buildBitcode(initFn);
-    const headers = compilation.buildHeaders();
+    const header = compilation.buildHeader();
 
-    return { bitcode, headers };
+    return { bitcode, header };
   }
 
   // Convenience

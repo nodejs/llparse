@@ -154,7 +154,7 @@ export class Compilation {
     return this.bitcode.build();
   }
 
-  public buildHeaders(): string {
+  public buildHeader(): string {
     let res = '';
     const PREFIX = this.prefix.toUpperCase().replace(/[^a-z]/gi, '_');
     const DEFINE = `INCLUDE_${PREFIX}_H_`;

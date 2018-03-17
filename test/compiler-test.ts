@@ -53,6 +53,6 @@ describe('llparse/Compiler', () => {
     const result = c.compile(start, b.properties);
 
     require('fs').writeFileSync('/tmp/1.bc', result.bitcode);
-    require('fs').writeFileSync('/tmp/1.h', result.headers);
+    require('fs').writeFileSync('/tmp/1.h', result.header);
   });
 });
