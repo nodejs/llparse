@@ -51,6 +51,7 @@ export abstract class Node {
   // Building
 
   public build(ctx: Compilation): IRDeclaration {
+    // TODO(indutny): skip `Empty` here too
     if (this.cachedDecl !== undefined) {
       return this.cachedDecl;
     }

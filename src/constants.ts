@@ -11,6 +11,7 @@ export const I64 = IR.i(64);
 
 export const BOOL = IR.i(1);
 export const INT = I32;
+export const INTPTR = I64; // TODO(indutny): find a way to do it cross-platform
 export const CSTR = IR.i(8).ptr();
 export const PTR = IR.i(8).ptr();
 export const GEP_OFF = INT;
