@@ -87,9 +87,11 @@ export class Translator {
     } else if (node instanceof api.Consume) {
       result = new compiler.Consume(id(), node.field);
     } else if (node instanceof api.SpanStart) {
-      result = new compiler.SpanStart(id(), this.spanMap.get(node.span)!);
+      result = new compiler.SpanStart(id(), this.spanMap.get(node.span)!,
+        this.translateCode(node.span.callback) as compilerCode.Span);
     } else if (node instanceof api.SpanEnd) {
-      result = new compiler.SpanEnd(id(), this.spanMap.get(node.span)!);
+      result = new compiler.SpanEnd(id(), this.spanMap.get(node.span)!,
+        this.translateCode(node.span.callback) as compilerCode.Span);
     } else if (node instanceof api.Invoke) {
       result = new compiler.Invoke(id(), this.translateCode(node.code));
     } else if (node instanceof api.Match) {
