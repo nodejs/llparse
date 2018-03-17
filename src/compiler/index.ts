@@ -5,6 +5,7 @@ import {
   node as apiNode,
   Property as APIProperty,
 } from 'llparse-builder';
+import * as builder from 'llparse-builder';
 
 import { Compilation } from '../compilation';
 import { SpanAllocator } from '../span';
@@ -12,7 +13,7 @@ import { ITranslatorLazyOptions, Translator } from '../translator';
 import { ExecuteBuilder } from './execute-builder';
 import { InitBuilder } from './init-builder';
 
-export { Builder };
+export { builder, Builder };
 
 export interface ICompilerOptions {
   // Debug method name, if present
@@ -28,8 +29,8 @@ export interface ICompilerResult {
 }
 
 export class Compiler {
-  constructor(private readonly prefix: string,
-              private readonly options: ICompilerOptions) {
+  constructor(private readonly prefix: string = 'llparse',
+              private readonly options: ICompilerOptions = {}) {
   }
 
   public compile(apiRoot: apiNode.Node,
