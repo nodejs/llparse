@@ -26,19 +26,16 @@ export const TYPE_OUTPUT = PTR;
 export const TYPE_POS = CSTR;
 export const TYPE_ENDPOS = TYPE_POS;
 export const TYPE_MATCH = INT;
-export const TYPE_SEQUENCE = TYPE_POS;
 
 export const ARG_STATE = 'state';
 export const ARG_POS = 'pos';
 export const ARG_ENDPOS = 'endpos';
 export const ARG_MATCH = 'match';
-export const ARG_SEQUENCE = 'seq';
 
 export const ATTR_STATE: AttributeList = [ 'noalias', 'nonnull' ];
 export const ATTR_POS: AttributeList = [ 'noalias', 'nonnull', 'readonly' ];
 export const ATTR_ENDPOS: AttributeList = [ 'noalias', 'nonnull', 'readnone' ];
 export const ATTR_MATCH: AttributeList = [];
-export const ATTR_SEQUENCE: AttributeList = ATTR_POS;
 
 export const FN_ATTR_NODE: AttributeList = [
   // TODO(indutny): reassess `minsize`. Looks like it gives best performance
@@ -77,3 +74,23 @@ export const DEFAULT_TRANSLATOR_MIN_TABLE_SIZE = 32;
 
 // Maximum width of entry in a table for a `TableLookup` optimization
 export const DEFAULT_TRANSLATOR_MAX_TABLE_WIDTH = 4;
+
+// Sequence Matcher
+
+export const TYPE_SEQUENCE = TYPE_POS;
+export const TYPE_SEQUENCE_LEN = TYPE_INDEX;
+export const TYPE_STATUS = INT;
+
+export const ARG_SEQUENCE = 'seq';
+export const ARG_SEQUENCE_LEN = 'seq_len';
+
+export const SEQUENCE_COMPLETE = 0;
+export const SEQUENCE_PAUSE = 1;
+export const SEQUENCE_MISMATCH = 2;
+
+export const ATTR_SEQUENCE = ATTR_POS;
+export const ATTR_SEQUENCE_LEN: AttributeList = [];
+
+export const FN_ATTR_MATCH_SEQUENCE: AttributeList = [
+  'nounwind', 'norecurse', 'alwaysinline',
+];

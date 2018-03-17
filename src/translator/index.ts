@@ -12,6 +12,7 @@ import {
   DEFAULT_TRANSLATOR_MAX_TABLE_WIDTH,
   DEFAULT_TRANSLATOR_MIN_TABLE_SIZE,
 } from '../constants';
+import { MatchSequence } from '../match-sequence';
 import * as compiler from '../node';
 import { ISpanAllocatorResult, Span } from '../span';
 import * as compilerTransform from '../transform';
@@ -42,6 +43,7 @@ export class Translator {
   private readonly map: Map<api.Node, compiler.Node> = new Map();
   private readonly spanMap: Map<APISpan, Span> = new Map();
   private readonly codeCache: Map<string, compilerCode.Code> = new Map();
+  private readonly matchSequenceCache: Map<string, MatchSequence> = new Map();
 
   constructor(private readonly prefix: string,
               options: ITranslatorLazyOptions,
@@ -115,12 +117,9 @@ export class Translator {
       }
 
       // Assign transform to every node of Trie
-      const transform = match.getTransform();
-      if (transform !== undefined) {
-        const translated = this.translateTransform(transform);
-        for (const child of result) {
-          child.setTransform(translated);
-        }
+      const transform = this.translateTransform(match.getTransform());
+      for (const child of result) {
+        child.setTransform(transform);
       }
 
       assert(result.length >= 1);
@@ -284,7 +283,11 @@ export class Translator {
 
   private translateSequence(node: api.Match, trie: TrieSequence,
                             children: compiler.Match[]): compiler.Match {
-    const sequence = new compiler.Sequence(this.id.id(node.name), trie.select);
+    const matchSequence = this.createMatchSequence(node);
+    matchSequence.addSequence(trie.select);
+
+    const sequence = new compiler.Sequence(this.id.id(node.name), matchSequence,
+      trie.select);
     children.push(sequence);
 
     // Break the loop
@@ -340,12 +343,27 @@ export class Translator {
     return res;
   }
 
-  private translateTransform(transform: apiTransform.Transform)
+  private translateTransform(transform?: apiTransform.Transform)
     : compilerTransform.Transform {
-    if (transform.name === 'to_lower_unsafe') {
+    if (transform === undefined) {
+      return new compilerTransform.ID();
+    } else if (transform.name === 'to_lower_unsafe') {
       return new compilerTransform.ToLowerUnsafe();
     } else {
       throw new Error(`Unsupported transform: "${transform.name}"`);
     }
+  }
+
+  private createMatchSequence(node: api.Match): MatchSequence {
+    const transform = this.translateTransform(node.getTransform());
+    const cacheKey = transform === undefined ? '' : transform.name;
+
+    if (this.matchSequenceCache.has(cacheKey)) {
+      return this.matchSequenceCache.get(cacheKey)!;
+    }
+
+    const res = new MatchSequence(transform);
+    this.matchSequenceCache.set(cacheKey, res);
+    return res;
   }
 }

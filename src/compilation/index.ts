@@ -70,10 +70,10 @@ export interface ISwitchWeight {
 export class Compilation {
   public readonly ir: BitcodeBuilder;
   public readonly signature: ISignatureMap;
+  public readonly state: irTypes.Struct;
   public readonly invariantGroup: irValues.constants.Metadata;
 
   private readonly bitcode: Bitcode = new Bitcode();
-  private readonly state: irTypes.Struct;
   private readonly cstringCache: Map<string, IRValue> = new Map();
   private readonly globalId: Identifier = new Identifier('g_');
   private readonly resumptionTargets: Set<IRDeclaration> = new Set();

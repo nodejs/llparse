@@ -30,10 +30,8 @@ export class Single extends Match {
     // Load the character
     let current: IRValue = bb.load(pos.current);
 
-    // Transform the character if needed
-    if (this.transform !== undefined) {
-      current = this.transform.build(ctx, bb, current);
-    }
+    // Transform the character
+    current = this.transform!.build(ctx, bb, current);
 
     // Mark error branches as unlikely
     const cases = this.edges.map((edge, i) => {
