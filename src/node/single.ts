@@ -34,7 +34,7 @@ export class Single extends Match {
     current = this.transform!.build(ctx, bb, current);
 
     // Mark error branches as unlikely
-    const cases = this.edges.map((edge, i) => {
+    const cases = this.edges.map((edge) => {
       if (edge.node instanceof ErrorNode) {
         return 'unlikely';
       } else {
