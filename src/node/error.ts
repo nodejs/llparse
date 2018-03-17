@@ -1,5 +1,5 @@
 import { IRBasicBlock } from '../compilation';
-import { GEP_OFF } from '../constants';
+import { FN_ATTR_ERROR, GEP_OFF } from '../constants';
 import { IUniqueName } from '../utils';
 import { INodePosition, Node } from './base';
 
@@ -26,6 +26,8 @@ class ErrorNode extends Node {
 
   protected doBuild(bb: IRBasicBlock, pos: INodePosition): void {
     bb = this.storeError(bb, pos);
+
+    bb.parent.attrs.add(FN_ATTR_ERROR);
 
     // Non-recoverable state
     const currentField = this.compilation.currentField(bb);

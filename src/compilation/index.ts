@@ -117,12 +117,8 @@ export class Compilation {
       ]),
     };
 
+    // Put most used fields first
     this.state.addField(constants.TYPE_INDEX, constants.STATE_INDEX);
-    this.state.addField(this.signature.node.ptr(), constants.STATE_CURRENT);
-    this.state.addField(constants.TYPE_ERROR, constants.STATE_ERROR);
-    this.state.addField(constants.TYPE_REASON, constants.STATE_REASON);
-    this.state.addField(constants.TYPE_ERROR_POS, constants.STATE_ERROR_POS);
-    this.state.addField(constants.TYPE_DATA, constants.STATE_DATA);
 
     spans.concurrency.forEach((concurrent, index) => {
       this.state.addField(constants.TYPE_SPAN_POS,
@@ -132,6 +128,12 @@ export class Compilation {
           constants.STATE_SPAN_CB + index);
       }
     });
+
+    this.state.addField(constants.TYPE_ERROR, constants.STATE_ERROR);
+    this.state.addField(constants.TYPE_REASON, constants.STATE_REASON);
+    this.state.addField(constants.TYPE_ERROR_POS, constants.STATE_ERROR_POS);
+    this.state.addField(constants.TYPE_DATA, constants.STATE_DATA);
+    this.state.addField(this.signature.node.ptr(), constants.STATE_CURRENT);
 
     for (const property of properties) {
       let ty: IRType;
@@ -304,6 +306,10 @@ export class Compilation {
 
   public addResumptionTarget(decl: IRDeclaration): void {
     this.resumptionTargets.add(decl);
+  }
+
+  public getResumptionTargets(): ReadonlyArray<IRDeclaration> {
+    return Array.from(this.resumptionTargets);
   }
 
   public branch(bb: IRBasicBlock, condition: IRValue,

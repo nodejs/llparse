@@ -6,9 +6,11 @@ import {
   Property as APIProperty,
 } from 'llparse-builder';
 
-import { Compilation } from './compilation';
-import { SpanAllocator } from './span';
-import { ITranslatorLazyOptions, Translator } from './translator';
+import { Compilation } from '../compilation';
+import { SpanAllocator } from '../span';
+import { ITranslatorLazyOptions, Translator } from '../translator';
+import { ExecuteBuilder } from './execute-builder';
+import { InitBuilder } from './init-builder';
 
 export { Builder };
 
@@ -49,6 +51,12 @@ export class Compiler {
       this.options);
 
     const initFn = root.build(compilation);
+
+    const ib = new InitBuilder();
+    ib.build(compilation, initFn);
+
+    const eb = new ExecuteBuilder();
+    eb.build(compilation);
 
     const bitcode = compilation.buildBitcode(initFn);
     const header = compilation.buildHeader();

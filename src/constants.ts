@@ -94,3 +94,9 @@ export const ATTR_SEQUENCE_LEN: AttributeList = [];
 export const FN_ATTR_MATCH_SEQUENCE: AttributeList = [
   'nounwind', 'norecurse', 'alwaysinline',
 ];
+
+// Nodes in general
+
+export const FN_ATTR_ERROR: AttributeList = [
+  'norecurse', 'cold', 'writeonly', 'noinline',
+];
