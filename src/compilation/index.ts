@@ -18,11 +18,12 @@ import IRSignature = irTypes.Signature;
 import IRDeclaration = irValues.constants.Declaration;
 import IRFunc = irValues.constants.Func;
 import IRBasicBlock = irValues.BasicBlock;
+import IRPhi = irValues.instructions.Phi;
 import IRType = irTypes.Type;
 import IRValue = irValues.Value;
 
 export {
-  irTypes, irValues, IRBasicBlock, IRDeclaration, IRFunc, IRSignature,
+  irTypes, irValues, IRBasicBlock, IRDeclaration, IRFunc, IRPhi, IRSignature,
   IRType, IRValue,
 };
 
@@ -92,24 +93,24 @@ export class Compilation {
     this.signature = {
       callback: {
         match: this.ir.signature(constants.TYPE_OUTPUT, [
-          this.state,
+          this.state.ptr(),
           constants.TYPE_POS,
           constants.TYPE_ENDPOS,
         ]),
         span: this.ir.signature(constants.TYPE_OUTPUT, [
-          this.state,
+          this.state.ptr(),
           constants.TYPE_POS,
           constants.TYPE_ENDPOS,
         ]),
         value: this.ir.signature(constants.TYPE_OUTPUT, [
-          this.state,
+          this.state.ptr(),
           constants.TYPE_POS,
           constants.TYPE_ENDPOS,
           constants.TYPE_MATCH,
         ]),
       },
       node: this.ir.signature(constants.TYPE_OUTPUT, [
-        this.state,
+        this.state.ptr(),
         constants.TYPE_POS,
         constants.TYPE_ENDPOS,
         constants.TYPE_MATCH,

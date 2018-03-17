@@ -18,5 +18,8 @@ describe('llparse/Compiler', () => {
     start.otherwise(b.error(1, 'error'));
 
     const result = c.compile(start, b.properties);
+
+    require('fs').writeFileSync('/tmp/1.bc', result.bitcode);
+    require('fs').writeFileSync('/tmp/1.h', result.headers);
   });
 });

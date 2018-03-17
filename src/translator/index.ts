@@ -204,6 +204,7 @@ export class Translator {
         key: child.key,
         noAdvance: child.noAdvance,
         node: childNode,
+        value: child.node instanceof TrieEmpty ? child.node.value : undefined,
       });
     }
     return single;
@@ -293,7 +294,10 @@ export class Translator {
 
     const childNode = this.translateTrie(node, trie.child, children);
 
-    sequence.setOnMatch(childNode);
+    const value = trie.child instanceof TrieEmpty ?
+      trie.child.value : undefined;
+
+    sequence.setEdge(childNode, value);
 
     return sequence;
   }

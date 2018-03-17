@@ -6,16 +6,21 @@ import { IUniqueName } from '../utils';
 import { INodePosition, Node } from './base';
 import { Match } from './match';
 
+export interface ISequenceEdge {
+  readonly node: Node;
+  readonly value: number | undefined;
+}
+
 export class Sequence extends Match {
-  private onMatch: Node | undefined;
+  private edge: ISequenceEdge | undefined;
 
   constructor(id: IUniqueName, private readonly select: Buffer) {
     super(id);
   }
 
-  public setOnMatch(node: Node) {
-    assert.strictEqual(this.onMatch, undefined);
-    this.onMatch = node;
+  public setEdge(node: Node, value: number | undefined) {
+    assert.strictEqual(this.edge, undefined);
+    this.edge = { node, value };
   }
 
   protected doBuild(bb: IRBasicBlock, pos: INodePosition): void {
