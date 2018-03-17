@@ -14,7 +14,7 @@ export class Consume extends Node {
     const ctx = this.compilation;
     const invariantGroup = ctx.invariantGroup;
 
-    // index = state.index
+    // index = state[field]
     const indexPtr = ctx.stateField(bb, this.field);
     const index = bb.load(indexPtr);
     index.metadata.set('invariant.group', invariantGroup);
@@ -43,13 +43,13 @@ export class Consume extends Node {
 
     assert(this.otherwise!.noAdvance);
 
-    // state.index = 0
+    // state[field] = 0
     hasData.store(index.ty.val(0), indexPtr)
       .metadata.set('invariant.group', invariantGroup);
     this.tailTo(hasData, this.otherwise!, { current: next, next });
 
     // Pause!
-    // state.index = need - avail
+    // state[field] = need - avail
     const left = noData.binop('sub', need, avail);
     const leftTrunc = ctx.truncate(noData, left, index.ty);
 
