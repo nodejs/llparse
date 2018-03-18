@@ -1,14 +1,12 @@
-import { builder, Builder, Compiler } from '../src/compiler';
+import { LLParse } from '../src/api';
 
 import { build, printMatch, printOff } from './fixtures';
 
 describe('llparse/Compiler', () => {
-  let c: Compiler;
-  let p: Builder;
+  let p: LLParse;
 
   beforeEach(() => {
-    c = new Compiler();
-    p = c.createBuilder();
+    p = new LLParse();
   });
 
   it('should compile simple parser', async () => {
@@ -32,7 +30,7 @@ describe('llparse/Compiler', () => {
 
     start.otherwise(p.error(3, 'Invalid word'));
 
-    const binary = build(c.compile(start, p.properties), 'simple');
+    const binary = build(p.build(start), 'simple');
     await binary.check('GET', 'off=3 match=1\n');
   });
 });

@@ -29,8 +29,8 @@ export interface ICompilerResult {
 }
 
 export class Compiler {
-  constructor(private readonly prefix: string = 'llparse',
-              private readonly options: ICompilerOptions = {}) {
+  constructor(private readonly prefix: string,
+              private readonly options: ICompilerOptions) {
   }
 
   public compile(apiRoot: apiNode.Node,

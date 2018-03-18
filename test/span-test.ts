@@ -1,14 +1,12 @@
-import { builder, Builder, Compiler } from '../src/compiler';
+import { LLParse } from '../src/api';
 
 import { build, printMatch, printOff } from './fixtures';
 
 describe('llparse/Compiler', () => {
-  let c: Compiler;
-  let p: Builder;
+  let p: LLParse;
 
   beforeEach(() => {
-    c = new Compiler();
-    p = c.createBuilder();
+    p = new LLParse();
   });
 
   it('should invoke span callback', async () => {
@@ -39,7 +37,7 @@ describe('llparse/Compiler', () => {
       .match('_', underscore)
       .otherwise(span.underscore.end(dot));
 
-    const binary = build(c.compile(start, p.properties), 'span');
+    const binary = build(p.build(start), 'span');
     await binary.check('..--..__..',
       'off=2 len=2 span[dash]="--"\n' +
       'off=6 len=2 span[underscore]="__"\n' +

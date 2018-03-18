@@ -1,9 +1,9 @@
 {
-  "name": "llparse-compiler",
+  "name": "llparse",
   "version": "1.0.0",
-  "description": "Compile LLParse graph to bitcode",
-  "main": "lib/compiler/index.js",
-  "types": "lib/compiler/index.d.ts",
+  "description": "Compile parsers to LLVM bitcode",
+  "main": "lib/api.js",
+  "types": "lib/api.d.ts",
   "files": [
     "lib",
     "src"
@@ -18,7 +18,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/indutny/llparse-compiler.git"
+    "url": "git+ssh://git@github.com/indutny/llparse.git"
   },
   "keywords": [
     "llparse",
@@ -28,9 +28,9 @@
   "author": "Fedor Indutny <fedor@indutny.com> (http://darksi.de/)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/indutny/llparse-compiler/issues"
+    "url": "https://github.com/indutny/llparse/issues"
   },
-  "homepage": "https://github.com/indutny/llparse-compiler#readme",
+  "homepage": "https://github.com/indutny/llparse#readme",
   "devDependencies": {
     "@types/mocha": "^2.2.48",
     "@types/node": "^9.4.7",
