@@ -37,7 +37,7 @@ describe('llparse/Compiler', () => {
       .match('_', underscore)
       .otherwise(span.underscore.end(dot));
 
-    const binary = build(p.build(start), 'span');
+    const binary = build(p, start, 'span');
     await binary.check('..--..__..',
       'off=2 len=2 span[dash]="--"\n' +
       'off=6 len=2 span[underscore]="__"\n' +

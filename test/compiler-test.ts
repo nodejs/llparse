@@ -32,7 +32,7 @@ describe('llparse/Compiler', () => {
 
     start.otherwise(p.error(3, 'Invalid word'));
 
-    const binary = build(p.build(start), 'simple');
+    const binary = build(p, start, 'simple');
     await binary.check('GET', 'off=3 match=1\n');
   });
 
@@ -43,7 +43,7 @@ describe('llparse/Compiler', () => {
 
     start.otherwise(p.error(3, 'Invalid word'));
 
-    const binary = build(p.build(start), 'shallow');
+    const binary = build(p, start, 'shallow');
     await binary.check('012', 'off=1 match=0\noff=2 match=1\noff=3 match=2\n');
   });
 
@@ -56,7 +56,7 @@ describe('llparse/Compiler', () => {
 
     start.otherwise(p.error(3, 'Invalid word'));
 
-    const binary = build(p.build(start), 'kv-select');
+    const binary = build(p, start, 'kv-select');
     await binary.check('012', 'off=1 match=0\noff=2 match=1\noff=3 match=2\n');
   });
 
@@ -72,7 +72,7 @@ describe('llparse/Compiler', () => {
 
     start.otherwise(p.error(3, 'Invalid word'));
 
-    const binary = build(p.build(start), 'multi-match');
+    const binary = build(p, start, 'multi-match');
     await binary.check(
       'A B\t\tA\r\nA',
       'off=1 match=0\noff=3 match=1\noff=6 match=0\noff=9 match=0\n');
@@ -90,7 +90,7 @@ describe('llparse/Compiler', () => {
 
     start.otherwise(p.error(3, 'Invalid word'));
 
-    const binary = build(p.build(start), 'multi-match');
+    const binary = build(p, start, 'multi-match');
     await binary.check(
       'A B  A  A',
       'off=1 match=0\noff=3 match=1\noff=6 match=0\noff=9 match=0\n');
@@ -114,7 +114,7 @@ describe('llparse/Compiler', () => {
       }, p.invoke(p.code.store('custom'), second))
       .otherwise(error);
 
-    const binary = build(p.build(start), 'custom-prop');
+    const binary = build(p, start, 'custom-prop');
     await binary.check('0110', 'off=1 0\noff=2 1\noff=3 1\noff=4 0\n');
   });
 
@@ -124,7 +124,7 @@ describe('llparse/Compiler', () => {
     start.match('a', start);
     start.otherwise(p.error(42, 'some reason'));
 
-    const binary = build(p.build(start), 'error');
+    const binary = build(p, start, 'error');
     await binary.check('aab', 'off=2 error code=42 reason="some reason"\n');
   });
 
@@ -139,7 +139,7 @@ describe('llparse/Compiler', () => {
     lf.match('\n', printOff(p, maybeCr));
     lf.otherwise(p.error(2, 'error'));
 
-    const binary = build(p.build(maybeCr), 'no-merge');
+    const binary = build(p, maybeCr, 'no-merge');
     await binary.check('\r\n\n', 'off=2\noff=3\n');
   });
 
@@ -152,7 +152,7 @@ describe('llparse/Compiler', () => {
         .skipTo(printOff(p, start));
 
       // TODO(indutny): validate compilation result?
-      const binary = build(p.build(start), 'match-bit-check');
+      const binary = build(p, start, 'match-bit-check');
       await binary.check('pecan.is.dead.', 'off=6\noff=9\noff=14\n');
     });
 
@@ -170,7 +170,7 @@ describe('llparse/Compiler', () => {
         .otherwise(start);
 
       // TODO(indutny): validate compilation result?
-      const binary = build(p.build(start), 'match-multi-bit-check');
+      const binary = build(p, start, 'match-multi-bit-check');
       await binary.check('pecan.135.is.dead.',
         'off=6\noff=10\noff=13\noff=18\n');
     });
@@ -190,7 +190,7 @@ describe('llparse/Compiler', () => {
         .match([ 'a', 'b' ], printOff(p, start))
         .otherwise(error);
 
-      const binary = build(p.build(start), 'peek');
+      const binary = build(p, start, 'peek');
       await binary.check('ab', 'off=1\noff=2\n');
     });
   });
@@ -208,7 +208,7 @@ describe('llparse/Compiler', () => {
         .match('B', printOff(p, b))
         .skipTo(a);
 
-      const binary = build(p.build(a), 'otherwise-noadvance');
+      const binary = build(p, a, 'otherwise-noadvance');
       await binary.check('AABAB', 'off=3\noff=5\n');
     });
 
@@ -219,7 +219,7 @@ describe('llparse/Compiler', () => {
         .match(' ', printOff(p, start))
         .skipTo(start);
 
-      const binary = build(p.build(start), 'otherwise-skip');
+      const binary = build(p, start, 'otherwise-skip');
       await binary.check('HELLO WORLD', 'off=6\n');
     });
 
@@ -229,7 +229,7 @@ describe('llparse/Compiler', () => {
       start
         .skipTo(start);
 
-      const binary = build(p.build(start), 'all-skip');
+      const binary = build(p, start, 'all-skip');
       await binary.check('HELLO WORLD', '\n');
     });
   });
