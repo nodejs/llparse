@@ -95,7 +95,7 @@ export class MulAdd extends Field {
     }
     store.name = 'store';
 
-    store.store(result, ctx.stateField(bb, this.field));
+    store.store(result, ctx.stateField(store, this.field));
     store.ret(returnTy.val(0));
   }
 

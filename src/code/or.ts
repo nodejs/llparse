@@ -8,8 +8,11 @@ export class Or extends FieldValue {
   }
 
   protected doBuild(ctx: Compilation, bb: IRBasicBlock): void {
-    const value = bb.load(ctx.stateField(bb, this.field));
-    const result = bb.binop('or', value, value.ty.val(this.value));
-    bb.ret(ctx.truncate(bb, result, bb.parent.ty.toSignature().returnType));
+    const ptr = ctx.stateField(bb, this.field);
+    const field = bb.load(ptr);
+    const result = bb.binop('or', field, field.ty.val(this.value));
+    bb.store(result, ptr);
+
+    bb.ret(bb.parent.ty.toSignature().returnType.toInt().val(0));
   }
 }

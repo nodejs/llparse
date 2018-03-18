@@ -41,8 +41,8 @@ export class Translator {
   public readonly spans: ReadonlyArray<Span>;
 
   private readonly options: ITranslatorOptions;
-  private readonly id: Identifier = new Identifier(this.prefix + '_n_');
-  private readonly codeId: Identifier = new Identifier(this.prefix + '_c_');
+  private readonly id: Identifier = new Identifier(this.prefix + '__n_');
+  private readonly codeId: Identifier = new Identifier(this.prefix + '__c_');
   private readonly map: Map<api.Node, compiler.Node> = new Map();
   private readonly spanMap: Map<APISpan, Span> = new Map();
   private readonly codeCache: Map<string, compilerCode.Code> = new Map();

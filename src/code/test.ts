@@ -8,9 +8,9 @@ export class Test extends FieldValue {
   }
 
   protected doBuild(ctx: Compilation, bb: IRBasicBlock): void {
-    const value = bb.load(ctx.stateField(bb, this.field));
-    const masked = bb.binop('and', value, value.ty.toInt().val(this.value));
-    const bool = bb.icmp('eq', masked, value.ty.toInt().val(this.value));
+    const field = bb.load(ctx.stateField(bb, this.field));
+    const masked = bb.binop('and', field, field.ty.toInt().val(this.value));
+    const bool = bb.icmp('eq', masked, field.ty.toInt().val(this.value));
     bb.ret(ctx.truncate(bb, bool, bb.parent.ty.toSignature().returnType));
   }
 }

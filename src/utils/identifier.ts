@@ -15,7 +15,7 @@ export class Identifier {
     if (this.ns.has(target)) {
       let i = 1;
       for (; i < this.ns.size; i++) {
-        if (!this.ns.has(target)) {
+        if (!this.ns.has(target + '_' + i)) {
           break;
         }
       }
