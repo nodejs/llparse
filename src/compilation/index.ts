@@ -9,7 +9,7 @@ import { Buffer } from 'buffer';
 import * as code from '../code';
 import * as constants from '../constants';
 import * as node from '../node';
-import { ISpanAllocatorResult } from '../span';
+import { Span } from '../span';
 import { Identifier } from '../utils';
 
 import irTypes = bitcodeBuilderNS.types;
@@ -81,7 +81,7 @@ export class Compilation {
   constructor(public readonly prefix: string,
               public readonly root: node.Node,
               private readonly properties: ReadonlyArray<ICompilationProperty>,
-              spans: ISpanAllocatorResult,
+              spans: ReadonlyArray<Span>,
               public readonly options: ICompilationOptions) {
     this.ir = this.bitcode.createBuilder();
     this.invariantGroup = this.ir.metadata([
@@ -120,12 +120,12 @@ export class Compilation {
     // Put most used fields first
     this.state.addField(constants.TYPE_INDEX, constants.STATE_INDEX);
 
-    spans.concurrency.forEach((concurrent, index) => {
+    spans.forEach((span) => {
       this.state.addField(constants.TYPE_SPAN_POS,
-        constants.STATE_SPAN_POS + index);
-      if (concurrent.length > 1) {
+        constants.STATE_SPAN_POS + span.index);
+      if (span.callbacks.length > 1) {
         this.state.addField(this.signature.callback.span.ptr(),
-          constants.STATE_SPAN_CB + index);
+          constants.STATE_SPAN_CB + span.index);
       }
     });
 

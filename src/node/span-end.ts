@@ -46,8 +46,9 @@ export class SpanEnd extends Node {
   private buildError(bb: IRBasicBlock, pos: INodePosition, code: IRValue): void {
     const ctx = this.compilation;
 
-    const reason = ctx.cstring(
-      `Span callback error in "${this.callback.name}"`);
+    // NOTE: We could print detailed error here, but it would generate
+    // inconsistent messages (see `execute` in `compiler/`)
+    const reason = ctx.cstring('Span callback error');
     const cast = bb.getelementptr(reason, GEP_OFF.val(0), GEP_OFF.val(0),
       true);
 

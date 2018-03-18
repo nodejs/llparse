@@ -38,6 +38,8 @@ export interface ITranslatorLazyOptions {
 }
 
 export class Translator {
+  public readonly spans: ReadonlyArray<Span>;
+
   private readonly options: ITranslatorOptions;
   private readonly id: Identifier = new Identifier(this.prefix + '_n_');
   private readonly codeId: Identifier = new Identifier(this.prefix + '_c_');
@@ -48,7 +50,7 @@ export class Translator {
 
   constructor(private readonly prefix: string,
               options: ITranslatorLazyOptions,
-              private readonly spans: ISpanAllocatorResult) {
+              spans: ISpanAllocatorResult) {
     this.options = {
       maxTableElemWidth: options.maxTableElemWidth === undefined ?
         DEFAULT_TRANSLATOR_MAX_TABLE_WIDTH : options.maxTableElemWidth,
@@ -59,7 +61,7 @@ export class Translator {
     assert(0 < this.options.maxTableElemWidth,
       'Invalid `maxTableElemWidth`, must be positive');
 
-    spans.concurrency.forEach((concurrent, index) => {
+    this.spans = spans.concurrency.map((concurrent, index) => {
       const span = new Span(index, concurrent.map((apiSpan) => {
         return this.translateCode(apiSpan.callback) as compilerCode.Span;
       }));
@@ -67,6 +69,8 @@ export class Translator {
       for (const apiSpan of concurrent) {
         this.spanMap.set(apiSpan, span);
       }
+
+      return span;
     });
   }
 
