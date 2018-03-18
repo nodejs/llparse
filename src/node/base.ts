@@ -77,7 +77,9 @@ export abstract class Node {
       current: ctx.posArg(fn.body),
       next: fn.body.getelementptr(ctx.posArg(fn.body), GEP_OFF.val(1)),
     };
-    this.doBuild(fn.body, pos);
+    const bb = ctx.debug(fn.body,
+      `Entering node "${this.id.originalName}" ("${this.id.name}")`);
+    this.doBuild(bb, pos);
 
     return fn;
   }
@@ -141,7 +143,7 @@ export abstract class Node {
       return;
     }
 
-    const tailBB = bb.parent.createBlock(bb.name + '.trampoline');
+    const tailBB = bb.parent.createBlock(`${edge.node.id.name}.trampoline`);
     bb.jmp(tailBB);
 
     const phi = tailBB.phi({ fromBlock: bb, value });

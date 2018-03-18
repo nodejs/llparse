@@ -41,6 +41,9 @@ export class SpanEnd extends Node {
 
     // Handle error
     this.buildError(error, pos, call);
+
+    // Otherwise
+    this.tailTo(noError, this.otherwise!, pos);
   }
 
   private buildError(bb: IRBasicBlock, pos: INodePosition, code: IRValue): void {
@@ -53,7 +56,7 @@ export class SpanEnd extends Node {
       true);
 
     const errorField = ctx.errorField(bb);
-    bb.store(ctx.truncate(bb, code, errorField.ty), errorField);
+    bb.store(ctx.truncate(bb, code, errorField.ty.toPointer().to), errorField);
     bb.store(cast, ctx.reasonField(bb));
 
     const otherwise = this.otherwise!;

@@ -100,3 +100,7 @@ export const FN_ATTR_MATCH_SEQUENCE: AttributeList = [
 export const FN_ATTR_ERROR: AttributeList = [
   'norecurse', 'cold', 'writeonly', 'noinline',
 ];
+
+// Debug
+
+export const TYPE_DEBUG_MSG = CSTR;

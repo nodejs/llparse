@@ -77,6 +77,7 @@ export class Compilation {
   private readonly cstringCache: Map<string, IRValue> = new Map();
   private readonly globalId: Identifier = new Identifier('g_');
   private readonly resumptionTargets: Set<IRDeclaration> = new Set();
+  private debugMethod: IRDeclaration | undefined = undefined;
 
   constructor(public readonly prefix: string,
               public readonly root: node.Node,
@@ -185,7 +186,8 @@ export class Compilation {
       } else if (field.ty.isEqual(constants.I64)) {
         ty = 'int32_t';
       } else if (field.name === constants.STATE_CURRENT ||
-                 field.ty.isEqual(constants.PTR)) {
+                 field.ty.isEqual(constants.PTR) ||
+                 field.ty.isEqual(this.signature.callback.span)) {
         ty = 'void*';
       } else {
         throw new Error(
@@ -390,6 +392,37 @@ export class Compilation {
     }
 
     return res;
+  }
+
+  public debug(bb: IRBasicBlock, message: string): IRBasicBlock {
+    if (this.options.debug === undefined) {
+      return bb;
+    }
+
+    // Lazily declare debug method
+    if (this.debugMethod === undefined) {
+      const sig = this.ir.signature(this.ir.void(), [
+        this.state.ptr(),
+        constants.TYPE_POS,
+        constants.TYPE_ENDPOS,
+        constants.TYPE_DEBUG_MSG,
+      ]);
+
+      this.debugMethod = this.declareFunction(sig, this.options.debug);
+    }
+
+    const str = this.cstring(message);
+    const GEP_OFF = constants.GEP_OFF;
+    const cast = bb.getelementptr(str, GEP_OFF.val(0), GEP_OFF.val(0), true);
+
+    bb.call(this.debugMethod!, [
+      this.stateArg(bb),
+      this.posArg(bb),
+      this.endPosArg(bb),
+      cast,
+    ]);
+
+    return bb;
   }
 
   // Internals

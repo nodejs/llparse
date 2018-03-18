@@ -7,7 +7,7 @@ describe('llparse/Compiler', () => {
   let p: Builder;
 
   beforeEach(() => {
-    c = new Compiler('llparse', {});
+    c = new Compiler();
     p = c.createBuilder();
   });
 

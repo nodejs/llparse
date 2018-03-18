@@ -48,8 +48,7 @@ export class ExecuteBuilder {
     const bitcast = success.cast('bitcast', call, current.ty);
     success.store(bitcast, ctx.currentField(success));
 
-    // TODO(indutny): execute unfinished spans
-    success.ret(TYPE_ERROR.val(0));
+    this.executeSpans(ctx, spans, success).ret(TYPE_ERROR.val(0));
 
     error.name = 'error';
 
