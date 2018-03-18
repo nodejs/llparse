@@ -33,6 +33,8 @@ export class TableLookup extends Match {
   }
 
   protected doBuild(bb: IRBasicBlock, pos: INodePosition): void {
+    bb = this.prologue(bb, pos);
+
     const table = this.buildTable();
     const ctx = this.compilation;
 

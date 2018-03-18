@@ -1,0 +1,6 @@
+http
+*.bc
+*.ll
+*.h
+*.o
+*.dSYM

@@ -13,7 +13,7 @@
     "clean": "rm -rf lib",
     "prepare": "npm run clean && npm run build",
     "lint": "tslint -c tslint.json src/*.ts src/**/*.ts src/**/**/*.ts test/*.ts test/**/*.ts",
-    "mocha": "mocha -r ts-node/register/type-check --reporter spec test/*-test.ts",
+    "mocha": "mocha --timeout=10000 -r ts-node/register/type-check --reporter spec test/*-test.ts",
     "test": "npm run mocha && npm run lint"
   },
   "repository": {
@@ -42,6 +42,6 @@
   },
   "dependencies": {
     "bitcode": "^1.1.4",
-    "llparse-builder": "^1.0.0-beta9"
+    "llparse-builder": "^1.0.0-beta10"
   }
 }

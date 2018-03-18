@@ -1,8 +1,66 @@
-# llparse-compiler
-[![Build Status](https://secure.travis-ci.org/indutny/llparse-compiler.svg)](http://travis-ci.org/indutny/llparse-compiler)
-[![NPM version](https://badge.fury.io/js/llparse-compiler.svg)](https://badge.fury.io/js/llparse-compiler)
+# llparse
+[![Build Status](https://secure.travis-ci.org/indutny/llparse.svg)](http://travis-ci.org/indutny/llparse)
+[![NPM version](https://badge.fury.io/js/llparse.svg)](https://badge.fury.io/js/llparse)
 
-See [llparse][0].
+An API for compiling an incremental parser into [LLVM bitcode][3].
+
+**NOTE: The resulting bitcode works only on a trunk version of `clang` now,
+other versions are broken. The required fixes will be released in
+`clang` 6.0.1**
+
+## Usage
+
+```js
+'use strict';
+
+const p = require('llparse').create('http_parser');
+
+const method = p.node('method');
+const beforeUrl = p.node('before_url');
+const urlSpan = p.span(p.code.span('on_url'));
+const url = p.node('url');
+const http = p.node('http');
+
+// Add custom uint8_t property to the state
+p.property('i8', 'method');
+
+// Store method inside a custom property
+const onMethod = p.invoke(p.code.store('method'), beforeUrl);
+
+// Invoke custom C function
+const complete = p.invoke(p.code.match('on_complete'), {
+  // Restart
+  0: method
+}, p.error(4, '`on_complete` error'));
+
+method
+  .select({
+    'HEAD': 0, 'GET': 1, 'POST': 2, 'PUT': 3,
+    'DELETE': 4, 'OPTIONS': 5, 'CONNECT': 6,
+    'TRACE': 7, 'PATCH': 8
+  }, onMethod)
+  .otherwise(p.error(5, 'Expected method'));
+
+beforeUrl
+  .match(' ', beforeUrl)
+  .otherwise(urlSpan.start(url));
+
+url
+  .peek(' ', urlSpan.end(http))
+  .skipTo(url);
+
+http
+  .match(' HTTP/1.1\r\n\r\n', complete)
+  .otherwise(p.error(6, 'Expected HTTP/1.1 and two newlines'));
+
+const artifacts = p.build(method);
+console.log('----- BITCODE -----');
+console.log(artifacts.bitcode);  // buffer
+console.log('----- BITCODE END -----');
+console.log('----- HEADER -----');
+console.log(artifacts.header);
+console.log('----- HEADER END -----');
+```
 
 #### LICENSE
 
@@ -29,4 +87,7 @@ DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-[0]: https://github.com/indutny/llparse
+[0]: https://reviews.llvm.org/D43729
+[1]: https://reviews.llvm.org/D43708
+[2]: https://reviews.llvm.org/D43695
+[3]: https://llvm.org/docs/LangRef.html
