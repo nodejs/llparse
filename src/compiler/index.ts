@@ -52,6 +52,7 @@ export class Compiler {
       this.options);
 
     const initFn = root.build(compilation);
+    compilation.addResumptionTarget(initFn);
 
     const ib = new InitBuilder();
     ib.build(compilation, initFn);

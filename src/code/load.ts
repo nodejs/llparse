@@ -7,6 +7,7 @@ export class Load extends Field {
   }
 
   protected doBuild(ctx: Compilation, bb: IRBasicBlock): void {
-    // TODO(indutny): implement me
+    const result = bb.load(ctx.stateField(bb, this.field));
+    bb.ret(ctx.truncate(bb, result, bb.parent.ty.toSignature().returnType));
   }
 }

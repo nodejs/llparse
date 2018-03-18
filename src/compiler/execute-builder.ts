@@ -33,9 +33,7 @@ export class ExecuteBuilder {
     const callees = ctx.getResumptionTargets().map((target) => {
       return ctx.ir.metadata(target);
     });
-    if (callees.length !== 0) {
-      call.metadata.set('callees', ctx.ir.metadata(callees));
-    }
+    call.metadata.set('callees', ctx.ir.metadata(callees));
 
     const cmp = bb.icmp('ne', call, call.ty.toPointer().val(null));
     const { onTrue: success, onFalse: error } = ctx.branch(bb, cmp, {

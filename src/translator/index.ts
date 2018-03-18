@@ -320,7 +320,11 @@ export class Translator {
     } else if (code instanceof apiCode.Load) {
       res = new compilerCode.Load(prefixed, code.field);
     } else if (code instanceof apiCode.MulAdd) {
-      res = new compilerCode.MulAdd(prefixed, code.field, code.options);
+      res = new compilerCode.MulAdd(prefixed, code.field, {
+        base: code.options.base,
+        max: code.options.max,
+        signed: code.options.signed === undefined ? true : code.options.signed,
+      });
     } else if (code instanceof apiCode.Or) {
       res = new compilerCode.Or(prefixed, code.field, code.value);
     } else if (code instanceof apiCode.Store) {

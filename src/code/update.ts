@@ -8,6 +8,8 @@ export class Update extends FieldValue {
   }
 
   protected doBuild(ctx: Compilation, bb: IRBasicBlock): void {
-    // TODO(indutny): implement me
+    const ptr = ctx.stateField(bb, this.field);
+    bb.store(ptr.ty.toPointer().to.toInt().val(this.value), ptr);
+    bb.ret(bb.parent.ty.toSignature().returnType.toInt().val(0));
   }
 }
