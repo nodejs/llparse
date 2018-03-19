@@ -1,4 +1,4 @@
-import { Builder, node, Span, code } from 'llparse-builder';
+import { Builder, code, node, Span } from 'llparse-builder';
 import * as builder from 'llparse-builder';
 
 import { Compiler, ICompilerOptions, ICompilerResult } from './compiler';
