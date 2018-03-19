@@ -10,10 +10,10 @@ other versions are broken. The required fixes will be released in
 
 ## Usage
 
-```js
-'use strict';
+```ts
+import { LLParse } from 'llparse';
 
-const p = require('llparse').create('http_parser');
+const p = new LLParse('http_parser');
 
 const method = p.node('method');
 const beforeUrl = p.node('before_url');
