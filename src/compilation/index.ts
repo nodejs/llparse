@@ -184,7 +184,7 @@ export class Compilation {
       } else if (field.ty.isEqual(constants.I32)) {
         ty = 'int32_t';
       } else if (field.ty.isEqual(constants.I64)) {
-        ty = 'int32_t';
+        ty = 'int64_t';
       } else if (field.name === constants.STATE_CURRENT ||
                  field.ty.isEqual(constants.PTR) ||
                  field.ty.isEqual(this.signature.callback.span)) {
