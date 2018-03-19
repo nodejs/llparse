@@ -2,6 +2,8 @@ import { Builder, node } from 'llparse-builder';
 
 import { Compiler, ICompilerOptions, ICompilerResult } from './compiler';
 
+export { node };
+
 export class LLParse extends Builder {
   constructor(private readonly prefix: string = 'llparse') {
     super();
