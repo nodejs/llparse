@@ -166,6 +166,9 @@ export class Compilation {
 
     res += `#ifndef ${DEFINE}\n`;
     res += `#define ${DEFINE}\n`;
+    res += '#ifdef __cplusplus\n';
+    res += 'extern "C" {\n';
+    res += '#endif\n';
     res += '\n';
 
     res += '#include <stdint.h>\n';
@@ -206,6 +209,9 @@ export class Compilation {
       'const char* p, const char* endp);\n';
 
     res += '\n';
+    res += '#ifdef __cplusplus\n';
+    res += '}  /* extern "C" */\n';
+    res += '#endif\n';
     res += `#endif  /* ${DEFINE} */\n`;
 
     return res;
