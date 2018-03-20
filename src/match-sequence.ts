@@ -4,6 +4,7 @@ import {
 import {
   ARG_ENDPOS, ARG_POS, ARG_SEQUENCE, ARG_SEQUENCE_LEN, ARG_STATE,
   ATTR_ENDPOS, ATTR_POS, ATTR_SEQUENCE, ATTR_SEQUENCE_LEN, ATTR_STATE,
+  BOOL,
   CCONV,
   FN_ATTR_MATCH_SEQUENCE,
   GEP_OFF,
@@ -101,7 +102,15 @@ export class MatchSequence {
     this.ret(iteration.complete, iteration.pos.current, SEQUENCE_COMPLETE);
 
     // We have more data!
-    iteration.loop.jmp(loop);
+    iteration.loop.jmp(loop).metadata.set('llvm.loop', ctx.ir.metadata([
+      ctx.ir.metadata([
+        ctx.ir.metadata('llvm.loop.vectorize.enable'),
+        ctx.ir.metadata(BOOL.val(1)),
+      ]),
+      ctx.ir.metadata([
+        ctx.ir.metadata('llvm.loop.unroll.enable'),
+      ]),
+    ]).addSelfReference().markDistinct());
     indexPhi.addEdge({ fromBlock: iteration.loop, value: iteration.index });
     posPhi.addEdge({ fromBlock: iteration.loop, value: iteration.pos.next });
 
