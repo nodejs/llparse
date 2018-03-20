@@ -103,13 +103,6 @@ export class MatchSequence {
 
     // We have more data!
     iteration.loop.jmp(loop).metadata.set('llvm.loop', ctx.ir.metadata([
-      ctx.ir.metadata([
-        ctx.ir.metadata('llvm.loop.vectorize.enable'),
-        ctx.ir.metadata(BOOL.val(1)),
-      ]),
-      ctx.ir.metadata([
-        ctx.ir.metadata('llvm.loop.unroll.enable'),
-      ]),
     ]).addSelfReference().markDistinct());
     indexPhi.addEdge({ fromBlock: iteration.loop, value: iteration.index });
     posPhi.addEdge({ fromBlock: iteration.loop, value: iteration.pos.next });
