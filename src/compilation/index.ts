@@ -29,6 +29,7 @@ export {
 
 export interface ICompilationOptions {
   readonly debug?: string;
+  readonly headerGuard?: string;
 }
 
 export interface ICompilationProperty {
@@ -160,7 +161,8 @@ export class Compilation {
   public buildHeader(): string {
     let res = '';
     const PREFIX = this.prefix.toUpperCase().replace(/[^a-z]/gi, '_');
-    const DEFINE = `INCLUDE_${PREFIX}_H_`;
+    const DEFINE = this.options.headerGuard === undefined ?
+      `INCLUDE_${PREFIX}_H_` : this.options.headerGuard;
 
     res += `#ifndef ${DEFINE}\n`;
     res += `#define ${DEFINE}\n`;

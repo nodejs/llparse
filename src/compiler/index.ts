@@ -21,6 +21,9 @@ export interface ICompilerOptions {
 
   // Translator options, if present
   readonly translator?: ITranslatorLazyOptions;
+
+  // What guard define to use in `#ifndef` in C headers
+  readonly headerGuard?: string;
 }
 
 export interface ICompilerResult {
