@@ -47,6 +47,11 @@ export class TableLookup extends Match {
     const cell = bb.load(
       bb.getelementptr(table.global, GEP_OFF.val(0), current, true));
 
+    cell.metadata.set('range', ctx.ir.metadata([
+      ctx.ir.metadata(cell.ty.toInt().val(0)),
+      ctx.ir.metadata(cell.ty.toInt().val(table.nodeToIndex.size + 1)),
+    ]));
+
     const nodes = Array.from(table.nodeToIndex.keys());
     const keys = Array.from(table.nodeToIndex.values());
 
