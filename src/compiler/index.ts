@@ -33,7 +33,7 @@ export interface ICompilerOptions {
   /** Translator options */
   readonly translator?: ITranslatorLazyOptions;
 
-  /** What guard define to use in `#ifndef` in C headers **/
+  /** What guard define to use in `#ifndef` in C headers */
   readonly headerGuard?: string;
 }
 
