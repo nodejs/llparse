@@ -1,4 +1,5 @@
 import { IRBasicBlock } from '../compilation';
+import { IUniqueName } from '../utils';
 import { INodePosition } from './base';
 import { Error as ErrorNode } from './error';
 
