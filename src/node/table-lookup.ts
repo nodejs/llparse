@@ -44,6 +44,9 @@ export class TableLookup extends Match {
     // Transform the character
     current = this.transform!.build(ctx, bb, current);
 
+    // Extend character to prevent signed problems
+    current = ctx.truncate(bb, current, GEP_OFF);
+
     const cell = bb.load(
       bb.getelementptr(table.global, GEP_OFF.val(0), current, true));
 

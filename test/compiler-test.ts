@@ -174,6 +174,19 @@ describe('llparse/Compiler', () => {
       await binary.check('pecan.135.is.dead.',
         'off=6\noff=10\noff=13\noff=18\n');
     });
+
+    it('should not overflow on signed char in table-lookup node', async () => {
+      const start = p.node('start');
+
+      start
+        .match(ALPHA, start)
+        .match([ 0xc3, 0xbc ], start)
+        .skipTo(printOff(p, start));
+
+      // TODO(indutny): validate compilation result?
+      const binary = build(p, start, 'match-bit-check');
+      await binary.check('Düsseldorf.', 'off=12\n');
+    });
   });
 
   describe('`.peek()`', () => {
