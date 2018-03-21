@@ -58,7 +58,10 @@ export class ExecuteBuilder {
                               bb: IRBasicBlock): IRBasicBlock {
     const code = bb.load(ctx.errorField(bb));
     const cmp = bb.icmp('eq', code, code.ty.toInt().val(0));
-    const { onTrue: noError, onFalse: error } = ctx.branch(bb, cmp);
+    const { onTrue: noError, onFalse: error } = ctx.branch(bb, cmp, {
+      onFalse: 'unlikely',
+      onTrue: 'likely',
+    });
 
     error.name = 'error';
     error.ret(code);
