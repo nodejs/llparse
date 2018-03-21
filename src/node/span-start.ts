@@ -11,6 +11,9 @@ export class SpanStart extends Node {
   }
 
   protected doBuild(bb: IRBasicBlock, pos: INodePosition): void {
+    // Prevent spurious empty spans
+    bb = this.prologue(bb, pos);
+
     const ctx = this.compilation;
     const span = this.span;
 

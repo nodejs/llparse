@@ -97,4 +97,21 @@ describe('llparse/spans', () => {
       '....a',
       /off=\d+ error code=1 reason="Span callback error"\n/);
   });
+
+  it('should not invoke spurious span callback', async () => {
+    const start = p.node('start');
+    const dot = p.node('dot');
+    const span = p.span(p.code.span('llparse__on_dot'));
+
+    start
+      .match('hello', span.start(dot))
+      .skipTo(start);
+
+    dot
+      .match('.', dot)
+      .skipTo(span.end(start));
+
+    const binary = build(p, start, 'span-spurious');
+    await binary.check('hello', [ '' ]);
+  });
 });
