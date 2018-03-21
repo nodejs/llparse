@@ -20,7 +20,8 @@ export class ExecuteBuilder {
 
     fn.linkage = 'external';
 
-    const bb = this.restartSpans(ctx, spans, fn.body);
+    const noLinger = this.checkLingeringError(ctx, fn.body);
+    const bb = this.restartSpans(ctx, spans, noLinger);
 
     const current = bb.load(ctx.currentField(bb));
     const call = bb.call(current, [
@@ -51,6 +52,19 @@ export class ExecuteBuilder {
     error.name = 'error';
 
     error.ret(error.load(ctx.errorField(error)));
+  }
+
+  private checkLingeringError(ctx: Compilation,
+                              bb: IRBasicBlock): IRBasicBlock {
+    const code = bb.load(ctx.errorField(bb));
+    const cmp = bb.icmp('eq', code, code.ty.toInt().val(0));
+    const { onTrue: noError, onFalse: error } = ctx.branch(bb, cmp);
+
+    error.name = 'error';
+    error.ret(code);
+
+    noError.name = 'no_error';
+    return noError;
   }
 
   private restartSpans(ctx: Compilation, spans: ReadonlyArray<Span>,
