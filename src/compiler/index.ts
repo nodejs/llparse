@@ -16,18 +16,33 @@ import { InitBuilder } from './init-builder';
 export { builder, Builder };
 
 export interface ICompilerOptions {
-  // Debug method name, if present
+   /**
+    * Debug method name
+    *
+    * The method must have following signature:
+    *
+    * ```c
+    * void debug(llparse_t* state, const char* p, const char* endp,
+    *            const char* msg);
+    * ```
+    *
+    * Where `llparse_t` is a parser state type.
+    */
   readonly debug?: string;
 
-  // Translator options, if present
+  /** Translator options */
   readonly translator?: ITranslatorLazyOptions;
 
-  // What guard define to use in `#ifndef` in C headers
+  /** What guard define to use in `#ifndef` in C headers **/
   readonly headerGuard?: string;
 }
 
+/** Build artifacts */
 export interface ICompilerResult {
+  /** Bitcode output */
   readonly bitcode: Buffer;
+
+  /** C header */
   readonly header: string;
 }
 
