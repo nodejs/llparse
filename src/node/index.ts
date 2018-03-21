@@ -5,6 +5,7 @@ export { Error } from './error';
 export { Invoke } from './invoke';
 export { Match } from './match';
 export { Pause } from './pause';
+export { Resume } from './resume';
 export { Sequence } from './sequence';
 export { ISingleEdge, Single } from './single';
 export { SpanEnd } from './span-end';

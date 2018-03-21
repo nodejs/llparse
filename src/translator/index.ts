@@ -21,6 +21,11 @@ import { Trie, TrieEmpty, TrieNode, TrieSequence, TrieSingle } from './trie';
 
 type IMatchResult = compiler.Node | ReadonlyArray<compiler.Match>;
 
+interface IPauseResult {
+  readonly pause: compiler.Node;
+  readonly resume: compiler.Node;
+}
+
 interface ITableLookupTarget {
   readonly keys: number[];
   readonly noAdvance: boolean;
@@ -79,7 +84,7 @@ export class Translator {
       return this.map.get(node)!;
     }
 
-    let result: compiler.Node | ReadonlyArray<compiler.Match>;
+    let result: compiler.Node | ReadonlyArray<compiler.Match> | IPauseResult;
 
     const id = (): IUniqueName => this.id.id(node.name);
 
@@ -87,7 +92,7 @@ export class Translator {
     if (node instanceof api.Error) {
       result = new compiler.Error(id(), node.code, node.reason);
     } else if (node instanceof api.Pause) {
-      result = new compiler.Pause(id(), node.code, node.reason);
+      result = this.translatePause(node);
     } else if (node instanceof api.Consume) {
       result = new compiler.Consume(id(), node.field);
     } else if (node instanceof api.SpanStart) {
@@ -154,7 +159,21 @@ export class Translator {
 
       return result;
     } else {
-      throw new Error('Unreachable');
+      assert(node instanceof api.Pause);
+
+      const { pause, resume } = result as IPauseResult;
+      this.map.set(node, pause);
+
+      if (otherwise !== undefined) {
+        resume.setOtherwise(this.translate(otherwise.node),
+          otherwise.noAdvance);
+      } else {
+        // TODO(indutny): move this to llparse-builder?
+        assert(node instanceof api.Error,
+          `Node "${node.name}" has no \`.otherwise()\``);
+      }
+
+      return pause;
     }
   }
 
@@ -352,6 +371,17 @@ export class Translator {
 
     this.codeCache.set(res.cacheKey, res);
     return res;
+  }
+
+  private translatePause(node: api.Pause): IPauseResult {
+    const pause = new compiler.Pause(this.id.id(node.name), node.code,
+      node.reason);
+    const resume = new compiler.Resume(this.id.id(node.name + '_resume'),
+      node.code);
+
+    pause.setOtherwise(resume, true);
+
+    return { pause, resume };
   }
 
   private translateTransform(transform?: apiTransform.Transform)
