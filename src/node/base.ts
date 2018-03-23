@@ -1,3 +1,5 @@
+import * as debugAPI from 'debug';
+
 import {
   Compilation, IRBasicBlock, IRDeclaration, IRPhi, IRValue,
 } from '../compilation';
@@ -11,6 +13,8 @@ import {
 } from '../constants';
 import * as compilerNode from '../node';
 import { IUniqueName } from '../utils';
+
+const debug = debugAPI('llparse:node');
 
 export interface INodeEdge {
   readonly node: Node;
@@ -55,6 +59,8 @@ export abstract class Node {
     if (this.cachedDecl !== undefined) {
       return this.cachedDecl;
     }
+
+    debug('building "%s"', this.id.originalName);
 
     this.privCompilation = ctx;
     const fn = ctx.defineFunction(ctx.signature.node, this.id.name, [
@@ -111,6 +117,7 @@ export abstract class Node {
     const ctx = this.compilation;
     const fn = bb.parent;
 
+    debug('pause in "%s"', this.id.originalName);
     const self = bb.cast('bitcast', fn, fn.ty.toSignature().returnType);
     bb.ret(self);
 
@@ -125,12 +132,19 @@ export abstract class Node {
 
     // Skip `noAdvance = true` Empty nodes
     let edgeTo: Node = edge.node;
+    debug('"%s" tails to "%s"', this.id.originalName, edgeTo.id.originalName);
+
     while (edgeTo instanceof compilerNode.Empty) {
       if (!edgeTo.otherwise!.noAdvance) {
         break;
       }
 
       edgeTo = edgeTo.otherwise!.node;
+    }
+
+    if (edge.node !== edgeTo) {
+      debug('Optimized tail from "%s" to "%s"', this.id.originalName,
+        edgeTo.id.originalName);
     }
 
     const value = edge.value === undefined ? matchTy.undef() :

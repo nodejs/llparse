@@ -41,7 +41,9 @@
     "typescript": "^2.7.2"
   },
   "dependencies": {
+    "@types/debug": "0.0.30",
     "bitcode": "^1.2.0",
+    "debug": "^3.1.0",
     "llparse-builder": "^1.0.2"
   }
 }

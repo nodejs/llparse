@@ -1,5 +1,6 @@
 import * as assert from 'assert';
 import { Buffer } from 'buffer';
+import * as debugAPI from 'debug';
 import {
   code as apiCode,
   node as api,
@@ -18,6 +19,8 @@ import { ISpanAllocatorResult, Span } from '../span';
 import * as compilerTransform from '../transform';
 import { Identifier, IUniqueName } from '../utils';
 import { Trie, TrieEmpty, TrieNode, TrieSequence, TrieSingle } from './trie';
+
+const debug = debugAPI('llparse:translator');
 
 type IMatchResult = compiler.Node | ReadonlyArray<compiler.Match>;
 
@@ -220,6 +223,8 @@ export class Translator {
                            children: compiler.Match[])
     : compiler.Match | undefined {
     if (trie.children.length < this.options.minTableSize) {
+      debug('not enough children of "%s" to allocate table, got %d need %d',
+        node.name, trie.children.length, this.options.minTableSize);
       return undefined;
     }
 
@@ -227,6 +232,8 @@ export class Translator {
 
     const bailout = !trie.children.every((child) => {
       if (!(child.node instanceof TrieEmpty)) {
+        debug('non-leaf trie child of "%s" prevents table allocation',
+          node.name);
         return false;
       }
 
@@ -234,6 +241,8 @@ export class Translator {
 
       // We can't pass values from the table yet
       if (empty.value !== undefined) {
+        debug('value passing trie leaf of "%s" prevents table allocation',
+          node.name);
         return false;
       }
 
@@ -251,6 +260,10 @@ export class Translator {
 
       // TODO(indutny): just use it as a sub-key?
       if (existing.noAdvance !== child.noAdvance) {
+        debug(
+          'noAdvance mismatch in a trie leaf of "%s" prevents ' +
+            'table allocation',
+          node.name);
         return false;
       }
 
@@ -264,6 +277,8 @@ export class Translator {
 
     // We've width limit for this optimization
     if (targets.size >= (1 << this.options.maxTableElemWidth)) {
+      debug('too many different trie targets of "%s" for a table allocation',
+        node.name);
       return undefined;
     }
 
@@ -285,6 +300,7 @@ export class Translator {
       });
     });
 
+    debug('optimized "%s" to a table lookup node', node.name);
     return table;
   }
 
