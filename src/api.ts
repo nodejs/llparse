@@ -3,7 +3,7 @@ import * as builder from 'llparse-builder';
 
 import { Compiler, ICompilerOptions, ICompilerResult } from './compiler';
 
-export { builder, code, node, Span };
+export { builder, code, node, ICompilerOptions, ICompilerResult, Span };
 
 /**
  * LLParse graph builder and compiler.
