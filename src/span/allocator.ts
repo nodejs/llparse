@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { node as api, Span } from 'llparse-builder';
+import { node as api, Reachability, Span } from 'llparse-builder';
 
 type SpanSet = Set<Span>;
 
@@ -22,32 +22,11 @@ function id(node: api.SpanStart | api.SpanEnd): Span {
 
 export class SpanAllocator {
   public allocate(root: api.Node): ISpanAllocatorResult {
-    const nodes = this.getNodes(root);
+    const r = new Reachability();
+    const nodes = r.build(root);
     const info = this.computeActive(nodes);
     const overlap = this.computeOverlap(info);
     return this.color(info.spans, overlap);
-  }
-
-  private getNodes(root: api.Node): ReadonlyArray<api.Node> {
-    const res = new Set();
-    const queue = [ root ];
-    while (queue.length !== 0) {
-      const node = queue.pop()!;
-      if (res.has(node)) {
-        continue;
-      }
-      res.add(node);
-
-      for (const edge of node) {
-        queue.push(edge.node);
-      }
-
-      const otherwise = node.getOtherwiseEdge();
-      if (otherwise !== undefined) {
-        queue.push(otherwise.node);
-      }
-    }
-    return Array.from(res);
   }
 
   private computeActive(nodes: ReadonlyArray<api.Node>): ISpanActiveInfo {
