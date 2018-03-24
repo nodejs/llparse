@@ -64,6 +64,22 @@ describe('llparse/spans', () => {
     assert.throws(() => p.build(start), /unmatched.*on_data/i);
   });
 
+  it('should throw on branched unmatched ends', () => {
+    const start = p.node('start');
+    const end = p.node('end');
+    const span = p.span(p.code.span('llparse__on_data'));
+
+    start
+      .match('a', end)
+      .match('b', span.start(end))
+      .otherwise(p.error(1, 'error'));
+
+    end
+      .otherwise(span.end(start));
+
+    assert.throws(() => p.build(start), /unmatched.*on_data/i);
+  });
+
   it('should propagate through the Invoke map', () => {
     const start = p.node('start');
     const span = p.span(p.code.span('llparse__on_data'));

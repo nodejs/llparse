@@ -1,5 +1,8 @@
 import * as assert from 'assert';
+import * as debugAPI from 'debug';
 import { node as api, Reachability, Span } from 'llparse-builder';
+
+const debug = debugAPI('llparse:span:allocator');
 
 type SpanSet = Set<Span>;
 
@@ -25,6 +28,7 @@ export class SpanAllocator {
     const r = new Reachability();
     const nodes = r.build(root);
     const info = this.computeActive(nodes);
+    this.check(info);
     const overlap = this.computeOverlap(info);
     return this.color(info.spans, overlap);
   }
@@ -52,13 +56,7 @@ export class SpanAllocator {
           return;
         }
 
-        const edges = Array.from(node);
-        const otherwise = node.getOtherwiseEdge();
-        if (otherwise !== undefined) {
-          edges.push(otherwise);
-        }
-
-        edges.forEach((edge) => {
+        node.getAllEdges().forEach((edge) => {
           const edgeNode = edge.node;
 
           // Disallow loops
@@ -78,17 +76,37 @@ export class SpanAllocator {
       });
     }
 
-    const ends: api.SpanEnd[] = nodes
-      .filter((node) => node instanceof api.SpanEnd)
-      .map((node) => node as api.SpanEnd);
-
-    ends.forEach((end) => {
-      const active = activeMap.get(end)!;
-      assert(active.has(id(end)),
-        `Unmatched span end for "${id(end).callback.name}"`);
-    });
-
     return { active: activeMap, spans: Array.from(spans) };
+  }
+
+  private check(info: ISpanActiveInfo): void {
+    debug('check start');
+    for (const [ node, spans ] of info.active) {
+      for (const edge of node.getAllEdges()) {
+        if (edge.node instanceof api.SpanStart) {
+          continue;
+        }
+
+        // Skip terminal nodes
+        if (edge.node.getAllEdges().length === 0) {
+          continue;
+        }
+
+        debug('checking edge from %j to %j', node.name, edge.node.name);
+
+        const edgeSpans = info.active.get(edge.node)!;
+        for (const subSpan of edgeSpans) {
+          assert(spans.has(subSpan),
+            `Unmatched span end for "${subSpan.callback.name}"`);
+        }
+
+        if (edge.node instanceof api.SpanEnd) {
+          const span = id(edge.node);
+          assert(spans.has(span),
+            `Unmatched span end for "${span.callback.name}"`);
+        }
+      }
+    }
   }
 
   private computeOverlap(info: ISpanActiveInfo): SpanOverlap {
