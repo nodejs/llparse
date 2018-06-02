@@ -5,11 +5,11 @@ import {
   LoopChecker,
   node as apiNode,
   Property as APIProperty,
+  SpanAllocator,
 } from 'llparse-builder';
 import * as builder from 'llparse-builder';
 
 import { Compilation } from '../compilation';
-import { SpanAllocator } from '../span';
 import { ITranslatorLazyOptions, Translator } from '../translator';
 import { ExecuteBuilder } from './execute-builder';
 import { InitBuilder } from './init-builder';

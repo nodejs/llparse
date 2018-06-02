@@ -46,53 +46,6 @@ describe('llparse/spans', () => {
       'off=0 len=10 span[dot]="..--..__.."\n');
   });
 
-  it('should throw on loops', () => {
-    const start = p.node('start');
-    const span = p.span(p.code.span('llparse__on_data'));
-
-    start.otherwise(span.start().skipTo(start));
-
-    assert.throws(() => p.build(start), /loop.*on_data/);
-  });
-
-  it('should throw on unmatched ends', () => {
-    const start = p.node('start');
-    const span = p.span(p.code.span('llparse__on_data'));
-
-    start.otherwise(span.end().skipTo(start));
-
-    assert.throws(() => p.build(start), /unmatched.*on_data/i);
-  });
-
-  it('should throw on branched unmatched ends', () => {
-    const start = p.node('start');
-    const end = p.node('end');
-    const span = p.span(p.code.span('llparse__on_data'));
-
-    start
-      .match('a', end)
-      .match('b', span.start(end))
-      .otherwise(p.error(1, 'error'));
-
-    end
-      .otherwise(span.end(start));
-
-    assert.throws(() => p.build(start), /unmatched.*on_data/i);
-  });
-
-  it('should propagate through the Invoke map', () => {
-    const start = p.node('start');
-    const span = p.span(p.code.span('llparse__on_data'));
-
-    p.property('i8', 'custom');
-
-    start.otherwise(p.invoke(p.code.load('custom'), {
-      0: span.end().skipTo(start),
-    }, span.end().skipTo(start)));
-
-    assert.doesNotThrow(() => p.build(span.start(start)));
-  });
-
   it('should return error', async () => {
     const start = p.node('start');
     const dot = p.node('dot');

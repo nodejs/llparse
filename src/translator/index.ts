@@ -3,6 +3,7 @@ import { Buffer } from 'buffer';
 import * as debugAPI from 'debug';
 import {
   code as apiCode,
+  ISpanAllocatorResult,
   node as api,
   Span as APISpan,
   transform as apiTransform,
@@ -15,7 +16,7 @@ import {
 } from '../constants';
 import { MatchSequence } from '../match-sequence';
 import * as compiler from '../node';
-import { ISpanAllocatorResult, Span } from '../span';
+import { Span } from '../span';
 import * as compilerTransform from '../transform';
 import { Identifier, IUniqueName } from '../utils';
 import { Trie, TrieEmpty, TrieNode, TrieSequence, TrieSingle } from './trie';
