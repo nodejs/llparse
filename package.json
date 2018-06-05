@@ -12,7 +12,8 @@
     "build": "tsc",
     "clean": "rm -rf lib",
     "prepare": "npm run clean && npm run build",
-    "lint": "tslint -c tslint.json src/*.ts src/**/*.ts src/**/**/*.ts test/*.ts test/**/*.ts",
+    "lint": "tslint -c tslint.json src/**/*.ts test/**/*.ts",
+    "fix-lint": "npm run lint -- --fix",
     "mocha": "mocha --timeout=10000 -r ts-node/register/type-check --reporter spec test/*-test.ts",
     "test": "npm run mocha && npm run lint"
   },
