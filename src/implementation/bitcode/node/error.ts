@@ -1,23 +1,19 @@
+import * as frontend from 'llparse-frontend';
+
 import { IRBasicBlock } from '../compilation';
 import { FN_ATTR_ERROR, GEP_OFF } from '../constants';
-import { IUniqueName } from '../utils';
 import { INodePosition, Node } from './base';
 
-class ErrorNode extends Node {
-  constructor(id: IUniqueName, private readonly code: number,
-              private readonly reason: string) {
-    super(id);
-  }
-
+class ErrorNode extends Node<frontend.node.Error> {
   protected storeError(bb: IRBasicBlock, pos: INodePosition): IRBasicBlock {
     const ctx = this.compilation;
-    const reason = ctx.cstring(this.reason);
+    const reason = ctx.cstring(this.ref.reason);
 
     const cast = bb.getelementptr(reason, GEP_OFF.val(0), GEP_OFF.val(0),
       true);
 
     const errorField = ctx.errorField(bb);
-    bb.store(errorField.ty.toPointer().to.val(this.code), errorField);
+    bb.store(errorField.ty.toPointer().to.val(this.ref.code), errorField);
     bb.store(cast, ctx.reasonField(bb));
     bb.store(pos.current, ctx.errorPosField(bb));
 
