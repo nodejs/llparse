@@ -16,10 +16,10 @@ import {
 
 const debug = debugAPI('llparse:bitcode:node');
 
-export interface INodeEdge<T extends frontend.node.Node> {
-  readonly node: Node<T>;
+export interface INodeEdge {
+  readonly node: frontend.IWrap<frontend.node.Node>;
   readonly noAdvance: boolean;
-  readonly value: number | undefined;
+  readonly value?: number;
 }
 
 export interface INodePosition {
@@ -32,15 +32,15 @@ interface ITail {
   readonly phi: IRPhi;
 }
 
-type SubTailMap<T extends frontend.node.Node> = Map<Node<T>, ITail>;
-type TailMap<T extends frontend.node.Node> = Map<boolean, SubTailMap<T>>;
+type SubTailMap = Map<Node<frontend.node.Node>, ITail>;
+type TailMap = Map<boolean, SubTailMap>;
 
 export abstract class Node<T extends frontend.node.Node> {
   private privCompilation: Compilation | undefined;
   private cachedDecl: IRDeclaration | undefined;
 
   // `noAdvance` => `target` => tail
-  private tailMap: TailMap<T> = new Map();
+  private tailMap: TailMap = new Map();
 
   constructor(public readonly ref: T) {
     this.tailMap.set(true, new Map());
@@ -119,14 +119,14 @@ export abstract class Node<T extends frontend.node.Node> {
     ctx.addResumptionTarget(fn);
   }
 
-  protected tailTo(bb: IRBasicBlock, edge: INodeEdge<T>,
+  protected tailTo(bb: IRBasicBlock, edge: INodeEdge,
                    pos: INodePosition): void {
     const ctx = this.compilation;
     const subTailMap = this.tailMap.get(edge.noAdvance)!;
     const matchTy = ctx.matchArg(bb).ty;
 
     // Skip `noAdvance = true` Empty nodes
-    let edgeTo = edge.node;
+    let edgeTo = edge.node as Node<frontend.node.Node>;
     debug('"%s" tails to "%s"', this.ref.id.originalName,
         edgeTo.ref.id.originalName);
 
@@ -135,7 +135,7 @@ export abstract class Node<T extends frontend.node.Node> {
         break;
       }
 
-      edgeTo = edgeTo.ref.otherwise!.node as Node<T>;
+      edgeTo = edgeTo.ref.otherwise!.node as Node<frontend.node.Node>;
     }
 
     if (edge.node !== edgeTo) {
