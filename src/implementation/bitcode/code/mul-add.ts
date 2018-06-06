@@ -1,41 +1,20 @@
+import * as frontend from 'llparse-frontend';
+
 import {
   Compilation, IRBasicBlock, IRDeclaration, IRType,
 } from '../compilation';
 import { BOOL } from '../constants';
-import { toCacheKey } from '../utils';
 import { Field } from './field';
-
-export interface IMulAddOptions {
-  readonly base: number;
-  readonly max?: number;
-  readonly signed: boolean;
-}
 
 interface IMulIntrinsics {
   readonly add: IRDeclaration;
   readonly mul: IRDeclaration;
 }
 
-function toOptionsKey(options: IMulAddOptions): string {
-  let res = `base_${toCacheKey(options.base)}`;
-  if (options.max !== undefined) {
-    res += `_max_${toCacheKey(options.max)}`;
-  }
-  if (options.signed !== undefined) {
-    res += `_signed_${toCacheKey(options.signed)}`;
-  }
-  return res;
-}
-
-export class MulAdd extends Field {
-  constructor(name: string, field: string,
-              private readonly options: IMulAddOptions) {
-    super('value', `mul_add_${field}_${toOptionsKey(options)}`, name, field);
-  }
-
+export class MulAdd extends Field<frontend.code.MulAdd> {
   protected doBuild(ctx: Compilation, bb: IRBasicBlock): void {
-    const options = this.options;
-    const field = bb.load(ctx.stateField(bb, this.field));
+    const options = this.ref.options;
+    const field = bb.load(ctx.stateField(bb, this.ref.field));
     const fieldTy = field.ty.toInt();
     const returnTy = bb.parent.ty.toSignature().returnType;
 
@@ -95,12 +74,12 @@ export class MulAdd extends Field {
     }
     store.name = 'store';
 
-    store.store(result, ctx.stateField(store, this.field));
+    store.store(result, ctx.stateField(store, this.ref.field));
     store.ret(returnTy.val(0));
   }
 
   private buildIntrinsics(ctx: Compilation, ty: IRType): IMulIntrinsics {
-    const signed = this.options.signed;
+    const signed = this.ref.options.signed;
 
     // Declare intrinsic functions
     const overRet = ctx.ir.struct();

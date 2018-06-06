@@ -5,12 +5,9 @@ import {
   Module as Bitcode,
 } from 'bitcode';
 import { Buffer } from 'buffer';
+import { Identifier, SpanField } from 'llparse-frontend';
 
-import * as code from '../code';
-import * as constants from '../constants';
-import * as node from '../node';
-import { Span } from '../span';
-import { Identifier } from '../utils';
+import * as constants from './constants';
 
 import irTypes = bitcodeBuilderNS.types;
 import irValues = bitcodeBuilderNS.values;
@@ -83,7 +80,7 @@ export class Compilation {
   constructor(public readonly prefix: string,
               public readonly root: node.Node,
               private readonly properties: ReadonlyArray<ICompilationProperty>,
-              spans: ReadonlyArray<Span>,
+              spans: ReadonlyArray<SpanField>,
               public readonly options: ICompilationOptions) {
     this.ir = this.bitcode.createBuilder();
     this.invariantGroup = this.ir.metadata([

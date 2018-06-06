@@ -1,6 +1,8 @@
+import { Buffer } from 'buffer';
+
 import {
   Compilation, IRBasicBlock, IRDeclaration, IRSignature, IRValue,
-} from './compilation';
+} from '../compilation';
 import {
   ARG_ENDPOS, ARG_POS, ARG_SEQUENCE, ARG_SEQUENCE_LEN, ARG_STATE,
   ATTR_ENDPOS, ATTR_POS, ATTR_SEQUENCE, ATTR_SEQUENCE_LEN, ATTR_STATE,
@@ -11,7 +13,7 @@ import {
   LINKAGE,
   SEQUENCE_COMPLETE, SEQUENCE_MISMATCH, SEQUENCE_PAUSE,
   TYPE_ENDPOS, TYPE_POS, TYPE_SEQUENCE, TYPE_SEQUENCE_LEN, TYPE_STATUS,
-} from './constants';
+} from '../constants';
 import { Transform } from './transform';
 
 interface IMatchIteration {

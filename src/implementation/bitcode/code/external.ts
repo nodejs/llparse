@@ -1,11 +1,11 @@
-import { Compilation, IRDeclaration, IRSignature} from '../compilation';
-import { FN_ATTR_CODE_EXTERNAL } from '../constants';
-import { Code, Signature } from './base';
+import * as frontend from 'llparse-frontend';
 
-export abstract class External extends Code {
-  constructor(signature: Signature, name: string) {
-    super(signature, 'external_' + name, name);
-  }
+import { Compilation, IRDeclaration, IRSignature } from '../compilation';
+import { FN_ATTR_CODE_EXTERNAL } from '../constants';
+import { Code } from './base';
+
+export abstract class External<T extends frontend.code.External>
+  extends Code<T> {
 
   public build(ctx: Compilation): IRDeclaration {
     if (this.cachedDecl !== undefined) {
@@ -13,7 +13,7 @@ export abstract class External extends Code {
     }
 
     const sig = this.getSignature(ctx);
-    const decl = ctx.declareFunction(sig, this.name);
+    const decl = ctx.declareFunction(sig, this.ref.name);
     this.setAttributes(decl);
     this.cachedDecl = decl;
     return decl;

@@ -1,20 +1,17 @@
+import * as frontend from 'llparse-frontend';
+
 import { Compilation, IRBasicBlock, IRDeclaration } from '../compilation';
 import { CCONV, FN_ATTR_CODE, LINKAGE } from '../constants';
-import { Code, Signature } from './base';
+import { Code } from './base';
 
-export abstract class Field extends Code {
-  constructor(signature: Signature, cacheKey: string, name: string,
-              protected readonly field: string) {
-    super(signature, cacheKey, name);
-  }
-
+export abstract class Field<T extends frontend.code.Field> extends Code<T> {
   public build(ctx: Compilation): IRDeclaration {
     if (this.cachedDecl !== undefined) {
       return this.cachedDecl;
     }
 
     const sig = this.getSignature(ctx);
-    const fn = ctx.defineFunction(sig, this.name, this.getParams());
+    const fn = ctx.defineFunction(sig, this.ref.name, this.getParams());
     this.setAttributes(fn);
 
     this.doBuild(ctx, fn.body);

@@ -1,3 +1,5 @@
+import { SpanField } from 'llparse-frontend';
+
 import { Compilation, IRBasicBlock, IRValue } from '../compilation';
 import {
   ARG_ENDPOS, ARG_POS, ARG_STATE,
@@ -6,10 +8,9 @@ import {
   GEP_OFF,
   TYPE_ENDPOS, TYPE_ERROR, TYPE_POS,
 } from '../constants';
-import { Span } from '../span';
 
 export class ExecuteBuilder {
-  public build(ctx: Compilation, spans: ReadonlyArray<Span>): void {
+  public build(ctx: Compilation, spans: ReadonlyArray<SpanField>): void {
     const sig = ctx.ir.signature(TYPE_ERROR, [
       ctx.state.ptr(), TYPE_POS, TYPE_ENDPOS ]);
     const fn = ctx.defineFunction(sig, `${ctx.prefix}_execute`,
@@ -70,7 +71,7 @@ export class ExecuteBuilder {
     return noError;
   }
 
-  private restartSpans(ctx: Compilation, spans: ReadonlyArray<Span>,
+  private restartSpans(ctx: Compilation, spans: ReadonlyArray<SpanField>,
                        bb: IRBasicBlock): IRBasicBlock {
     spans.forEach((span) => {
       const startPtr = ctx.spanPosField(bb, span.index);
@@ -90,7 +91,7 @@ export class ExecuteBuilder {
     return bb;
   }
 
-  private executeSpans(ctx: Compilation, spans: ReadonlyArray<Span>,
+  private executeSpans(ctx: Compilation, spans: ReadonlyArray<SpanField>,
                        bb: IRBasicBlock): IRBasicBlock {
     spans.forEach((span) => {
       const start = bb.load(ctx.spanPosField(bb, span.index));

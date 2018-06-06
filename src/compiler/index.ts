@@ -5,12 +5,12 @@ import {
   LoopChecker,
   node as apiNode,
   Property as APIProperty,
-  SpanAllocator,
 } from 'llparse-builder';
 import * as builder from 'llparse-builder';
+import { IFrontendLazyOptions, Frontend } from 'llparse-frontend';
 
 import { Compilation } from '../compilation';
-import { ITranslatorLazyOptions, Translator } from '../translator';
+import { Node } from '../node';
 import { ExecuteBuilder } from './execute-builder';
 import { InitBuilder } from './init-builder';
 
@@ -33,8 +33,8 @@ export interface ICompilerOptions {
     */
   readonly debug?: string;
 
-  /** Translator options */
-  readonly translator?: ITranslatorLazyOptions;
+  /** Frontend options */
+  readonly frontend?: IFrontendLazyOptions;
 
   /** What guard define to use in `#ifndef` in C headers */
   readonly headerGuard?: string;
@@ -61,15 +61,10 @@ export class Compiler {
     const lc = new LoopChecker();
     lc.check(apiRoot);
 
-    // Allocate spans
-    debug('allocating spans');
-    const sa = new SpanAllocator();
-    const spans = sa.allocate(apiRoot);
-
     // Translate to compiler nodes
-    debug('translating nodes');
-    const t = new Translator(this.prefix, this.options.translator || {}, spans);
-    const root = t.translate(apiRoot);
+    debug('frontend');
+    const f = new Frontend(this.prefix, this.options.frontend);
+    const root = t.compile(apiRoot) as Node;
 
     // Compile to bitcode
     const compilation = new Compilation(this.prefix, root, properties, t.spans,
