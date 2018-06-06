@@ -1,15 +1,18 @@
+import * as frontend from 'llparse-frontend';
+
 import { IRBasicBlock } from '../compilation';
-import { IUniqueName } from '../utils';
-import { INodePosition } from './base';
+import { Node, INodePosition } from './base';
 import { Error as ErrorNode } from './error';
 
-export class Pause extends ErrorNode {
+export class Pause extends ErrorNode<frontend.node.Pause> {
   protected doBuild(bb: IRBasicBlock, pos: INodePosition): void {
     const ctx = this.compilation;
     bb = this.storeError(bb, pos);
 
     // Recoverable state
-    const target = this.otherwise!.node.build(ctx);
+    // TODO(indutny): define a type
+    const otherwise = this.ref.otherwise!.node as Node<frontend.node.Node>;
+    const target = otherwise.build(ctx);
     ctx.addResumptionTarget(target);
     bb.store(target, ctx.currentField(bb));
 

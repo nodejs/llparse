@@ -4,7 +4,7 @@ import { IRBasicBlock } from '../compilation';
 import { FN_ATTR_ERROR, GEP_OFF } from '../constants';
 import { INodePosition, Node } from './base';
 
-class ErrorNode extends Node<frontend.node.Error> {
+class ErrorNode<T extends frontend.node.Error> extends Node<T> {
   protected storeError(bb: IRBasicBlock, pos: INodePosition): IRBasicBlock {
     const ctx = this.compilation;
     const reason = ctx.cstring(this.ref.reason);
