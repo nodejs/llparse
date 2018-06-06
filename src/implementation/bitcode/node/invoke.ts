@@ -3,6 +3,7 @@ import * as frontend from 'llparse-frontend';
 
 import { Code } from '../code';
 import { IRBasicBlock, IRValue } from '../compilation';
+import { CONTAINER_KEY } from '../constants';
 import { INodePosition, Node } from './base';
 
 export class Invoke extends Node<frontend.node.Invoke> {
@@ -10,7 +11,8 @@ export class Invoke extends Node<frontend.node.Invoke> {
     const ctx = this.compilation;
 
     // TODO(indutny): declare the type
-    const code = this.ref.code as Code<frontend.code.Code>;
+    const code = (this.ref.code as frontend.ContainerWrap<frontend.code.Code>)
+        .get<Code<frontend.code.Code>>(CONTAINER_KEY);
     const codeDecl = code.build(ctx);
 
     const args: IRValue[] = [

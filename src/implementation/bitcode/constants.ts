@@ -4,6 +4,8 @@ import Type = ir.types.Type;
 
 export type AttributeList = ReadonlyArray<ir.Attribute>;
 
+export const CONTAINER_KEY = 'bitcode';
+
 export const I8 = IR.i(8);
 export const I16 = IR.i(16);
 export const I32 = IR.i(32);

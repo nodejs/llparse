@@ -12,6 +12,7 @@ import {
   FN_ATTR_NODE,
   GEP_OFF,
   LINKAGE,
+  CONTAINER_KEY,
 } from '../constants';
 
 const debug = debugAPI('llparse:bitcode:node');
@@ -126,7 +127,7 @@ export abstract class Node<T extends frontend.node.Node> {
     const matchTy = ctx.matchArg(bb).ty;
 
     // Skip `noAdvance = true` Empty nodes
-    let edgeTo = edge.node as Node<frontend.node.Node>;
+    let edgeTo = edge.node as frontend.ContainerWrap<frontend.node.Node>;
     debug('"%s" tails to "%s"', this.ref.id.originalName,
         edgeTo.ref.id.originalName);
 
@@ -135,7 +136,8 @@ export abstract class Node<T extends frontend.node.Node> {
         break;
       }
 
-      edgeTo = edgeTo.ref.otherwise!.node as Node<frontend.node.Node>;
+      edgeTo = edgeTo.ref.otherwise!.node as
+          frontend.ContainerWrap<frontend.node.Node>;
     }
 
     if (edge.node !== edgeTo) {
@@ -143,10 +145,12 @@ export abstract class Node<T extends frontend.node.Node> {
         edgeTo.ref.id.originalName);
     }
 
+    const edgeNode = edgeTo.get<Node<frontend.node.Node>>(CONTAINER_KEY);
+
     const value = edge.value === undefined ? matchTy.undef() :
       matchTy.val(edge.value);
-    if (subTailMap.has(edgeTo)) {
-      const tail = subTailMap.get(edgeTo)!;
+    if (subTailMap.has(edgeNode)) {
+      const tail = subTailMap.get(edgeNode)!;
 
       tail.phi.addEdge({ fromBlock: bb, value });
       bb.jmp(tail.block);
@@ -158,7 +162,7 @@ export abstract class Node<T extends frontend.node.Node> {
     bb.jmp(tailBB);
 
     const phi = tailBB.phi({ fromBlock: bb, value });
-    subTailMap.set(edgeTo, { block: tailBB, phi });
+    subTailMap.set(edgeNode, { block: tailBB, phi });
 
     const args = [
       ctx.stateArg(bb),
@@ -167,7 +171,7 @@ export abstract class Node<T extends frontend.node.Node> {
       phi,
     ];
 
-    const res = tailBB.call(edgeTo.build(ctx), args, 'musttail');
+    const res = tailBB.call(edgeNode.build(ctx), args, 'musttail');
     tailBB.ret(res);
   }
 }
