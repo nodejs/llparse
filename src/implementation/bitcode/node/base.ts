@@ -1,3 +1,5 @@
+import * as frontend from 'llparse-frontend';
+
 import * as debugAPI from 'debug';
 
 import {
@@ -11,13 +13,11 @@ import {
   GEP_OFF,
   LINKAGE,
 } from '../constants';
-import * as compilerNode from '../node';
-import { IUniqueName } from '../utils';
 
-const debug = debugAPI('llparse:node');
+const debug = debugAPI('llparse:bitcode:node');
 
-export interface INodeEdge {
-  readonly node: Node;
+export interface INodeEdge<T extends frontend.node.Node> {
+  readonly node: Node<T>;
   readonly noAdvance: boolean;
   readonly value: number | undefined;
 }
@@ -32,24 +32,19 @@ interface ITail {
   readonly phi: IRPhi;
 }
 
-type SubTailMap = Map<Node, ITail>;
-type TailMap = Map<boolean, SubTailMap>;
+type SubTailMap<T extends frontend.node.Node> = Map<Node<T>, ITail>;
+type TailMap<T extends frontend.node.Node> = Map<boolean, SubTailMap<T>>;
 
-export abstract class Node {
-  protected otherwise: INodeEdge | undefined;
+export abstract class Node<T extends frontend.node.Node> {
   private privCompilation: Compilation | undefined;
   private cachedDecl: IRDeclaration | undefined;
 
   // `noAdvance` => `target` => tail
-  private tailMap: TailMap = new Map();
+  private tailMap: TailMap<T> = new Map();
 
-  constructor(public readonly id: IUniqueName) {
+  constructor(public readonly ref: T) {
     this.tailMap.set(true, new Map());
     this.tailMap.set(false, new Map());
-  }
-
-  public setOtherwise(node: Node, noAdvance: boolean) {
-    this.otherwise = { node, noAdvance, value: undefined };
   }
 
   // Building
@@ -60,10 +55,10 @@ export abstract class Node {
       return this.cachedDecl;
     }
 
-    debug('building "%s"', this.id.originalName);
+    debug('building "%s"', this.ref.id.originalName);
 
     this.privCompilation = ctx;
-    const fn = ctx.defineFunction(ctx.signature.node, this.id.name, [
+    const fn = ctx.defineFunction(ctx.signature.node, this.ref.id.name, [
       ARG_STATE, ARG_POS, ARG_ENDPOS, ARG_MATCH,
     ]);
 
@@ -84,7 +79,7 @@ export abstract class Node {
       next: fn.body.getelementptr(ctx.posArg(fn.body), GEP_OFF.val(1)),
     };
     const bb = ctx.debug(fn.body,
-      `Entering node "${this.id.originalName}" ("${this.id.name}")`);
+      `Entering node "${this.ref.id.originalName}" ("${this.ref.id.name}")`);
     this.doBuild(bb, pos);
 
     return fn;
@@ -117,34 +112,35 @@ export abstract class Node {
     const ctx = this.compilation;
     const fn = bb.parent;
 
-    debug('pause in "%s"', this.id.originalName);
+    debug('pause in "%s"', this.ref.id.originalName);
     const self = bb.cast('bitcast', fn, fn.ty.toSignature().returnType);
     bb.ret(self);
 
     ctx.addResumptionTarget(fn);
   }
 
-  protected tailTo(bb: IRBasicBlock, edge: INodeEdge, pos: INodePosition)
-    : void {
+  protected tailTo(bb: IRBasicBlock, edge: INodeEdge<T>,
+                   pos: INodePosition): void {
     const ctx = this.compilation;
     const subTailMap = this.tailMap.get(edge.noAdvance)!;
     const matchTy = ctx.matchArg(bb).ty;
 
     // Skip `noAdvance = true` Empty nodes
-    let edgeTo: Node = edge.node;
-    debug('"%s" tails to "%s"', this.id.originalName, edgeTo.id.originalName);
+    let edgeTo = edge.node;
+    debug('"%s" tails to "%s"', this.ref.id.originalName,
+        edgeTo.ref.id.originalName);
 
-    while (edgeTo instanceof compilerNode.Empty) {
-      if (!edgeTo.otherwise!.noAdvance) {
+    while (edgeTo.ref instanceof frontend.node.Empty) {
+      if (!edgeTo.ref.otherwise!.noAdvance) {
         break;
       }
 
-      edgeTo = edgeTo.otherwise!.node;
+      edgeTo = edgeTo.ref.otherwise!.node as Node<T>;
     }
 
     if (edge.node !== edgeTo) {
-      debug('Optimized tail from "%s" to "%s"', this.id.originalName,
-        edgeTo.id.originalName);
+      debug('Optimized tail from "%s" to "%s"', this.ref.id.originalName,
+        edgeTo.ref.id.originalName);
     }
 
     const value = edge.value === undefined ? matchTy.undef() :
@@ -157,7 +153,8 @@ export abstract class Node {
       return;
     }
 
-    const tailBB = bb.parent.createBlock(`${edge.node.id.name}.trampoline`);
+    const tailBB = bb.parent.createBlock(
+        `${edge.node.ref.id.name}.trampoline`);
     bb.jmp(tailBB);
 
     const phi = tailBB.phi({ fromBlock: bb, value });
