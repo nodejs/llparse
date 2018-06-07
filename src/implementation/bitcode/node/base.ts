@@ -94,6 +94,12 @@ export abstract class Node<T extends frontend.node.Node> {
     return this.privCompilation!;
   }
 
+  protected cast(wrap: frontend.IWrap<frontend.node.Node>)
+    : Node<frontend.node.Node> {
+    const container = wrap as frontend.ContainerWrap<frontend.node.Node>;
+    return container.get<Node<frontend.node.Node>>(CONTAINER_KEY);
+  }
+
   protected prologue(bb: IRBasicBlock, pos: INodePosition): IRBasicBlock {
     const ctx = this.compilation;
 
@@ -127,7 +133,7 @@ export abstract class Node<T extends frontend.node.Node> {
     const matchTy = ctx.matchArg(bb).ty;
 
     // Skip `noAdvance = true` Empty nodes
-    let edgeTo = edge.node as frontend.ContainerWrap<frontend.node.Node>;
+    let edgeTo = edge.node;
     debug('"%s" tails to "%s"', this.ref.id.originalName,
         edgeTo.ref.id.originalName);
 
@@ -136,8 +142,7 @@ export abstract class Node<T extends frontend.node.Node> {
         break;
       }
 
-      edgeTo = edgeTo.ref.otherwise!.node as
-          frontend.ContainerWrap<frontend.node.Node>;
+      edgeTo = edgeTo.ref.otherwise!.node;
     }
 
     if (edge.node !== edgeTo) {
@@ -145,7 +150,7 @@ export abstract class Node<T extends frontend.node.Node> {
         edgeTo.ref.id.originalName);
     }
 
-    const edgeNode = edgeTo.get<Node<frontend.node.Node>>(CONTAINER_KEY);
+    const edgeNode = this.cast(edgeTo);
 
     const value = edge.value === undefined ? matchTy.undef() :
       matchTy.val(edge.value);

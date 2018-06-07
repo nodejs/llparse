@@ -12,12 +12,9 @@ export class Pause extends ErrorNode<frontend.node.Pause> {
 
     // Recoverable state
     // TODO(indutny): define a type
-    const otherwise = this.ref.otherwise!.node as
-        frontend.ContainerWrap<frontend.node.Node>;
-    const target = otherwise.get<Node<frontend.node.Node>>(CONTAINER_KEY)
-        .build(ctx);
-    ctx.addResumptionTarget(target);
-    bb.store(target, ctx.currentField(bb));
+    const otherwise = this.cast(this.ref.otherwise!.node).build(ctx);
+    ctx.addResumptionTarget(otherwise);
+    bb.store(otherwise, ctx.currentField(bb));
 
     const retType = bb.parent.ty.toSignature().returnType;
     bb.ret(retType.val(null));
