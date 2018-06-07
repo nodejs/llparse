@@ -11,13 +11,15 @@ import transform from './transform';
 import { ExecuteBuilder } from './helpers/execute-builder';
 import { InitBuilder } from './helpers/init-builder';
 
-const debug = debugAPI('llparse:compiler');
+const debug = debugAPI('llparse:bitcode');
+
+export { CONTAINER_KEY };
 
 export interface IBitcodeCompilerOptions {
   readonly debug?: string;
 }
 
-export class Compiler {
+export class BitcodeCompiler {
   constructor(container: frontend.Container,
               private readonly options: IBitcodeCompilerOptions) {
     container.add(CONTAINER_KEY, { code, node, transform });

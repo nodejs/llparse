@@ -1,4 +1,11 @@
+import * as debugAPI from 'debug';
 import * as source from 'llparse-builder';
+import * as frontend from 'llparse-frontend';
+
+import * as bitcodeImpl from '../implementation/bitcode';
+import { HeaderBuilder } from './header-builder';
+
+const debug = debugAPI('llparse:compiler');
 
 export interface ICompilerOptions {
    /**
@@ -24,9 +31,26 @@ export interface ICompilerOptions {
 
   /** Generate bitcode (`true` by default) */
   readonly generateBitcode?: boolean;
+
+  /** Optional frontend configuration */
+  readonly frontend?: frontend.IFrontendLazyOptions;
 }
 
 export interface ICompilerResult {
+  /**
+   * Binary LLVM bitcode, if `generateBitcode` option was `true`
+   */
+  readonly bitcode?: Buffer;
+
+  /**
+   * Textual C header file
+   */
+  readonly headers: string;
+}
+
+interface IWritableCompilerResult {
+  bitcode?: Buffer;
+  headers: string;
 }
 
 export class Compiler {
@@ -36,6 +60,37 @@ export class Compiler {
 
   public compile(root: source.node.Node,
                  properties: ReadonlyArray<source.Property>): ICompilerResult {
-    return {};
+    debug('Combining implementations');
+    const container = new frontend.Container();
+
+    let bitcode: bitcodeImpl.BitcodeCompiler | undefined;
+    if (this.options.generateBitcode !== false) {
+      bitcode = new bitcodeImpl.BitcodeCompiler(container, {
+        debug: this.options.debug,
+      });
+    }
+
+    debug('Running frontend pass');
+    const f = new frontend.Frontend(this.prefix,
+                                    container.build(),
+                                    this.options.frontend);
+    const info = f.compile(root, properties);
+
+    debug('Building headers');
+    const hb = new HeaderBuilder();
+
+    const headers = hb.build({
+      prefix: this.prefix,
+      headerGuard: this.options.headerGuard,
+      properties: properties,
+      spans: info.spans,
+    });
+
+    let result: IWritableCompilerResult = { headers };
+    if (bitcode) {
+      result.bitcode = bitcode.compile(info);
+    }
+
+    return result;
   }
 }
