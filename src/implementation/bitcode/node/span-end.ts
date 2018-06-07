@@ -1,29 +1,28 @@
+import * as frontend from 'llparse-frontend';
 import * as assert from 'assert';
 
-import { Span as SpanCallback } from '../code';
+import { Code } from '../code';
 import { IRBasicBlock, IRValue } from '../compilation';
-import { GEP_OFF } from '../constants';
-import { Span } from '../span';
-import { IUniqueName } from '../utils';
+import { CONTAINER_KEY, GEP_OFF } from '../constants';
 import { INodePosition, Node } from './base';
 
-export class SpanEnd extends Node {
-  constructor(id: IUniqueName, private readonly span: Span,
-              private readonly callback: SpanCallback) {
-    super(id);
-  }
-
+export class SpanEnd extends Node<frontend.node.SpanEnd> {
   protected doBuild(bb: IRBasicBlock, pos: INodePosition): void {
     const ctx = this.compilation;
 
     // Load
-    const startPtr = ctx.spanPosField(bb, this.span.index);
+    const startPtr = ctx.spanPosField(bb, this.ref.field.index);
     const start = bb.load(startPtr);
 
     // ...and reset
     bb.store(start.ty.toPointer().val(null), startPtr);
 
-    const call = bb.call(this.callback.build(ctx), [
+    const callbackContainer =
+        this.ref.callback as frontend.ContainerWrap<frontend.code.Code>;
+    const callback = callbackContainer.get<Code<frontend.code.Code>>(
+        CONTAINER_KEY);
+
+    const call = bb.call(callback.build(ctx), [
       ctx.stateArg(bb),
       start,
       pos.current,
@@ -43,7 +42,7 @@ export class SpanEnd extends Node {
     this.buildError(error, pos, call);
 
     // Otherwise
-    this.tailTo(noError, this.otherwise!, pos);
+    this.tailTo(noError, this.ref.otherwise!, pos);
   }
 
   private buildError(bb: IRBasicBlock, pos: INodePosition, code: IRValue): void {
@@ -59,11 +58,11 @@ export class SpanEnd extends Node {
     bb.store(ctx.truncate(bb, code, errorField.ty.toPointer().to), errorField);
     bb.store(cast, ctx.reasonField(bb));
 
-    const otherwise = this.otherwise!;
+    const otherwise = this.ref.otherwise!;
     bb.store(otherwise.noAdvance ? pos.current : pos.next,
       ctx.errorPosField(bb));
 
-    const resumptionTarget = otherwise.node.build(ctx);
+    const resumptionTarget = this.cast(otherwise.node).build(ctx);
     bb.store(resumptionTarget, ctx.currentField(bb));
     ctx.addResumptionTarget(resumptionTarget);
 
