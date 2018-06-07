@@ -1,5 +1,5 @@
-import * as source from 'llparse-builder';
 import * as frontend from 'llparse-frontend';
+import source = frontend.source;
 
 export interface IHeaderBuilderOptions {
   readonly prefix: string;
@@ -28,11 +28,13 @@ export class HeaderBuilder {
     // Structure
     res += `typedef struct ${options.prefix}_s ${options.prefix}_t;\n`;
     res += `struct ${options.prefix}_s {\n`;
-    res += '  int32_t index;\n';
+    res += '  int32_t _index;\n';
 
-    for (const index of options.spans.keys()) {
-      res += `  const char* _span_pos${index};\n`;
-      res += `  void* _span_cb${index};\n`;
+    for (const [ index, field ] of options.spans.entries()) {
+      res += `  void* _span_pos${index};\n`;
+      if (field.callbacks.length > 1) {
+        res += `  void* _span_cb${index};\n`;
+      }
     }
 
     res += '  int32_t error;\n';

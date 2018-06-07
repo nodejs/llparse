@@ -1,6 +1,7 @@
 import * as debugAPI from 'debug';
-import * as source from 'llparse-builder';
 import * as frontend from 'llparse-frontend';
+
+import source = frontend.source;
 
 import * as bitcodeImpl from '../implementation/bitcode';
 import { HeaderBuilder } from './header-builder';
@@ -45,12 +46,12 @@ export interface ICompilerResult {
   /**
    * Textual C header file
    */
-  readonly headers: string;
+  readonly header: string;
 }
 
 interface IWritableCompilerResult {
   bitcode?: Buffer;
-  headers: string;
+  header: string;
 }
 
 export class Compiler {
@@ -76,17 +77,20 @@ export class Compiler {
                                     this.options.frontend);
     const info = f.compile(root, properties);
 
-    debug('Building headers');
+    debug('Building header');
     const hb = new HeaderBuilder();
 
-    const headers = hb.build({
+    const header = hb.build({
       prefix: this.prefix,
       headerGuard: this.options.headerGuard,
       properties: properties,
       spans: info.spans,
     });
 
-    let result: IWritableCompilerResult = { headers };
+    let result: IWritableCompilerResult = {
+      header,
+      bitcode: undefined,
+    };
     if (bitcode) {
       result.bitcode = bitcode.compile(info);
     }

@@ -1,4 +1,4 @@
-import { node as apiNode } from 'llparse-builder';
+import { source } from 'llparse-frontend'
 import { Fixture, FixtureResult } from 'llparse-test-fixture';
 import * as path from 'path';
 
@@ -11,18 +11,19 @@ const fixtures = new Fixture({
   extra: [ path.join(__dirname, 'extra.c') ],
 });
 
-export function build(llparse: LLParse, node: apiNode.Node, outFile: string)
+export function build(llparse: LLParse, node: source.node.Node, outFile: string)
   : FixtureResult {
   return fixtures.build(llparse.build(node), outFile);
 }
 
-export function printMatch(p: LLParse, next: apiNode.Node): apiNode.Node {
+export function printMatch(p: LLParse, next: source.node.Node)
+  : source.node.Node {
   const code = p.code.value('llparse__print_match');
   const res = p.invoke(code, next);
   return res;
 }
 
-export function printOff(p: LLParse, next: apiNode.Node): apiNode.Node {
+export function printOff(p: LLParse, next: source.node.Node): source.node.Node {
   const code = p.code.match('llparse__print_off');
   return p.invoke(code, next);
 }

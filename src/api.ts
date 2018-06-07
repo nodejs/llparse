@@ -1,14 +1,15 @@
-import { Builder, code, node, Span } from 'llparse-builder';
-import * as builder from 'llparse-builder';
+import * as frontend from 'llparse-frontend';
+
+import source = frontend.source;
 
 import { Compiler, ICompilerOptions, ICompilerResult } from './compiler';
 
-export { builder, code, node, ICompilerOptions, ICompilerResult, Span };
+export { source, ICompilerOptions, ICompilerResult };
 
 /**
  * LLParse graph builder and compiler.
  */
-export class LLParse extends Builder {
+export class LLParse extends source.Builder {
   /**
    * The prefix controls the names of methods and state struct in generated
    * public C headers:
@@ -35,7 +36,7 @@ export class LLParse extends Builder {
    * @param root  Root node of the parse graph (see `.node()`)
    * @param options Compiler options.
    */
-  public build(root: node.Node, options: ICompilerOptions = {})
+  public build(root: source.node.Node, options: ICompilerOptions = {})
     : ICompilerResult {
     const c = new Compiler(this.prefix, options);
 
