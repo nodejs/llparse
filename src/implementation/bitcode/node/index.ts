@@ -8,6 +8,7 @@ import { Pause } from './pause';
 import { Sequence } from './sequence';
 import { Single } from './single';
 import { SpanEnd } from './span-end';
+import { SpanStart } from './span-start';
 
 export * from './base';
 
@@ -21,4 +22,5 @@ export default {
   // Sequence,
   Single,
   SpanEnd,
+  SpanStart,
 };
