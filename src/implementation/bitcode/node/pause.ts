@@ -1,7 +1,6 @@
 import * as frontend from 'llparse-frontend';
 
 import { IRBasicBlock } from '../compilation';
-import { CONTAINER_KEY } from '../constants';
 import { Node, INodePosition } from './base';
 import { Error as ErrorNode } from './error';
 

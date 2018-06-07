@@ -1,3 +1,4 @@
+import * as frontend from 'llparse-frontend';
 import * as assert from 'assert';
 import { Buffer } from 'buffer';
 
@@ -7,39 +8,20 @@ import {
   SEQUENCE_COMPLETE, SEQUENCE_MISMATCH, SEQUENCE_PAUSE,
   TYPE_INDEX,
 } from '../constants';
-import { MatchSequence } from '../match-sequence';
-import { IUniqueName } from '../utils';
 import { INodePosition, Node } from './base';
-import { Error as ErrorNode } from './error';
-import { Match } from './match';
 
-export interface ISequenceEdge {
-  readonly node: Node;
-  readonly value: number | undefined;
-}
-
-export class Sequence extends Match {
-  private edge: ISequenceEdge | undefined;
-
-  constructor(id: IUniqueName, private readonly matchSequence: MatchSequence,
-              private readonly select: Buffer) {
-    super(id);
-  }
-
-  public setEdge(node: Node, value: number | undefined) {
-    assert.strictEqual(this.edge, undefined);
-    this.edge = { node, value };
-  }
-
+export class Sequence extends Node<frontend.node.Sequence> {
   protected doBuild(bb: IRBasicBlock, pos: INodePosition): void {
     bb = this.prologue(bb, pos);
 
     const ctx = this.compilation;
-    const seq = ctx.blob(this.select);
+    const seq = ctx.blob(this.ref.select);
 
     const cast = bb.getelementptr(seq, GEP_OFF.val(0), GEP_OFF.val(0), true);
 
-    const matchSequence = this.matchSequence.build(ctx);
+    // TODO(indutny): implement this
+    const matchSequence = this.compilation.getMatchSequence(this.ref.transform)
+      .preBuild(ctx);
 
     const returnType = matchSequence.ty.toSignature().returnType.toStruct();
 
@@ -48,7 +30,7 @@ export class Sequence extends Match {
       pos.current,
       ctx.endPosArg(bb),
       cast,
-      TYPE_INDEX.val(this.select.length),
+      TYPE_INDEX.val(this.ref.select.length),
     ]);
 
     const status = bb.extractvalue(call,
@@ -69,7 +51,8 @@ export class Sequence extends Match {
         'unlikely',
 
         // SEQUENCE_MISMATCH
-        this.otherwise!.node instanceof ErrorNode ? 'unlikely' : 'likely',
+        this.ref.otherwise!.node.ref instanceof frontend.node.Error ?
+            'unlikely' : 'likely',
       ],
       otherwise: 'likely',  // SEQUENCE_COMPLETE
     });
@@ -82,8 +65,8 @@ export class Sequence extends Match {
     complete.name = 'complete';
     this.tailTo(complete, {
       noAdvance: false,
-      node: this.edge!.node,
-      value: this.edge!.value,
+      node: this.ref.edge!.node,
+      value: this.ref.edge!.value,
     }, { current, next });
 
     // Not enough data
@@ -92,6 +75,6 @@ export class Sequence extends Match {
 
     // Not equal
     mismatch.name = 'mismatch';
-    this.tailTo(mismatch, this.otherwise!, { current, next });
+    this.tailTo(mismatch, this.ref.otherwise!, { current, next });
   }
 }
