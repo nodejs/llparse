@@ -15,12 +15,7 @@ export class Single extends Node<frontend.node.Single> {
     let current: IRValue = bb.load(pos.current);
 
     // Transform the character
-    const transformContainer = this.ref.transform! as
-        frontend.ContainerWrap<frontend.transform.Transform>;
-
-    current = transformContainer
-        .get<Transform<frontend.transform.Transform>>(CONTAINER_KEY)
-        .build(ctx, bb, current);
+    current = this.applyTransform(this.ref.transform!, bb, current);
 
     // Mark error branches as unlikely
     const cases = this.ref.edges.map((edge) => {

@@ -9,6 +9,7 @@ import { Sequence } from './sequence';
 import { Single } from './single';
 import { SpanEnd } from './span-end';
 import { SpanStart } from './span-start';
+import { TableLookup } from './table-lookup';
 
 export * from './base';
 
@@ -23,4 +24,5 @@ export default {
   Single,
   SpanEnd,
   SpanStart,
+  TableLookup,
 };

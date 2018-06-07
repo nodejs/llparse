@@ -14,6 +14,7 @@ import {
   LINKAGE,
   CONTAINER_KEY,
 } from '../constants';
+import { Transform } from '../transform';
 
 const debug = debugAPI('llparse:bitcode:node');
 
@@ -35,6 +36,8 @@ interface ITail {
 
 type SubTailMap = Map<Node<frontend.node.Node>, ITail>;
 type TailMap = Map<boolean, SubTailMap>;
+
+type TransformWrap = frontend.IWrap<frontend.transform.Transform>;
 
 export abstract class Node<T extends frontend.node.Node> {
   private privCompilation: Compilation | undefined;
@@ -98,6 +101,19 @@ export abstract class Node<T extends frontend.node.Node> {
     : Node<frontend.node.Node> {
     const container = wrap as frontend.ContainerWrap<frontend.node.Node>;
     return container.get<Node<frontend.node.Node>>(CONTAINER_KEY);
+  }
+
+  protected applyTransform(transform: TransformWrap, bb: IRBasicBlock,
+                           value: IRValue): IRValue {
+    // Transform the character
+    const transformContainer = transform as
+        frontend.ContainerWrap<frontend.transform.Transform>;
+
+    value = transformContainer
+        .get<Transform<frontend.transform.Transform>>(CONTAINER_KEY)
+        .build(this.compilation, bb, value);
+
+    return value;
   }
 
   protected prologue(bb: IRBasicBlock, pos: INodePosition): IRBasicBlock {

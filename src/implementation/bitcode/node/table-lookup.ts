@@ -1,37 +1,19 @@
 import * as assert from 'assert';
+import * as frontend from 'llparse-frontend';
 
 import { IRBasicBlock, IRValue } from '../compilation';
 import { GEP_OFF } from '../constants';
-import { IUniqueName } from '../utils';
 import { INodePosition, Node } from './base';
-import { Error as ErrorNode } from './error';
-import { Match } from './match';
 
 const MAX_CHAR = 0xff;
 const CELL_WIDTH = 8;
 
-export interface ITableEdge {
-  readonly keys: ReadonlyArray<number>;
-  readonly node: Node;
-  readonly noAdvance: boolean;
-}
-
 interface ITable {
   readonly global: IRValue;
-  readonly nodeToIndex: ReadonlyMap<Node, number>;
+  readonly nodeToIndex: ReadonlyMap<frontend.IWrap<frontend.node.Node>, number>;
 }
 
-export class TableLookup extends Match {
-  protected readonly edges: ITableEdge[] = [];
-
-  constructor(id: IUniqueName) {
-    super(id);
-  }
-
-  public addEdge(edge: ITableEdge): void {
-    this.edges.push(edge);
-  }
-
+export class TableLookup extends Node<frontend.node.TableLookup> {
   protected doBuild(bb: IRBasicBlock, pos: INodePosition): void {
     bb = this.prologue(bb, pos);
 
@@ -42,7 +24,7 @@ export class TableLookup extends Match {
     let current: IRValue = bb.load(pos.current);
 
     // Transform the character
-    current = this.transform!.build(ctx, bb, current);
+    current = this.applyTransform(this.ref.transform!, bb, current);
 
     // Extend character to prevent signed problems
     current = ctx.truncate(bb, current, GEP_OFF);
@@ -61,7 +43,7 @@ export class TableLookup extends Match {
     // TODO(indutny): de-duplicate this
     // Mark error branches as unlikely
     const cases = nodes.map((node) => {
-      if (node instanceof ErrorNode) {
+      if (node.ref instanceof frontend.node.Error) {
         return 'unlikely';
       } else {
         return 'likely';
@@ -70,11 +52,11 @@ export class TableLookup extends Match {
 
     const s = ctx.switch(bb, cell, keys, {
       cases,
-      otherwise: this.otherwise!.node instanceof ErrorNode ?
+      otherwise: this.ref.otherwise!.node.ref instanceof frontend.node.Error ?
         'unlikely' : 'likely',
     });
 
-    this.edges.forEach((edge, index) => {
+    this.ref.edges.forEach((edge, index) => {
       this.tailTo(s.cases[index], {
         noAdvance: edge.noAdvance,
         node: edge.node,
@@ -82,14 +64,15 @@ export class TableLookup extends Match {
       }, pos);
     });
 
-    this.tailTo(s.otherwise, this.otherwise!, pos);
+    this.tailTo(s.otherwise, this.ref.otherwise!, pos);
   }
 
   private buildTable(): ITable {
     const table: number[] = new Array(MAX_CHAR + 1).fill(0);
-    const nodeToIndex: Map<Node, number> = new Map();
+    const nodeToIndex: Map<frontend.IWrap<frontend.node.Node>, number> =
+        new Map();
 
-    this.edges.forEach((edge) => {
+    this.ref.edges.forEach((edge) => {
       const index = nodeToIndex.size + 1;
       nodeToIndex.set(edge.node, index);
 
