@@ -29,7 +29,8 @@ export interface INodePosition {
   readonly next: IRValue;
 }
 
-interface ITail {
+// TODO(indutny): Why `export` is needed here?
+export interface ITail {
   readonly block: IRBasicBlock;
   readonly phi: IRPhi;
 }

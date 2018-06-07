@@ -13,41 +13,17 @@ import { InitBuilder } from './helpers/init-builder';
 
 const debug = debugAPI('llparse:compiler');
 
-export interface ICompilerOptions {
-   /**
-    * Debug method name
-    *
-    * The method must have following signature:
-    *
-    * ```c
-    * void debug(llparse_t* state, const char* p, const char* endp,
-    *            const char* msg);
-    * ```
-    *
-    * Where `llparse_t` is a parser state type.
-    */
+export interface IBitcodeCompilerOptions {
   readonly debug?: string;
-
-  /** What guard define to use in `#ifndef` in C headers */
-  readonly headerGuard?: string;
-}
-
-/** Build artifacts */
-export interface ICompilerResult {
-  /** Bitcode output */
-  readonly bitcode: Buffer;
-
-  /** C header */
-  readonly header: string;
 }
 
 export class Compiler {
   constructor(container: frontend.Container,
-              private readonly options: ICompilerOptions) {
+              private readonly options: IBitcodeCompilerOptions) {
     container.add(CONTAINER_KEY, { code, node, transform });
   }
 
-  public compile(info: frontend.IFrontendResult): ICompilerResult {
+  public compile(info: frontend.IFrontendResult): Buffer {
     // Compile to bitcode
     const compilation = new Compilation(info.prefix, info.properties,
         info.spans, this.options);
@@ -72,10 +48,7 @@ export class Compiler {
     debug('building bitcode');
     const bitcode = compilation.buildBitcode(initFn);
 
-    debug('building header');
-    const header = compilation.buildHeader();
-
     debug('done');
-    return { bitcode, header };
+    return bitcode;
   }
 }
