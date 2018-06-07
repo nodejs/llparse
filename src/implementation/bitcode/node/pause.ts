@@ -10,7 +10,7 @@ export class Pause extends ErrorNode<frontend.node.Pause> {
     bb = this.storeError(bb, pos);
 
     // Recoverable state
-    const otherwise = this.cast(this.ref.otherwise!.node).build(ctx);
+    const otherwise = ctx.unwrapNode(this.ref.otherwise!.node).build(ctx);
     ctx.addResumptionTarget(otherwise);
     bb.store(otherwise, ctx.currentField(bb));
 

@@ -97,23 +97,10 @@ export abstract class Node<T extends frontend.node.Node> {
     return this.privCompilation!;
   }
 
-  protected cast(wrap: frontend.IWrap<frontend.node.Node>)
-    : Node<frontend.node.Node> {
-    const container = wrap as frontend.ContainerWrap<frontend.node.Node>;
-    return container.get<Node<frontend.node.Node>>(CONTAINER_KEY);
-  }
-
   protected applyTransform(transform: TransformWrap, bb: IRBasicBlock,
                            value: IRValue): IRValue {
-    // Transform the character
-    const transformContainer = transform as
-        frontend.ContainerWrap<frontend.transform.Transform>;
-
-    value = transformContainer
-        .get<Transform<frontend.transform.Transform>>(CONTAINER_KEY)
-        .build(this.compilation, bb, value);
-
-    return value;
+    const wrap = this.compilation.unwrapTransform(transform);
+    return wrap.build(this.compilation, bb, value);
   }
 
   protected prologue(bb: IRBasicBlock, pos: INodePosition): IRBasicBlock {
@@ -166,7 +153,7 @@ export abstract class Node<T extends frontend.node.Node> {
         edgeTo.ref.id.originalName);
     }
 
-    const edgeNode = this.cast(edgeTo);
+    const edgeNode = ctx.unwrapNode(edgeTo);
 
     const value = edge.value === undefined ? matchTy.undef() :
       matchTy.val(edge.value);

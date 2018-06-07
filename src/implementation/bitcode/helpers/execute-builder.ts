@@ -103,7 +103,7 @@ export class ExecuteBuilder {
 
       let cb;
       if (span.callbacks.length === 1) {
-        cb = span.callbacks[0].build(ctx);
+        cb = ctx.unwrapCode(span.callbacks[0]).build(ctx);
       } else {
         cb = present.load(ctx.spanCbField(present, span.index));
       }
@@ -117,7 +117,7 @@ export class ExecuteBuilder {
       ]);
       if (span.callbacks.length > 1) {
         const callees = span.callbacks.map((callback) => {
-          return ctx.ir.metadata(callback.build(ctx));
+          return ctx.ir.metadata(ctx.unwrapCode(callback).build(ctx));
         });
         call.metadata.set('callees', ctx.ir.metadata(callees));
       }

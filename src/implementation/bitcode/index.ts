@@ -49,7 +49,7 @@ export class Compiler {
 
   public compile(info: frontend.IFrontendResult): ICompilerResult {
     // Compile to bitcode
-    const compilation = new Compilation(info.prefix, info.root, info.properties,
+    const compilation = new Compilation(info.prefix, info.properties,
         info.spans, this.options);
 
     debug('building root');
@@ -57,6 +57,9 @@ export class Compiler {
     const initFn = root.get<Node<frontend.node.Node>>(CONTAINER_KEY)
         .build(compilation);
     compilation.addResumptionTarget(initFn);
+
+    debug('building match sequence');
+    compilation.buildMatchSequence();
 
     debug('building init');
     const ib = new InitBuilder();

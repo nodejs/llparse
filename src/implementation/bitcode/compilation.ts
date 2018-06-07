@@ -5,9 +5,13 @@ import {
   Module as Bitcode,
 } from 'bitcode';
 import { Buffer } from 'buffer';
-import { Identifier, SpanField } from 'llparse-frontend';
+import * as frontend from 'llparse-frontend';
 
 import * as constants from './constants';
+import { MatchSequence } from './helpers/match-sequence';
+import { Code } from './code';
+import { Node } from './node';
+import { Transform } from './transform';
 
 import irTypes = bitcodeBuilderNS.types;
 import irValues = bitcodeBuilderNS.values;
@@ -18,6 +22,8 @@ import IRBasicBlock = irValues.BasicBlock;
 import IRPhi = irValues.instructions.Phi;
 import IRType = irTypes.Type;
 import IRValue = irValues.Value;
+
+type TransformWrap = Transform<frontend.transform.Transform>;
 
 export {
   irTypes, irValues, IRBasicBlock, IRDeclaration, IRFunc, IRPhi, IRSignature,
@@ -73,14 +79,14 @@ export class Compilation {
 
   private readonly bitcode: Bitcode = new Bitcode();
   private readonly cstringCache: Map<string, IRValue> = new Map();
-  private readonly globalId: Identifier = new Identifier('g_');
+  private readonly globalId = new frontend.Identifier('g_');
   private readonly resumptionTargets: Set<IRDeclaration> = new Set();
+  private readonly matchSequence: Map<TransformWrap, MatchSequence> = new Map();
   private debugMethod: IRDeclaration | undefined = undefined;
 
   constructor(public readonly prefix: string,
-              public readonly root: node.Node,
               private readonly properties: ReadonlyArray<ICompilationProperty>,
-              spans: ReadonlyArray<SpanField>,
+              spans: ReadonlyArray<frontend.SpanField>,
               public readonly options: ICompilationOptions) {
     this.ir = this.bitcode.createBuilder();
     this.invariantGroup = this.ir.metadata([
@@ -212,6 +218,30 @@ export class Compilation {
     res += `#endif  /* ${DEFINE} */\n`;
 
     return res;
+  }
+
+  // MatchSequence cache
+
+  public getMatchSequence(
+    transform: frontend.IWrap<frontend.transform.Transform>, select: Buffer)
+    : IRDeclaration {
+    const wrap = this.unwrapTransform(transform);
+
+    let match: MatchSequence;
+    if (this.matchSequence.has(wrap)) {
+      match = this.matchSequence.get(wrap)!;
+    } else {
+      match = new MatchSequence(wrap);
+      this.matchSequence.set(wrap, match);
+    }
+    match.addSequence(select);
+    return match.preBuild(this);
+  }
+
+  public buildMatchSequence(): void {
+    for (const match of this.matchSequence.values()) {
+      match.build(this);
+    }
   }
 
   // Arguments
@@ -428,6 +458,25 @@ export class Compilation {
     ]);
 
     return bb;
+  }
+
+  public unwrapCode(code: frontend.IWrap<frontend.code.Code>)
+    : Code<frontend.code.Code> {
+    const container = code as frontend.ContainerWrap<frontend.code.Code>;
+    return container.get(constants.CONTAINER_KEY);
+  }
+
+  public unwrapNode(node: frontend.IWrap<frontend.node.Node>)
+    : Node<frontend.node.Node> {
+    const container = node as frontend.ContainerWrap<frontend.node.Node>;
+    return container.get(constants.CONTAINER_KEY);
+  }
+
+  public unwrapTransform(node: frontend.IWrap<frontend.transform.Transform>)
+    : Transform<frontend.transform.Transform> {
+    const container =
+        node as frontend.ContainerWrap<frontend.transform.Transform>;
+    return container.get(constants.CONTAINER_KEY);
   }
 
   // Internals

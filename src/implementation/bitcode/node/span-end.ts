@@ -17,10 +17,7 @@ export class SpanEnd extends Node<frontend.node.SpanEnd> {
     // ...and reset
     bb.store(start.ty.toPointer().val(null), startPtr);
 
-    const callbackContainer =
-        this.ref.callback as frontend.ContainerWrap<frontend.code.Code>;
-    const callback = callbackContainer.get<Code<frontend.code.Code>>(
-        CONTAINER_KEY);
+    const callback = ctx.unwrapCode(this.ref.callback);
 
     const call = bb.call(callback.build(ctx), [
       ctx.stateArg(bb),
@@ -62,7 +59,7 @@ export class SpanEnd extends Node<frontend.node.SpanEnd> {
     bb.store(otherwise.noAdvance ? pos.current : pos.next,
       ctx.errorPosField(bb));
 
-    const resumptionTarget = this.cast(otherwise.node).build(ctx);
+    const resumptionTarget = ctx.unwrapNode(otherwise.node).build(ctx);
     bb.store(resumptionTarget, ctx.currentField(bb));
     ctx.addResumptionTarget(resumptionTarget);
 

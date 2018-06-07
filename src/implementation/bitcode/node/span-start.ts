@@ -16,11 +16,7 @@ export class SpanStart extends Node<frontend.node.SpanStart> {
     bb.store(ctx.posArg(bb), ctx.spanPosField(bb, field.index));
 
     if (field.callbacks.length > 1) {
-      const callbackContainer =
-          this.ref.callback as frontend.ContainerWrap<frontend.code.Code>;
-      const callback = callbackContainer.get<Code<frontend.code.Code>>(
-          CONTAINER_KEY);
-
+      const callback = ctx.unwrapCode(this.ref.callback);
       bb.store(callback.build(ctx), ctx.spanCbField(bb, field.index));
     }
 

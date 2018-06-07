@@ -19,9 +19,9 @@ export class Sequence extends Node<frontend.node.Sequence> {
 
     const cast = bb.getelementptr(seq, GEP_OFF.val(0), GEP_OFF.val(0), true);
 
-    // TODO(indutny): implement this
-    const matchSequence = this.compilation.getMatchSequence(this.ref.transform)
-      .preBuild(ctx);
+    assert(this.ref.transform !== undefined);
+    const matchSequence = this.compilation.getMatchSequence(this.ref.transform!,
+        this.ref.select);
 
     const returnType = matchSequence.ty.toSignature().returnType.toStruct();
 

@@ -1,7 +1,9 @@
+import * as assert from 'assert';
 import { Buffer } from 'buffer';
+import * as frontend from 'llparse-frontend';
 
 import {
-  Compilation, IRBasicBlock, IRDeclaration, IRSignature, IRValue,
+  Compilation, IRBasicBlock, IRDeclaration, IRFunc, IRSignature, IRValue,
 } from '../compilation';
 import {
   ARG_ENDPOS, ARG_POS, ARG_SEQUENCE, ARG_SEQUENCE_LEN, ARG_STATE,
@@ -14,7 +16,9 @@ import {
   SEQUENCE_COMPLETE, SEQUENCE_MISMATCH, SEQUENCE_PAUSE,
   TYPE_ENDPOS, TYPE_POS, TYPE_SEQUENCE, TYPE_SEQUENCE_LEN, TYPE_STATUS,
 } from '../constants';
-import { Transform } from './transform';
+import { Transform } from '../transform';
+
+type TransformWrap = Transform<frontend.transform.Transform>;
 
 interface IMatchIteration {
   readonly complete: IRBasicBlock;
@@ -30,18 +34,18 @@ interface IMatchIteration {
 
 export class MatchSequence {
   private maxSequenceLen: number = 0;
-  private cachedDecl: IRDeclaration | undefined;
+  private cachedFn: IRFunc | undefined;
 
-  constructor(private readonly transform: Transform) {
+  constructor(private readonly transform: TransformWrap) {
   }
 
   public addSequence(sequence: Buffer): void {
     this.maxSequenceLen = Math.max(this.maxSequenceLen, sequence.length);
   }
 
-  public build(ctx: Compilation): IRDeclaration {
-    if (this.cachedDecl !== undefined) {
-      return this.cachedDecl;
+  public preBuild(ctx: Compilation): IRDeclaration {
+    if (this.cachedFn !== undefined) {
+      return this.cachedFn;
     }
 
     const returnType = ctx.ir.struct();
@@ -58,7 +62,7 @@ export class MatchSequence {
     ]);
 
     const fn = ctx.defineFunction(signature,
-      `${ctx.prefix}__match_sequence_${this.transform.name}`,
+      `${ctx.prefix}__match_sequence_${this.transform.ref.name}`,
       [ ARG_STATE, ARG_POS, ARG_ENDPOS, ARG_SEQUENCE, ARG_SEQUENCE_LEN ]);
 
     fn.paramAttrs[0].add(ATTR_STATE);
@@ -71,11 +75,15 @@ export class MatchSequence {
     fn.linkage = LINKAGE;
     fn.cconv = CCONV;
 
-    this.cachedDecl = fn;
-
-    this.buildBody(ctx, fn.body);
+    this.cachedFn = fn;
 
     return fn;
+  }
+
+  public build(ctx: Compilation): void {
+    assert(this.cachedFn !== undefined);
+
+    this.buildBody(ctx, this.cachedFn!.body);
   }
 
   private buildBody(ctx: Compilation, bb: IRBasicBlock): void {

@@ -19,8 +19,7 @@ export default {
   Error: class Error extends ErrorNode<frontend.node.Error> {},
   Invoke,
   Pause,
-  // TODO(indutny): enable me, after implementing match-sequence
-  // Sequence,
+  Sequence,
   Single,
   SpanEnd,
   SpanStart,

@@ -10,9 +10,7 @@ export class Invoke extends Node<frontend.node.Invoke> {
   protected doBuild(bb: IRBasicBlock, pos: INodePosition): void {
     const ctx = this.compilation;
 
-    // TODO(indutny): declare the type
-    const code = (this.ref.code as frontend.ContainerWrap<frontend.code.Code>)
-        .get<Code<frontend.code.Code>>(CONTAINER_KEY);
+    const code = ctx.unwrapCode(this.ref.code);
     const codeDecl = code.build(ctx);
 
     const args: IRValue[] = [
