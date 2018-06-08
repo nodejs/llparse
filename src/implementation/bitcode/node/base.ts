@@ -137,29 +137,14 @@ export abstract class Node<T extends frontend.node.Node> {
     const matchTy = ctx.matchArg(bb).ty;
 
     // Skip `noAdvance = true` Empty nodes
-    let edgeTo = edge.node;
+    const edgeTo = ctx.unwrapNode(edge.node);
     debug('"%s" tails to "%s"', this.ref.id.originalName,
         edgeTo.ref.id.originalName);
 
-    while (edgeTo.ref instanceof frontend.node.Empty) {
-      if (!edgeTo.ref.otherwise!.noAdvance) {
-        break;
-      }
-
-      edgeTo = edgeTo.ref.otherwise!.node;
-    }
-
-    if (edge.node !== edgeTo) {
-      debug('Optimized tail from "%s" to "%s"', this.ref.id.originalName,
-        edgeTo.ref.id.originalName);
-    }
-
-    const edgeNode = ctx.unwrapNode(edgeTo);
-
     const value = edge.value === undefined ? matchTy.undef() :
       matchTy.val(edge.value);
-    if (subTailMap.has(edgeNode)) {
-      const tail = subTailMap.get(edgeNode)!;
+    if (subTailMap.has(edgeTo)) {
+      const tail = subTailMap.get(edgeTo)!;
 
       tail.phi.addEdge({ fromBlock: bb, value });
       bb.jmp(tail.block);
@@ -171,7 +156,7 @@ export abstract class Node<T extends frontend.node.Node> {
     bb.jmp(tailBB);
 
     const phi = tailBB.phi({ fromBlock: bb, value });
-    subTailMap.set(edgeNode, { block: tailBB, phi });
+    subTailMap.set(edgeTo, { block: tailBB, phi });
 
     const args = [
       ctx.stateArg(bb),
@@ -180,7 +165,7 @@ export abstract class Node<T extends frontend.node.Node> {
       phi,
     ];
 
-    const res = tailBB.call(edgeNode.build(ctx), args, 'musttail');
+    const res = tailBB.call(edgeTo.build(ctx), args, 'musttail');
     tailBB.ret(res);
   }
 }
