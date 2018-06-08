@@ -1,4 +1,4 @@
-import { source } from 'llparse-frontend'
+import { source } from 'llparse-frontend';
 import { Fixture, FixtureResult } from 'llparse-test-fixture';
 import * as path from 'path';
 

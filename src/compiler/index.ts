@@ -81,15 +81,15 @@ export class Compiler {
     const hb = new HeaderBuilder();
 
     const header = hb.build({
-      prefix: this.prefix,
       headerGuard: this.options.headerGuard,
-      properties: properties,
+      prefix: this.prefix,
+      properties,
       spans: info.spans,
     });
 
-    let result: IWritableCompilerResult = {
-      header,
+    const result: IWritableCompilerResult = {
       bitcode: undefined,
+      header,
     };
     if (bitcode) {
       result.bitcode = bitcode.compile(info);
