@@ -13,8 +13,6 @@ import { InitBuilder } from './helpers/init-builder';
 
 const debug = debugAPI('llparse:bitcode');
 
-export { CONTAINER_KEY };
-
 export interface IBitcodeCompilerOptions {
   readonly debug?: string;
 }

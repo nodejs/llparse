@@ -4,6 +4,7 @@ import * as frontend from 'llparse-frontend';
 import source = frontend.source;
 
 import * as bitcodeImpl from '../implementation/bitcode';
+import * as cImpl from '../implementation/c';
 import { HeaderBuilder } from './header-builder';
 
 const debug = debugAPI('llparse:compiler');
@@ -33,6 +34,9 @@ export interface ICompilerOptions {
   /** Generate bitcode (`true` by default) */
   readonly generateBitcode?: boolean;
 
+  /** Generate C (`true` by default) */
+  readonly generateC?: boolean;
+
   /** Optional frontend configuration */
   readonly frontend?: frontend.IFrontendLazyOptions;
 }
@@ -44,6 +48,11 @@ export interface ICompilerResult {
   readonly bitcode?: Buffer;
 
   /**
+   * Textual C code, if `generateC` option was `true`
+   */
+  readonly c?: string;
+
+  /**
    * Textual C header file
    */
   readonly header: string;
@@ -51,6 +60,7 @@ export interface ICompilerResult {
 
 interface IWritableCompilerResult {
   bitcode?: Buffer;
+  c?: string;
   header: string;
 }
 
@@ -67,6 +77,13 @@ export class Compiler {
     let bitcode: bitcodeImpl.BitcodeCompiler | undefined;
     if (this.options.generateBitcode !== false) {
       bitcode = new bitcodeImpl.BitcodeCompiler(container, {
+        debug: this.options.debug,
+      });
+    }
+
+    let c: cImpl.CCompiler | undefined;
+    if (this.options.generateC !== false) {
+      c = new cImpl.CCompiler(container, {
         debug: this.options.debug,
       });
     }
@@ -91,8 +108,15 @@ export class Compiler {
       bitcode: undefined,
       header,
     };
+
+    debug('Building bitcode');
     if (bitcode) {
       result.bitcode = bitcode.compile(info);
+    }
+
+    debug('Building C');
+    if (c) {
+      result.c = c.compile(info);
     }
 
     return result;
