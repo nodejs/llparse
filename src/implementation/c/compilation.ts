@@ -9,6 +9,12 @@ import { Transform } from './transform';
 export class Compilation {
   private readonly stateMap: Map<string, ReadonlyArray<string>> = new Map();
 
+  public buildStateEnum(out: string[]): void {
+    out.push('enum llparse_state_e {');
+    this.stateMap.forEach((_, name) => out.push(`  ${name},`));
+    out.push('};');
+  }
+
   public buildStates(out: string[]): void {
     this.stateMap.forEach((lines, name) => {
       out.push(`case ${name}: {`);

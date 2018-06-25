@@ -39,6 +39,9 @@ export interface ICompilerOptions {
 
   /** Optional frontend configuration */
   readonly frontend?: frontend.IFrontendLazyOptions;
+
+  /** Optional C-backend configuration */
+  readonly c?: cImpl.ICPublicOptions;
 }
 
 export interface ICompilerResult {
@@ -83,9 +86,9 @@ export class Compiler {
 
     let c: cImpl.CCompiler | undefined;
     if (this.options.generateC !== false) {
-      c = new cImpl.CCompiler(container, {
+      c = new cImpl.CCompiler(container, Object.assign({
         debug: this.options.debug,
-      });
+      }, this.options.c));
     }
 
     debug('Running frontend pass');
@@ -117,6 +120,7 @@ export class Compiler {
     debug('Building C');
     if (c) {
       result.c = c.compile(info);
+      console.log(result.c);
     }
 
     return result;

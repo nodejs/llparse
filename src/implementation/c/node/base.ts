@@ -22,12 +22,12 @@ export abstract class Node<T extends frontend.node.Node> {
       return this.cachedDecl;
     }
 
+    const res = STATE_PREFIX + this.ref.id.name;
+    this.cachedDecl = res;
+
     this.privCompilation = compilation;
     const out: string[] = [];
     this.doBuild(out);
-
-    const res = STATE_PREFIX + this.ref.id.name;
-    this.cachedDecl = res;
 
     compilation.addState(res, out);
 
@@ -50,8 +50,7 @@ export abstract class Node<T extends frontend.node.Node> {
   }
 
   protected pause(out: string[]): void {
-    out.push(`${ARG_STATE}->_current = (void*) (intptr_t) ${this.cachedDecl};`);
-    out.push('return 0;');
+    out.push(`return ${this.cachedDecl};`);
   }
 
   protected tailTo(out: string[], edge: INodeEdge): void {
