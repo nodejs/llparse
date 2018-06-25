@@ -4,6 +4,7 @@ import { ARG_STATE, ARG_POS, ARG_ENDPOS, CONTAINER_KEY } from './constants';
 import { Compilation } from './compilation';
 import code from './code';
 import node from './node';
+import { Node } from './node';
 import transform from './transform';
 
 export interface ICCompilerOptions {
@@ -25,14 +26,16 @@ export class CCompiler {
     const compilation = new Compilation();
     const out: string[] = [];
 
-    let rootState = 'todo';
-
     out.push('#include <stdlib.h>');
     out.push('#include <stdint.h>');
     out.push('#include <string.h>');
     out.push('');
     out.push(`#include "${this.options.header || info.prefix}.h"`);
     out.push(``);
+
+    const root = info.root as frontend.ContainerWrap<frontend.node.Node>;
+    const rootState = root.get<Node<frontend.node.Node>>(CONTAINER_KEY)
+        .build(compilation);
 
     compilation.buildStateEnum(out);
     out.push('');
