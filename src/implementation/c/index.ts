@@ -18,7 +18,7 @@ export interface ICPublicOptions {
 export class CCompiler {
   constructor(container: frontend.Container,
               public readonly options: ICCompilerOptions) {
-    // container.add(CONTAINER_KEY, { code, node, transform });
+    container.add(CONTAINER_KEY, { code, node, transform });
   }
 
   public compile(info: frontend.IFrontendResult): string {
