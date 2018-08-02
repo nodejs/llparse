@@ -4,9 +4,7 @@
 
 An API for compiling an incremental parser into [LLVM bitcode][3].
 
-**NOTE: The resulting bitcode works only on a trunk version of `clang` now,
-other versions are broken. The required fixes will be released in
-`clang` 6.0.1**
+**NOTE: The resulting bitcode works with `clang` 6.0.1 or later**
 
 ## Usage
 
@@ -87,7 +85,4 @@ DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-[0]: https://reviews.llvm.org/D43729
-[1]: https://reviews.llvm.org/D43708
-[2]: https://reviews.llvm.org/D43695
 [3]: https://llvm.org/docs/LangRef.html
