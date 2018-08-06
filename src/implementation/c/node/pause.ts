@@ -1,9 +1,9 @@
 import * as frontend from 'llparse-frontend';
 
 import { Compilation } from '../compilation';
-import { Node } from './base';
+import { Error as ErrorNode } from './error';
 
-export class Pause extends Node<frontend.node.Pause> {
+export class Pause extends ErrorNode<frontend.node.Pause> {
   public doBuild(out: string[]): void {
   }
 }

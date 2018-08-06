@@ -47,7 +47,8 @@ export class CCompiler {
     out.push('}');
     out.push('');
 
-    out.push(`static int ${info.prefix}_run(${info.prefix}_t* ${ARG_STATE}, ` +
+    out.push(`static llparse_state_e ${info.prefix}_run(` +
+             `${info.prefix}_t* ${ARG_STATE}, ` +
              `const char* ${ARG_POS}, const char* ${ARG_ENDPOS}) {`);
     out.push('  switch (current) {');
 
@@ -60,6 +61,7 @@ export class CCompiler {
     out.push('      abort();');
     out.push('  }');
     out.push('}');
+    out.push('');
 
     out.push(`int ${info.prefix}_execute(${info.prefix}_t* ${ARG_STATE}, ` +
              `const char* ${ARG_POS}, const char* ${ARG_ENDPOS}) {`);
