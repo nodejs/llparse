@@ -57,6 +57,12 @@ export class Compilation {
     return container.get(CONTAINER_KEY);
   }
 
+  public indent(out: string[], lines: ReadonlyArray<string>, pad: string) {
+    for (const line of lines) {
+      out.push(`${pad}${line}`);
+    }
+  }
+
   // Arguments
 
   public stateArg(): string {

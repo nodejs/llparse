@@ -44,7 +44,7 @@ export abstract class Node<T extends frontend.node.Node> {
 
     const tmp: string[] = [];
     this.pause(tmp);
-    tmp.forEach((line) => out.push(`  ${line}`));
+    this.compilation.indent(out, tmp, '  ');
 
     out.push('}');
   }
