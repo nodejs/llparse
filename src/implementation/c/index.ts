@@ -50,7 +50,7 @@ export class CCompiler {
     out.push(`static llparse_state_e ${info.prefix}_run(` +
              `${info.prefix}_t* ${ARG_STATE}, ` +
              `const char* ${ARG_POS}, const char* ${ARG_ENDPOS}) {`);
-    out.push('  switch (current) {');
+    out.push(`  switch (${compilation.currentField()}) {`);
 
     const tmp: string[] = [];
     compilation.buildStates(tmp);
