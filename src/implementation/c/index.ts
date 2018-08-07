@@ -44,9 +44,6 @@ export class CCompiler {
     compilation.buildGlobals(out);
     out.push('');
 
-    compilation.buildStateEnum(out);
-    out.push('');
-
     out.push(`int ${info.prefix}_init(${info.prefix}_t* ${ARG_STATE}) {`);
     out.push(`  memset(${ARG_STATE}, 0, sizeof(*${ARG_STATE}));`);
     out.push(`  ${ARG_STATE}->_current = (void*) (intptr_t) ${rootState};`);

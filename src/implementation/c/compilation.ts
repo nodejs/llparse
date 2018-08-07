@@ -18,7 +18,7 @@ export class Compilation {
   private readonly stateMap: Map<string, ReadonlyArray<string>> = new Map();
   private readonly blobs: Map<Buffer, string> = new Map();
 
-  public buildStateEnum(out: string[]): void {
+  private buildStateEnum(out: string[]): void {
     out.push('enum llparse_state_e {');
     out.push(`  ${STATE_NULL},`);
     for (const stateName of this.stateMap.keys()) {
@@ -49,6 +49,10 @@ export class Compilation {
 
       out.push(`};`);
     }
+
+    out.push('');
+
+    this.buildStateEnum(out);
   }
 
   public buildStates(out: string[]): void {
