@@ -1,7 +1,7 @@
 import * as frontend from 'llparse-frontend';
 
 import { Compilation } from '../compilation';
-import { STATE_NULL } from '../constants';
+import { STATE_ERROR } from '../constants';
 import { Error as ErrorNode } from './error';
 
 export class Pause extends ErrorNode<frontend.node.Pause> {
@@ -14,6 +14,6 @@ export class Pause extends ErrorNode<frontend.node.Pause> {
     const otherwise = ctx.unwrapNode(this.ref.otherwise!.node).build(ctx);
     out.push(`${ctx.currentField()} = ` +
         `(void*) (intptr_t) ${otherwise};`);
-    out.push(`return ${STATE_NULL};`);
+    out.push(`return ${STATE_ERROR};`);
   }
 }

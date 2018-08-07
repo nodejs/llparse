@@ -1,7 +1,7 @@
 import * as frontend from 'llparse-frontend';
 
 import { Compilation } from '../compilation';
-import { STATE_NULL } from '../constants';
+import { STATE_ERROR } from '../constants';
 import { Node } from './base';
 
 class ErrorNode<T extends frontend.node.Error> extends Node<T> {
@@ -25,8 +25,8 @@ class ErrorNode<T extends frontend.node.Error> extends Node<T> {
 
     // Non-recoverable state
     out.push(`${this.compilation.currentField()} = ` +
-        `(void*) (intptr_t) ${STATE_NULL};`);
-    out.push(`return ${STATE_NULL};`);
+        `(void*) (intptr_t) ${STATE_ERROR};`);
+    out.push(`return ${STATE_ERROR};`);
   }
 }
 

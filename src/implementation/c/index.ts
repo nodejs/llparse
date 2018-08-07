@@ -51,7 +51,7 @@ export class CCompiler {
     out.push('}');
     out.push('');
 
-    out.push(`static llparse_state_t ${info.prefix}_run(`);
+    out.push(`static llparse_state_t ${info.prefix}__run(`);
     out.push(`    ${info.prefix}_t* ${ARG_STATE},`);
     out.push(`    const unsigned char* ${ARG_POS},`);
     out.push(`    const unsigned char* ${ARG_ENDPOS}) {`);
@@ -72,15 +72,15 @@ export class CCompiler {
 
     out.push(`int ${info.prefix}_execute(${info.prefix}_t* ${ARG_STATE}, ` +
              `const char* ${ARG_POS}, const char* ${ARG_ENDPOS}) {`);
-    out.push('  llparse_state_t current;');
+    out.push('  llparse_state_t next;');
     out.push('');
-    out.push(`  current = (intptr_t) ${ARG_STATE}->_current;`);
+    out.push(`  next = llparse__run(${ARG_STATE}, ${ARG_POS}, ${ARG_ENDPOS});`);
 
     // TODO(indutny): lingering errors
     // TODO(indutny): restart spans
     // TODO(indutny): call spans
     // TODO(indutny): return value
-    out.push(`  ${ARG_STATE}->_current = (void*) (intptr_t) current;`);
+    out.push(`  ${ARG_STATE}->_current = (void*) (intptr_t) next;`);
     out.push('  return 0;');
     out.push('}');
 

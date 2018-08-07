@@ -2,7 +2,7 @@ export const CONTAINER_KEY = 'c';
 
 export const LABEL_PREFIX = '';
 export const STATE_PREFIX = 's_n_';
-export const STATE_NULL = 's_null';
+export const STATE_ERROR = 's_error';
 
 export const BLOB_PREFIX = 'llparse_blob';
 
