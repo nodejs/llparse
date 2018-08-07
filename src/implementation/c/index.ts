@@ -56,7 +56,8 @@ export class CCompiler {
     out.push(`    const unsigned char* ${ARG_POS},`);
     out.push(`    const unsigned char* ${ARG_ENDPOS}) {`);
     out.push(`  int ${VAR_MATCH};`);
-    out.push(`  switch ((llparse_state_t) ${compilation.currentField()}) {`);
+    out.push(`  switch ((llparse_state_t) (intptr_t) ` +
+        `${compilation.currentField()}) {`);
 
     const tmp: string[] = [];
     compilation.buildStates(tmp);

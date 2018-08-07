@@ -10,8 +10,6 @@ export class Sequence extends Node<frontend.node.Sequence> {
   public doBuild(out: string[]): void {
     const ctx = this.compilation;
 
-    const otherwise = this.ref.otherwise!;
-
     this.prologue(out);
 
     const matchSequence = ctx.getMatchSequence(this.ref.transform!,
@@ -22,13 +20,37 @@ export class Sequence extends Node<frontend.node.Sequence> {
     out.push(`match = ${matchSequence}(${ctx.stateArg()}, ${ctx.posArg()}, ` +
         `${ctx.endPosArg()}, ${ctx.blob(this.ref.select)}, ` +
         `${this.ref.select.length});`);
+    out.push('p = match.current;');
+
+    let tmp: string[];
 
     out.push('switch (match.status) {');
-    out.push(`  case ${SEQUENCE_PAUSE}:`);
-    out.push(`  case ${SEQUENCE_MISMATCH}:`);
-    out.push(`  case ${SEQUENCE_COMPLETE}:`);
+
+    out.push(`  case ${SEQUENCE_COMPLETE}: {`);
+    tmp = [];
+    this.tailTo(tmp, {
+      noAdvance: false,
+      node: this.ref.edge!.node,
+      value: this.ref.edge!.value,
+    });
+    ctx.indent(out, tmp, '    ');
+    out.push('  }');
+
+    out.push(`  case ${SEQUENCE_PAUSE}: {`);
+    tmp = [];
+    this.pause(tmp);
+    ctx.indent(out, tmp, '    ');
+    out.push('  }');
+
+    out.push(`  case ${SEQUENCE_MISMATCH}: {`);
+    tmp = [];
+    this.tailTo(tmp, this.ref.otherwise!);
+    ctx.indent(out, tmp, '    ');
+    out.push('  }');
+
     out.push('}');
 
-    this.tailTo(out, otherwise);
+    out.push('/* UNREACHABLE */');
+    out.push('abort();');
   }
 }
