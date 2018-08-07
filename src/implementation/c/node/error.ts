@@ -17,7 +17,7 @@ class ErrorNode<T extends frontend.node.Error> extends Node<T> {
 
     out.push(`${ctx.errorField()} = ${hexCode};`);
     out.push(`${ctx.reasonField()} = ${ctx.cstring(this.ref.reason)};`);
-    out.push(`${ctx.errorPosField()} = ${ctx.posArg()};`);
+    out.push(`${ctx.errorPosField()} = (const char*) ${ctx.posArg()};`);
   }
 
   public doBuild(out: string[]): void {
