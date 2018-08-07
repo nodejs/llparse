@@ -24,7 +24,8 @@ class ErrorNode<T extends frontend.node.Error> extends Node<T> {
     this.storeError(out);
 
     // Non-recoverable state
-    out.push(`${this.compilation.currentField()} = ${STATE_NULL};`);
+    out.push(`${this.compilation.currentField()} = ` +
+        `(void*) (intptr_t) ${STATE_NULL};`);
     out.push(`return ${STATE_NULL};`);
   }
 }
