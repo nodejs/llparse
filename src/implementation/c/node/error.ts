@@ -8,7 +8,14 @@ class ErrorNode<T extends frontend.node.Error> extends Node<T> {
   protected storeError(out: string[]): void {
     const ctx = this.compilation;
 
-    out.push(`${ctx.errorField()} = ${this.ref.code};`);
+    let hexCode: string;
+    if (this.ref.code < 0) {
+      hexCode = `-0x` + this.ref.code.toString(16);
+    } else {
+      hexCode = '0x' + this.ref.code.toString(16);
+    }
+
+    out.push(`${ctx.errorField()} = ${hexCode};`);
     out.push(`${ctx.reasonField()} = ${ctx.cstring(this.ref.reason)};`);
     out.push(`${ctx.errorPosField()} = ${ctx.posArg()};`);
   }
