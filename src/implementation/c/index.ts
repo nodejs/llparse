@@ -27,7 +27,7 @@ export class CCompiler {
   }
 
   public compile(info: frontend.IFrontendResult): string {
-    const compilation = new Compilation();
+    const compilation = new Compilation(info.prefix);
     const out: string[] = [];
 
     out.push('#include <stdlib.h>');
@@ -51,10 +51,10 @@ export class CCompiler {
     out.push('}');
     out.push('');
 
-    out.push(`static llparse_state_t ${info.prefix}_run(` +
-             `${info.prefix}_t* ${ARG_STATE}, ` +
-             `const unsigned char* ${ARG_POS}, ` +
-             `const unsigned char* ${ARG_ENDPOS}) {`);
+    out.push(`static llparse_state_t ${info.prefix}_run(`);
+    out.push(`    ${info.prefix}_t* ${ARG_STATE},`);
+    out.push(`    const unsigned char* ${ARG_POS},`);
+    out.push(`    const unsigned char* ${ARG_ENDPOS}) {`);
     out.push(`  int ${VAR_MATCH};`);
     out.push(`  switch ((llparse_state_t) ${compilation.currentField()}) {`);
 

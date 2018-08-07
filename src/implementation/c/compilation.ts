@@ -22,6 +22,9 @@ export class Compilation {
   private readonly matchSequence:
       Map<Transform<frontend.transform.Transform>, MatchSequence> = new Map();
 
+  constructor(public readonly prefix: string) {
+  }
+
   private buildStateEnum(out: string[]): void {
     out.push('enum llparse_state_e {');
     out.push(`  ${STATE_NULL},`);
@@ -29,7 +32,7 @@ export class Compilation {
       out.push(`  ${stateName},`);
     }
     out.push('};');
-    out.push('typedef enum llparse_state_e llparse_state_t');
+    out.push('typedef enum llparse_state_e llparse_state_t;');
   }
 
   private buildBlobs(out: string[]): void {
@@ -70,9 +73,9 @@ export class Compilation {
     out.push('');
 
     for (const match of this.matchSequence.values()) {
-      match.build(out);
+      match.build(this, out);
+      out.push('');
     }
-    out.push('');
   }
 
   public buildGlobals(out: string[]): void {
