@@ -1,6 +1,9 @@
 import * as frontend from 'llparse-frontend';
 
 import { Compilation } from '../compilation';
+import {
+  SEQUENCE_COMPLETE, SEQUENCE_MISMATCH, SEQUENCE_PAUSE,
+} from '../constants';
 import { Node } from './base';
 
 export class Sequence extends Node<frontend.node.Sequence> {
@@ -21,9 +24,9 @@ export class Sequence extends Node<frontend.node.Sequence> {
         `${this.ref.select.length});`);
 
     out.push('switch (match.status) {');
-    out.push('  case kMatchPause:');
-    out.push('  case kMatchMismatch:');
-    out.push('  case kMatchComplete:');
+    out.push(`  case ${SEQUENCE_PAUSE}:`);
+    out.push(`  case ${SEQUENCE_MISMATCH}:`);
+    out.push(`  case ${SEQUENCE_COMPLETE}:`);
     out.push('}');
 
     this.tailTo(out, otherwise);

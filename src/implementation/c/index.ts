@@ -51,13 +51,12 @@ export class CCompiler {
     out.push('}');
     out.push('');
 
-    out.push(`static enum llparse_state_e ${info.prefix}_run(` +
+    out.push(`static llparse_state_t ${info.prefix}_run(` +
              `${info.prefix}_t* ${ARG_STATE}, ` +
              `const unsigned char* ${ARG_POS}, ` +
              `const unsigned char* ${ARG_ENDPOS}) {`);
     out.push(`  int ${VAR_MATCH};`);
-    out.push(`  switch ((enum llparse_state_e) ` +
-        `${compilation.currentField()}) {`);
+    out.push(`  switch ((llparse_state_t) ${compilation.currentField()}) {`);
 
     const tmp: string[] = [];
     compilation.buildStates(tmp);
@@ -72,7 +71,7 @@ export class CCompiler {
 
     out.push(`int ${info.prefix}_execute(${info.prefix}_t* ${ARG_STATE}, ` +
              `const char* ${ARG_POS}, const char* ${ARG_ENDPOS}) {`);
-    out.push('  enum llparse_state_e current;');
+    out.push('  llparse_state_t current;');
     out.push('');
     out.push(`  current = (intptr_t) ${ARG_STATE}->_current;`);
 

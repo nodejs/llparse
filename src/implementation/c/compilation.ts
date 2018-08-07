@@ -7,16 +7,20 @@ import {
   ARG_STATE, ARG_POS, ARG_ENDPOS,
   VAR_MATCH,
   LABEL_PREFIX, BLOB_PREFIX,
+  SEQUENCE_COMPLETE, SEQUENCE_MISMATCH, SEQUENCE_PAUSE,
 } from './constants';
 import { Code } from './code';
 import { Node } from './node';
 import { Transform } from './transform';
+import { MatchSequence } from './helpers/match-sequence';
 
 const BLOB_GROUP_SIZE = 11;
 
 export class Compilation {
   private readonly stateMap: Map<string, ReadonlyArray<string>> = new Map();
   private readonly blobs: Map<Buffer, string> = new Map();
+  private readonly matchSequence:
+      Map<Transform<frontend.transform.Transform>, MatchSequence> = new Map();
 
   private buildStateEnum(out: string[]): void {
     out.push('enum llparse_state_e {');
@@ -25,9 +29,14 @@ export class Compilation {
       out.push(`  ${stateName},`);
     }
     out.push('};');
+    out.push('typedef enum llparse_state_e llparse_state_t');
   }
 
-  public buildGlobals(out: string[]): void {
+  private buildBlobs(out: string[]): void {
+    if (this.blobs.size === 0) {
+      return;
+    }
+
     for (const [ blob, name ] of this.blobs) {
       out.push(`static const unsigned char ${name}[] = {`);
 
@@ -49,9 +58,26 @@ export class Compilation {
 
       out.push(`};`);
     }
+    out.push('');
+  }
 
+  private buildMatchSequence(out: string[]): void {
+    if (this.matchSequence.size === 0) {
+      return;
+    }
+
+    MatchSequence.buildGlobals(out);
     out.push('');
 
+    for (const match of this.matchSequence.values()) {
+      match.build(out);
+    }
+    out.push('');
+  }
+
+  public buildGlobals(out: string[]): void {
+    this.buildBlobs(out);
+    this.buildMatchSequence(out);
     this.buildStateEnum(out);
   }
 
@@ -99,13 +125,22 @@ export class Compilation {
 
   // MatchSequence cache
 
+  // TODO(indutny): this is practically a copy from `bitcode/compilation.ts`
+  // Unify it somehow?
   public getMatchSequence(
     transform: frontend.IWrap<frontend.transform.Transform>, select: Buffer)
     : string {
     const wrap = this.unwrapTransform(transform);
 
-    // TODO(indutny): implement me
-    return 'todo_match_sequence';
+    let res: MatchSequence;
+    if (this.matchSequence.has(wrap)) {
+      res = this.matchSequence.get(wrap)!;
+    } else {
+      res = new MatchSequence(wrap);
+      this.matchSequence.set(wrap, res);
+    }
+
+    return res.getName();
   }
 
   // Arguments

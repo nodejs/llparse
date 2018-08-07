@@ -11,3 +11,9 @@ export const ARG_POS = 'p';
 export const ARG_ENDPOS = 'endp';
 
 export const VAR_MATCH = 'match';
+
+// MatchSequence
+
+export const SEQUENCE_COMPLETE = 'kMatchComplete';
+export const SEQUENCE_MISMATCH = 'kMatchMismatch';
+export const SEQUENCE_PAUSE = 'kMatchPause';

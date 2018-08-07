@@ -34,13 +34,13 @@
   "homepage": "https://github.com/indutny/llparse#readme",
   "devDependencies": {
     "@types/debug": "0.0.30",
-    "@types/mocha": "^2.2.48",
-    "@types/node": "^9.6.20",
+    "@types/mocha": "^5.2.5",
+    "@types/node": "^10.5.7",
     "llparse-test-fixture": "git://github.com/indutny/llparse-test-fixture.git",
     "mocha": "^5.2.0",
-    "ts-node": "^5.0.1",
-    "tslint": "^5.10.0",
-    "typescript": "^2.9.1"
+    "ts-node": "^7.0.0",
+    "tslint": "^5.11.0",
+    "typescript": "^3.0.1"
   },
   "dependencies": {
     "bitcode": "^1.2.0",
