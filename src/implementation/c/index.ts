@@ -1,6 +1,10 @@
 import * as frontend from 'llparse-frontend';
 
-import { ARG_STATE, ARG_POS, ARG_ENDPOS, CONTAINER_KEY } from './constants';
+import {
+  ARG_STATE, ARG_POS, ARG_ENDPOS,
+  VAR_MATCH,
+  CONTAINER_KEY,
+} from './constants';
 import { Compilation } from './compilation';
 import code from './code';
 import node from './node';
@@ -51,6 +55,7 @@ export class CCompiler {
              `${info.prefix}_t* ${ARG_STATE}, ` +
              `const unsigned char* ${ARG_POS}, ` +
              `const unsigned char* ${ARG_ENDPOS}) {`);
+    out.push(`  int ${VAR_MATCH};`);
     out.push(`  switch (${compilation.currentField()}) {`);
 
     const tmp: string[] = [];

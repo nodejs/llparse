@@ -1,5 +1,6 @@
 export const CONTAINER_KEY = 'c';
 
+export const LABEL_PREFIX = '';
 export const STATE_PREFIX = 's_n_';
 export const STATE_NULL = 's_null';
 

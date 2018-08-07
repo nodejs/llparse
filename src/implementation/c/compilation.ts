@@ -5,6 +5,7 @@ import {
   CONTAINER_KEY, STATE_NULL,
   ARG_STATE, ARG_POS, ARG_ENDPOS,
   VAR_MATCH,
+  LABEL_PREFIX,
 } from './constants';
 import { Code } from './code';
 import { Node } from './node';
@@ -24,7 +25,8 @@ export class Compilation {
 
   public buildStates(out: string[]): void {
     this.stateMap.forEach((lines, name) => {
-      out.push(`case ${name}: {`);
+      out.push(`case ${name}:`);
+      out.push(`${LABEL_PREFIX}${name}: {`);
       lines.forEach((line) => out.push(`  ${line}`));
       out.push('  break;');
       out.push('}');

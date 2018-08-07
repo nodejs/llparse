@@ -2,7 +2,9 @@ import * as assert from 'assert';
 import * as frontend from 'llparse-frontend';
 
 import { Compilation } from '../compilation';
-import { ARG_POS, ARG_ENDPOS, ARG_STATE, STATE_PREFIX } from '../constants';
+import {
+  STATE_PREFIX, LABEL_PREFIX,
+} from '../constants';
 
 export interface INodeEdge {
   readonly node: frontend.IWrap<frontend.node.Node>;
@@ -40,7 +42,9 @@ export abstract class Node<T extends frontend.node.Node> {
   }
 
   protected prologue(out: string[]): void {
-    out.push(`if (${ARG_POS} == ${ARG_ENDPOS}) {`);
+    const ctx = this.compilation;
+
+    out.push(`if (${ctx.posArg()} == ${ctx.endPosArg()}) {`);
 
     const tmp: string[] = [];
     this.pause(tmp);
@@ -58,9 +62,9 @@ export abstract class Node<T extends frontend.node.Node> {
     const target = ctx.unwrapNode(edge.node).build(ctx);
 
     if (!edge.noAdvance) {
-      out.push(`${ARG_POS}++;`);
+      out.push(`${ctx.posArg()}++;`);
     }
-    out.push(`goto ${target};`);
+    out.push(`goto ${LABEL_PREFIX}${target};`);
   }
 
   protected abstract doBuild(out: string[]): void;
