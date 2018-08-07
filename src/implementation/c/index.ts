@@ -41,22 +41,26 @@ export class CCompiler {
     const rootState = root.get<Node<frontend.node.Node>>(CONTAINER_KEY)
         .build(compilation);
 
+    compilation.buildGlobals(out);
+    out.push('');
+
     compilation.buildStateEnum(out);
     out.push('');
 
     out.push(`int ${info.prefix}_init(${info.prefix}_t* ${ARG_STATE}) {`);
     out.push(`  memset(${ARG_STATE}, 0, sizeof(*${ARG_STATE}));`);
-    out.push(`  ${ARG_STATE}->_current = ${rootState};`);
+    out.push(`  ${ARG_STATE}->_current = (void*) (intptr_t) ${rootState};`);
     out.push('  return 0;');
     out.push('}');
     out.push('');
 
-    out.push(`static llparse_state_e ${info.prefix}_run(` +
+    out.push(`static enum llparse_state_e ${info.prefix}_run(` +
              `${info.prefix}_t* ${ARG_STATE}, ` +
              `const unsigned char* ${ARG_POS}, ` +
              `const unsigned char* ${ARG_ENDPOS}) {`);
     out.push(`  int ${VAR_MATCH};`);
-    out.push(`  switch (${compilation.currentField()}) {`);
+    out.push(`  switch ((enum llparse_state_e) ` +
+        `${compilation.currentField()}) {`);
 
     const tmp: string[] = [];
     compilation.buildStates(tmp);
@@ -71,9 +75,9 @@ export class CCompiler {
 
     out.push(`int ${info.prefix}_execute(${info.prefix}_t* ${ARG_STATE}, ` +
              `const char* ${ARG_POS}, const char* ${ARG_ENDPOS}) {`);
-    out.push('  llparse_state_e current;');
+    out.push('  enum llparse_state_e current;');
     out.push('');
-    out.push(`  current = (inptr_t) ${ARG_STATE}->_current;`);
+    out.push(`  current = (intptr_t) ${ARG_STATE}->_current;`);
 
     // TODO(indutny): lingering errors
     // TODO(indutny): restart spans

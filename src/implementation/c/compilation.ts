@@ -1,18 +1,22 @@
 import * as assert from 'assert';
+import { Buffer } from 'buffer';
 import * as frontend from 'llparse-frontend';
 
 import {
   CONTAINER_KEY, STATE_NULL,
   ARG_STATE, ARG_POS, ARG_ENDPOS,
   VAR_MATCH,
-  LABEL_PREFIX,
+  LABEL_PREFIX, BLOB_PREFIX,
 } from './constants';
 import { Code } from './code';
 import { Node } from './node';
 import { Transform } from './transform';
 
+const BLOB_GROUP_SIZE = 11;
+
 export class Compilation {
   private readonly stateMap: Map<string, ReadonlyArray<string>> = new Map();
+  private readonly blobs: Map<Buffer, string> = new Map();
 
   public buildStateEnum(out: string[]): void {
     out.push('enum llparse_state_e {');
@@ -21,6 +25,30 @@ export class Compilation {
       out.push(`  ${stateName},`);
     }
     out.push('};');
+  }
+
+  public buildGlobals(out: string[]): void {
+    for (const [ blob, name ] of this.blobs) {
+      out.push(`static const unsigned char ${name}[] = {`);
+
+      for (let i = 0; i < blob.length; i += BLOB_GROUP_SIZE) {
+        const limit = Math.min(blob.length, i + BLOB_GROUP_SIZE);
+        const hex: string[] = [];
+        for (let j = i; j < limit; j++) {
+          const value = blob[j] as number;
+
+          // TODO(indutny): printable ASCII should be emitted verbatim
+          hex.push(`0x${value.toString(16)}`);
+        }
+        let line = '  ' + hex.join(', ');
+        if (limit !== blob.length) {
+          line += ',';
+        }
+        out.push(line);
+      }
+
+      out.push(`};`);
+    }
   }
 
   public buildStates(out: string[]): void {
@@ -63,6 +91,17 @@ export class Compilation {
     for (const line of lines) {
       out.push(`${pad}${line}`);
     }
+  }
+
+  // MatchSequence cache
+
+  public getMatchSequence(
+    transform: frontend.IWrap<frontend.transform.Transform>, select: Buffer)
+    : string {
+    const wrap = this.unwrapTransform(transform);
+
+    // TODO(indutny): implement me
+    return 'todo_match_sequence';
   }
 
   // Arguments
@@ -121,5 +160,14 @@ export class Compilation {
 
   public cstring(value: string): string {
     return JSON.stringify(value);
+  }
+
+  public blob(value: Buffer): string {
+    if (this.blobs.has(value)) {
+      return this.blobs.get(value)!;
+    }
+    const res = BLOB_PREFIX + this.blobs.size;
+    this.blobs.set(value, res);
+    return res;
   }
 }
