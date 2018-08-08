@@ -123,6 +123,15 @@ export class Compilation {
     return code.ref.name;
   }
 
+  public getFieldType(field: string): string {
+    for (const property of this.properties) {
+      if (property.name === field) {
+        return property.ty;
+      }
+    }
+    throw new Error(`Field "${field}" not found`);
+  }
+
   // Helpers
 
   public unwrapCode(code: frontend.IWrap<frontend.code.Code>)
