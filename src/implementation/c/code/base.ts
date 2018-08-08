@@ -8,5 +8,5 @@ export abstract class Code<T extends frontend.code.Code> {
   constructor(public readonly ref: T) {
   }
 
-  public abstract build(ctx: Compilation, out: string[]): string;
+  public abstract build(ctx: Compilation, out: string[]): void;
 }

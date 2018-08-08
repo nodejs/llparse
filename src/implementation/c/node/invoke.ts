@@ -7,9 +7,8 @@ export class Invoke extends Node<frontend.node.Invoke> {
   public doBuild(out: string[]): void {
     const ctx = this.compilation;
 
-    // TODO(indutny): implement me
     const code = ctx.unwrapCode(this.ref.code);
-    const codeDecl = 'todo_code';
+    const codeDecl = ctx.buildCode(code);
 
     const args: string[] = [
       ctx.stateArg(),

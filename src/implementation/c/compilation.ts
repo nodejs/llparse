@@ -3,7 +3,7 @@ import { Buffer } from 'buffer';
 import * as frontend from 'llparse-frontend';
 
 import {
-  CONTAINER_KEY, STATE_NULL,
+  CONTAINER_KEY, STATE_ERROR,
   ARG_STATE, ARG_POS, ARG_ENDPOS,
   VAR_MATCH,
   LABEL_PREFIX, BLOB_PREFIX,
@@ -19,6 +19,7 @@ const BLOB_GROUP_SIZE = 11;
 export class Compilation {
   private readonly stateMap: Map<string, ReadonlyArray<string>> = new Map();
   private readonly blobs: Map<Buffer, string> = new Map();
+  private readonly codeMap: Map<string, Code<frontend.code.Code>> = new Map();
   private readonly matchSequence:
       Map<Transform<frontend.transform.Transform>, MatchSequence> = new Map();
 
@@ -27,7 +28,7 @@ export class Compilation {
 
   private buildStateEnum(out: string[]): void {
     out.push('enum llparse_state_e {');
-    out.push(`  ${STATE_NULL},`);
+    out.push(`  ${STATE_ERROR},`);
     for (const stateName of this.stateMap.keys()) {
       out.push(`  ${stateName},`);
     }
@@ -82,6 +83,11 @@ export class Compilation {
     this.buildBlobs(out);
     this.buildMatchSequence(out);
     this.buildStateEnum(out);
+
+    for (const code of this.codeMap.values()) {
+      out.push('');
+      code.build(this, out);
+    }
   }
 
   public buildStates(out: string[]): void {
@@ -97,6 +103,16 @@ export class Compilation {
   public addState(state: string, lines: ReadonlyArray<string>): void {
     assert(!this.stateMap.has(state));
     this.stateMap.set(state, lines);
+  }
+
+  public buildCode(code: Code<frontend.code.Code>): string {
+    if (this.codeMap.has(code.ref.name)) {
+      assert.strictEqual(this.codeMap.get(code.ref.name)!, code,
+          `Code name conflict for "${code.ref.name}"`);
+    } else {
+      this.codeMap.set(code.ref.name, code);
+    }
+    return code.ref.name;
   }
 
   // Helpers
