@@ -14,7 +14,14 @@ import { Node } from './node';
 import { Transform } from './transform';
 import { MatchSequence } from './helpers/match-sequence';
 
+// Number of hex words per line of blob declaration
 const BLOB_GROUP_SIZE = 11;
+
+// TODO(indutny): deduplicate
+export interface ICompilationProperty {
+  readonly name: string;
+  readonly ty: string;
+}
 
 export class Compilation {
   private readonly stateMap: Map<string, ReadonlyArray<string>> = new Map();
@@ -23,7 +30,8 @@ export class Compilation {
   private readonly matchSequence:
       Map<Transform<frontend.transform.Transform>, MatchSequence> = new Map();
 
-  constructor(public readonly prefix: string) {
+  constructor(public readonly prefix: string,
+      private readonly properties: ReadonlyArray<ICompilationProperty>) {
   }
 
   private buildStateEnum(out: string[]): void {

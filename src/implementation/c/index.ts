@@ -27,7 +27,7 @@ export class CCompiler {
   }
 
   public compile(info: frontend.IFrontendResult): string {
-    const compilation = new Compilation(info.prefix);
+    const compilation = new Compilation(info.prefix, info.properties);
     const out: string[] = [];
 
     out.push('#include <stdlib.h>');

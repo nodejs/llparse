@@ -9,6 +9,11 @@ export abstract class External<T extends frontend.code.External>
   public build(ctx: Compilation, out: string[]): void {
     out.push(`int ${this.ref.name}(`);
     out.push(`    ${ctx.prefix}_t* s, const unsigned char* p,`);
-    out.push('    const unsigned char* endp);');
+    if (this.ref.signature === 'value') {
+      out.push('    const unsigned char* endp,');
+      out.push('    int value);');
+    } else {
+      out.push('    const unsigned char* endp);');
+    }
   }
 }
