@@ -22,9 +22,6 @@ export class Invoke extends Node<frontend.node.Invoke> {
     const signature = code.ref.signature;
     if (signature === 'value') {
       args.push(ctx.matchArg(bb));
-    } else {
-      assert.strictEqual(signature, 'match',
-        'Passing `span` callback to `invoke` is not allowed');
     }
 
     const call = bb.call(codeDecl, args);

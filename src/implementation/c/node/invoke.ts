@@ -5,12 +5,41 @@ import { Node } from './base';
 
 export class Invoke extends Node<frontend.node.Invoke> {
   public doBuild(out: string[]): void {
-    const otherwise = this.ref.otherwise!;
+    const ctx = this.compilation;
 
-    if (!otherwise.noAdvance) {
-      this.prologue(out);
+    // TODO(indutny): implement me
+    const code = ctx.unwrapCode(this.ref.code);
+    const codeDecl = 'todo_code';
+
+    const args: string[] = [
+      ctx.stateArg(),
+      ctx.posArg(),
+      ctx.endPosArg(),
+    ];
+
+    const signature = code.ref.signature;
+    if (signature === 'value') {
+      args.push(ctx.matchVar());
     }
 
-    this.tailTo(out, otherwise);
+    out.push(`switch (${codeDecl}(${args.join(', ')})) {`);
+    let tmp: string[];
+
+    for (const edge of this.ref.edges) {
+      out.push(`  case ${edge.code}:`);
+      tmp = [];
+      this.tailTo(tmp, {
+        noAdvance: true,
+        node: edge.node,
+        value: undefined,
+      });
+      ctx.indent(out, tmp, '    ');
+    }
+
+    out.push('  default:');
+    tmp = [];
+    this.tailTo(tmp, this.ref.otherwise!);
+    ctx.indent(out, tmp, '    ');
+    out.push('}');
   }
 }
