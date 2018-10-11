@@ -67,6 +67,7 @@ export class TableLookup extends Node<frontend.node.TableLookup> {
     this.tailTo(s.otherwise, this.ref.otherwise!, pos);
   }
 
+  // TODO(indutny): reduce copy-paste between `C` and `bitcode` implementations
   private buildTable(): ITable {
     const table: number[] = new Array(MAX_CHAR + 1).fill(0);
     const nodeToIndex: Map<frontend.IWrap<frontend.node.Node>, number> =
