@@ -120,7 +120,6 @@ export class Compiler {
     debug('Building C');
     if (c) {
       result.c = c.compile(info);
-      console.log(result.c);
     }
 
     return result;
