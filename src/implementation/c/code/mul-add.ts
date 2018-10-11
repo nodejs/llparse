@@ -7,8 +7,10 @@ import { Field } from './field';
 const SIGNED_LIMITS: Map<string, [ string, string ]> = new Map();
 SIGNED_LIMITS.set('i8', [ '-0x80', '0x7f' ]);
 SIGNED_LIMITS.set('i16', [ '-0x8000', '0x7fff' ]);
-SIGNED_LIMITS.set('i32', [ '-0x80000000', '0x7fffffff' ]);
-SIGNED_LIMITS.set('i64', [ '-0x8000000000000000LL', '0x7fffffffffffffffLL' ]);
+SIGNED_LIMITS.set('i32', [ '-0x80000000L', '0x7fffffff' ]);
+SIGNED_LIMITS.set('i64', [
+    '((int64_t) 0x8000000000000000ULL)',
+    '0x7fffffffffffffffLL' ]);
 
 const UNSIGNED_LIMITS: Map<string, [ string, string ]> = new Map();
 UNSIGNED_LIMITS.set('i8', [ '0', '0xff' ]);
