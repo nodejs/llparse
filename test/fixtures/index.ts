@@ -13,7 +13,11 @@ const fixtures = new Fixture({
 
 export function build(llparse: LLParse, node: source.node.Node, outFile: string)
   : FixtureResult {
-  return fixtures.build(llparse.build(node), outFile);
+  return fixtures.build(llparse.build(node, {
+    c: {
+      header: outFile,
+    },
+  }), outFile);
 }
 
 export function printMatch(p: LLParse, next: source.node.Node)
