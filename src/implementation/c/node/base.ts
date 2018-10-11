@@ -64,6 +64,9 @@ export abstract class Node<T extends frontend.node.Node> {
     if (!edge.noAdvance) {
       out.push(`${ctx.posArg()}++;`);
     }
+    if (edge.value !== undefined) {
+      out.push(`${ctx.matchVar()} = ${edge.value};`);
+    }
     out.push(`goto ${LABEL_PREFIX}${target};`);
   }
 

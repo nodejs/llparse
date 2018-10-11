@@ -15,16 +15,17 @@ export class Sequence extends Node<frontend.node.Sequence> {
     const matchSequence = ctx.getMatchSequence(this.ref.transform!,
         this.ref.select);
 
-    out.push('llparse_match_t match;');
+    out.push('llparse_match_t match_seq;');
     out.push('');
-    out.push(`match = ${matchSequence}(${ctx.stateArg()}, ${ctx.posArg()}, ` +
+    out.push(`match_seq = ${matchSequence}(${ctx.stateArg()}, ` +
+        `${ctx.posArg()}, ` +
         `${ctx.endPosArg()}, ${ctx.blob(this.ref.select)}, ` +
         `${this.ref.select.length});`);
-    out.push('p = match.current;');
+    out.push('p = match_seq.current;');
 
     let tmp: string[];
 
-    out.push('switch (match.status) {');
+    out.push('switch (match_seq.status) {');
 
     out.push(`  case ${SEQUENCE_COMPLETE}: {`);
     tmp = [];
