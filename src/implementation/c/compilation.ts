@@ -28,7 +28,7 @@ export class Compilation {
   private readonly blobs: Map<Buffer, string> = new Map();
   private readonly codeMap: Map<string, Code<frontend.code.Code>> = new Map();
   private readonly matchSequence:
-      Map<Transform<frontend.transform.Transform>, MatchSequence> = new Map();
+      Map<string, MatchSequence> = new Map();
 
   constructor(public readonly prefix: string,
       private readonly properties: ReadonlyArray<ICompilationProperty>) {
@@ -177,11 +177,11 @@ export class Compilation {
     const wrap = this.unwrapTransform(transform);
 
     let res: MatchSequence;
-    if (this.matchSequence.has(wrap)) {
-      res = this.matchSequence.get(wrap)!;
+    if (this.matchSequence.has(wrap.ref.name)) {
+      res = this.matchSequence.get(wrap.ref.name)!;
     } else {
       res = new MatchSequence(wrap);
-      this.matchSequence.set(wrap, res);
+      this.matchSequence.set(wrap.ref.name, res);
     }
 
     return res.getName();

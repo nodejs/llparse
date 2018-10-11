@@ -80,7 +80,7 @@ export class Compilation {
   private readonly cstringCache: Map<string, IRValue> = new Map();
   private readonly globalId = new frontend.Identifier('g_');
   private readonly resumptionTargets: Set<IRDeclaration> = new Set();
-  private readonly matchSequence: Map<TransformWrap, MatchSequence> = new Map();
+  private readonly matchSequence: Map<string, MatchSequence> = new Map();
   private debugMethod: IRDeclaration | undefined = undefined;
 
   constructor(public readonly prefix: string,
@@ -168,11 +168,11 @@ export class Compilation {
     const wrap = this.unwrapTransform(transform);
 
     let match: MatchSequence;
-    if (this.matchSequence.has(wrap)) {
-      match = this.matchSequence.get(wrap)!;
+    if (this.matchSequence.has(wrap.ref.name)) {
+      match = this.matchSequence.get(wrap.ref.name)!;
     } else {
       match = new MatchSequence(wrap);
-      this.matchSequence.set(wrap, match);
+      this.matchSequence.set(wrap.ref.name, match);
     }
     match.addSequence(select);
     return match.preBuild(this);
