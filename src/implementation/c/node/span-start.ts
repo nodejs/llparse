@@ -5,6 +5,7 @@ import { Node } from './base';
 
 export class SpanStart extends Node<frontend.node.SpanStart> {
   public doBuild(out: string[]): void {
+    // Prevent spurious empty spans
     this.prologue(out);
 
     const ctx = this.compilation;

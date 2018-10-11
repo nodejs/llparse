@@ -10,8 +10,6 @@ export class SpanEnd extends Node<frontend.node.SpanEnd> {
     out.push('int err;');
     out.push('');
 
-    this.prologue(out);
-
     const ctx = this.compilation;
     const field = this.ref.field;
     const posField = ctx.spanPosField(field.index);
