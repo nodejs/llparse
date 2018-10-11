@@ -11,7 +11,9 @@ export class Single extends Node<frontend.node.Single> {
 
     this.prologue(out);
 
-    out.push(`switch (*${ctx.posArg()}) {`)
+    const transform = ctx.unwrapTransform(this.ref.transform!);
+    const current = transform.build(ctx, `*${ctx.posArg()}`);
+    out.push(`switch (${current}) {`)
     this.ref.edges.forEach((edge) => {
       let ch: string;
 
