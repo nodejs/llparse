@@ -16,7 +16,7 @@ export class SpanStart extends Node<frontend.node.SpanStart> {
     if (field.callbacks.length > 1) {
       const cbField = ctx.spanCbField(field.index);
       const callback = ctx.unwrapCode(this.ref.callback);
-      out.push(`${cbField} = ${ctx.buildCode(callback)}`);
+      out.push(`${cbField} = ${ctx.buildCode(callback)};`);
     }
 
     const otherwise = this.ref.otherwise!;

@@ -37,6 +37,8 @@ export class CCompiler {
     out.push('');
     out.push(`#include "${this.options.header || info.prefix}.h"`);
     out.push(``);
+    out.push(`typedef int (*${info.prefix}__span_cb)(`);
+    out.push(`             ${info.prefix}_t*, const char*, const char*);`);
 
     // Queue span callbacks to be built before `executeSpans()` code gets called
     // below.
@@ -95,7 +97,7 @@ export class CCompiler {
       `(const unsigned char*) ${compilation.posArg()}`,
       `(const unsigned char*) ${compilation.endPosArg()}`,
     ];
-    out.push(`  next = llparse__run(${args.join(', ')});`);
+    out.push(`  next = ${info.prefix}__run(${args.join(', ')});`);
     out.push(`  if (next == ${STATE_ERROR}) {`);
     out.push(`    return ${compilation.errorField()};`);
     out.push('  }');
@@ -138,9 +140,13 @@ export class CCompiler {
     out.push('/* execute spans */');
     for (const span of info.spans) {
       const posField = ctx.spanPosField(span.index);
-      const callback = span.callbacks.length === 1 ?
-          ctx.buildCode(ctx.unwrapCode(span.callbacks[0])) :
-          ctx.spanCbField(span.index);
+      let callback: string;
+      if (span.callbacks.length === 1) {
+        callback = ctx.buildCode(ctx.unwrapCode(span.callbacks[0]));
+      } else {
+        callback = `(${info.prefix}__span_cb) ` + ctx.spanCbField(span.index);
+        callback = `(${callback})`;
+      }
 
       const args = [
         ctx.stateArg(), posField, `(const unsigned char*) ${ctx.endPosArg()}`,
