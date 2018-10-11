@@ -48,7 +48,7 @@ export class SpanEnd extends Node<frontend.node.SpanEnd> {
       resumePos = `(${resumePos} + 1)`;
     }
 
-    out.push(`${ctx.errorPosField()} = ${resumePos};`);
+    out.push(`${ctx.errorPosField()} = (const char*) ${resumePos};`);
 
     const resumptionTarget = ctx.unwrapNode(otherwise.node).build(ctx);
     out.push(`${ctx.currentField()} = ` +

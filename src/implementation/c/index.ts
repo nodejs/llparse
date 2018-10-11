@@ -90,7 +90,12 @@ export class CCompiler {
     this.restartSpans(compilation, info, tmp);
     compilation.indent(out, tmp, '  ');
 
-    out.push(`  next = llparse__run(${ARG_STATE}, ${ARG_POS}, ${ARG_ENDPOS});`);
+    const args = [
+      compilation.stateArg(),
+      `(const unsigned char*) ${compilation.posArg()}`,
+      `(const unsigned char*) ${compilation.endPosArg()}`,
+    ];
+    out.push(`  next = llparse__run(${args.join(', ')});`);
     out.push(`  if (next == ${STATE_ERROR}) {`);
     out.push(`    return ${compilation.errorField()};`);
     out.push('  }');
@@ -118,7 +123,7 @@ export class CCompiler {
       const posField = ctx.spanPosField(span.index);
 
       out.push(`if (${posField} != NULL) {`);
-      out.push(`  ${posField} = ${ctx.posArg()};`);
+      out.push(`  ${posField} = (void*) ${ctx.posArg()};`);
       out.push('}');
     }
     out.push('');
@@ -138,7 +143,7 @@ export class CCompiler {
           ctx.spanCbField(span.index);
 
       const args = [
-        ctx.stateArg(), posField, ctx.endPosArg(),
+        ctx.stateArg(), posField, `(const unsigned char*) ${ctx.endPosArg()}`,
       ];
 
       out.push(`if (${posField} != NULL) {`);
