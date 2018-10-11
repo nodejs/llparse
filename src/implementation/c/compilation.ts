@@ -87,6 +87,14 @@ export class Compilation {
     }
   }
 
+  public reserveSpans(spans: ReadonlyArray<frontend.SpanField>): void {
+    for (const span of spans) {
+      for (const callback of span.callbacks) {
+        this.buildCode(this.unwrapCode(callback));
+      }
+    }
+  }
+
   public buildGlobals(out: string[]): void {
     this.buildBlobs(out);
     this.buildMatchSequence(out);
