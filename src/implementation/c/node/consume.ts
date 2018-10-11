@@ -7,7 +7,7 @@ export class Consume extends Node<frontend.node.Consume> {
   public doBuild(out: string[]): void {
     const ctx = this.compilation;
 
-    const index = ctx.indexField();
+    const index = ctx.stateField(this.ref.field);
 
     out.push('size_t avail;');
     out.push('size_t need;');
