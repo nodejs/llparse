@@ -5,10 +5,11 @@ import { Compilation } from '../compilation';
 import { Node } from './base';
 
 const MAX_CHAR = 0xff;
+const TABLE_GROUP = 16;
 
 interface ITable {
   readonly name: string;
-  readonly declaration: string;
+  readonly declaration: ReadonlyArray<string>;
 }
 
 export class TableLookup extends Node<frontend.node.TableLookup> {
@@ -16,7 +17,9 @@ export class TableLookup extends Node<frontend.node.TableLookup> {
     const ctx = this.compilation;
 
     const table = this.buildTable();
-    out.push(table.declaration);
+    for (const line of table.declaration) {
+      out.push(line);
+    }
 
     this.prologue(out);
 
@@ -61,9 +64,21 @@ export class TableLookup extends Node<frontend.node.TableLookup> {
       });
     }
 
+    const lines = [
+      'static uint8_t lookup_table[] = {',
+    ];
+    for (let i = 0; i < table.length; i += TABLE_GROUP) {
+      let line = `  ${table.slice(i, i + TABLE_GROUP).join(', ')}`;
+      if (i + TABLE_GROUP < table.length) {
+        line += ',';
+      }
+      lines.push(line);
+    }
+    lines.push('};');
+
     return {
       name: 'lookup_table',
-      declaration: `static uint8_t lookup_table[] = { ${table.join(', ')} };`,
+      declaration: lines,
     };
   }
 }
