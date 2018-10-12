@@ -79,7 +79,6 @@ export class Compilation {
   private readonly bitcode: Bitcode = new Bitcode();
   private readonly cstringCache: Map<string, IRValue> = new Map();
   private readonly globalId = new frontend.Identifier('g_');
-  private readonly resumptionTargets: Set<IRDeclaration> = new Set();
   private readonly matchSequence: Map<string, MatchSequence> = new Map();
   private debugMethod: IRDeclaration | undefined = undefined;
 
@@ -280,14 +279,6 @@ export class Compilation {
   }
 
   // Miscellaneous
-
-  public addResumptionTarget(decl: IRDeclaration): void {
-    this.resumptionTargets.add(decl);
-  }
-
-  public getResumptionTargets(): ReadonlyArray<IRDeclaration> {
-    return Array.from(this.resumptionTargets);
-  }
 
   public branch(bb: IRBasicBlock, condition: IRValue,
                 weights?: IBranchWeight): IBranchResult {

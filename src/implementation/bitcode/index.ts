@@ -32,7 +32,6 @@ export class BitcodeCompiler {
     const root = info.root as frontend.ContainerWrap<frontend.node.Node>;
     const initFn = root.get<Node<frontend.node.Node>>(CONTAINER_KEY)
         .build(compilation);
-    compilation.addResumptionTarget(initFn);
 
     debug('building match sequence');
     compilation.buildMatchSequence();
@@ -43,7 +42,7 @@ export class BitcodeCompiler {
 
     debug('building execute');
     const eb = new ExecuteBuilder();
-    eb.build(compilation, info.spans);
+    eb.build(compilation, info);
 
     debug('building bitcode');
     const bitcode = compilation.buildBitcode(initFn);

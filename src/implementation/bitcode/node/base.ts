@@ -126,8 +126,6 @@ export abstract class Node<T extends frontend.node.Node> {
     debug('pause in "%s"', this.ref.id.originalName);
     const self = bb.cast('bitcast', fn, fn.ty.toSignature().returnType);
     bb.ret(self);
-
-    ctx.addResumptionTarget(fn);
   }
 
   protected tailTo(bb: IRBasicBlock, edge: INodeEdge,

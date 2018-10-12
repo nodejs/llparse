@@ -1,4 +1,5 @@
-import { SpanField } from 'llparse-frontend';
+import * as frontend from 'llparse-frontend';
+import SpanField = frontend.SpanField;
 
 import { Compilation, IRBasicBlock, IRValue } from '../compilation';
 import {
@@ -10,7 +11,7 @@ import {
 } from '../constants';
 
 export class ExecuteBuilder {
-  public build(ctx: Compilation, spans: ReadonlyArray<SpanField>): void {
+  public build(ctx: Compilation, info: frontend.IFrontendResult): void {
     const sig = ctx.ir.signature(TYPE_ERROR, [
       ctx.state.ptr(), TYPE_POS, TYPE_ENDPOS ]);
     const fn = ctx.defineFunction(sig, `${ctx.prefix}_execute`,
@@ -22,7 +23,7 @@ export class ExecuteBuilder {
     fn.linkage = 'external';
 
     const noLinger = this.checkLingeringError(ctx, fn.body);
-    const bb = this.restartSpans(ctx, spans, noLinger);
+    const bb = this.restartSpans(ctx, info.spans, noLinger);
 
     const current = bb.load(ctx.currentField(bb));
     const call = bb.call(current, [
@@ -32,8 +33,8 @@ export class ExecuteBuilder {
       current.ty.toPointer().to.toSignature().params[3].undef(),
     ], 'normal', CCONV);
 
-    const callees = ctx.getResumptionTargets().map((target) => {
-      return ctx.ir.metadata(target);
+    const callees = Array.from(info.resumptionTargets).map((target) => {
+      return ctx.ir.metadata(ctx.unwrapNode(target).build(ctx));
     });
     call.metadata.set('callees', ctx.ir.metadata(callees));
 
@@ -48,7 +49,7 @@ export class ExecuteBuilder {
     const bitcast = success.cast('bitcast', call, current.ty);
     success.store(bitcast, ctx.currentField(success));
 
-    this.executeSpans(ctx, spans, success).ret(TYPE_ERROR.val(0));
+    this.executeSpans(ctx, info.spans, success).ret(TYPE_ERROR.val(0));
 
     error.name = 'error';
 

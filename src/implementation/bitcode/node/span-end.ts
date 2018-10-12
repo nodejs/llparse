@@ -61,7 +61,6 @@ export class SpanEnd extends Node<frontend.node.SpanEnd> {
 
     const resumptionTarget = ctx.unwrapNode(otherwise.node).build(ctx);
     bb.store(resumptionTarget, ctx.currentField(bb));
-    ctx.addResumptionTarget(resumptionTarget);
 
     bb.ret(bb.parent.ty.toSignature().returnType.toPointer().val(null));
   }

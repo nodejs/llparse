@@ -11,7 +11,6 @@ export class Pause extends ErrorNode<frontend.node.Pause> {
 
     // Recoverable state
     const otherwise = ctx.unwrapNode(this.ref.otherwise!.node).build(ctx);
-    ctx.addResumptionTarget(otherwise);
     bb.store(otherwise, ctx.currentField(bb));
 
     const retType = bb.parent.ty.toSignature().returnType;
