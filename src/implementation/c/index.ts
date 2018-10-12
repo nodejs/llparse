@@ -39,6 +39,7 @@ export class CCompiler {
     out.push(``);
     out.push(`typedef int (*${info.prefix}__span_cb)(`);
     out.push(`             ${info.prefix}_t*, const char*, const char*);`);
+    out.push('');
 
     // Queue span callbacks to be built before `executeSpans()` code gets called
     // below.
