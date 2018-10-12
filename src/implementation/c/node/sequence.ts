@@ -10,13 +10,14 @@ export class Sequence extends Node<frontend.node.Sequence> {
   public doBuild(out: string[]): void {
     const ctx = this.compilation;
 
+    out.push('llparse_match_t match_seq;');
+    out.push('');
+
     this.prologue(out);
 
     const matchSequence = ctx.getMatchSequence(this.ref.transform!,
         this.ref.select);
 
-    out.push('llparse_match_t match_seq;');
-    out.push('');
     out.push(`match_seq = ${matchSequence}(${ctx.stateArg()}, ` +
         `${ctx.posArg()}, ` +
         `${ctx.endPosArg()}, ${ctx.blob(this.ref.select)}, ` +
