@@ -18,14 +18,26 @@ UNSIGNED_LIMITS.set('i16', [ '0', '0xffff' ]);
 UNSIGNED_LIMITS.set('i32', [ '0', '0xffffffff' ]);
 UNSIGNED_LIMITS.set('i64', [ '0ULL', '0xffffffffffffffffULL' ]);
 
+const UNSIGNED_TYPES: Map<string, string> = new Map();
+UNSIGNED_TYPES.set('i8', 'uint8_t');
+UNSIGNED_TYPES.set('i16', 'uint16_t');
+UNSIGNED_TYPES.set('i32', 'uint32_t');
+UNSIGNED_TYPES.set('i64', 'uint64_t');
+
 export class MulAdd extends Field<frontend.code.MulAdd> {
   protected doBuild(ctx: Compilation, out: string[]): void {
+    const options = this.ref.options;
     const ty = ctx.getFieldType(this.ref.field);
 
-    const field = this.field(ctx);
-    const match = ctx.matchVar();
+    let field = this.field(ctx);
+    if (!options.signed) {
+      assert(UNSIGNED_TYPES.has(ty), `Unexpected mulAdd type "${ty}"`);
+      const targetTy = UNSIGNED_TYPES.get(ty)!;
+      out.push(`${targetTy}* field = (${targetTy}*) &${field};`);
+      field = '(*field)';
+    }
 
-    const options = this.ref.options;
+    const match = ctx.matchVar();
 
     const limits = options.signed ? SIGNED_LIMITS : UNSIGNED_LIMITS;
     assert(limits.has(ty), `Unexpected mulAdd type "${ty}"`);

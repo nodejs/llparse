@@ -149,7 +149,7 @@ export class CCompiler {
       }
 
       const args = [
-        ctx.stateArg(), posField, `(const unsigned char*) ${ctx.endPosArg()}`,
+        ctx.stateArg(), posField, `(const char*) ${ctx.endPosArg()}`,
       ];
 
       out.push(`if (${posField} != NULL) {`);
