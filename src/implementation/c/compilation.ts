@@ -58,8 +58,15 @@ export class Compilation {
         for (let j = i; j < limit; j++) {
           const value = blob[j] as number;
 
-          // TODO(indutny): printable ASCII should be emitted verbatim
-          hex.push(`0x${value.toString(16)}`);
+          const ch = String.fromCharCode(value);
+          // `'`, `\`
+          if (value === 0x27 || value === 0x5c) {
+            hex.push(`'\\${ch}'`);
+          } else if (value >= 0x20 && value <= 0x7e) {
+            hex.push(`'${ch}'`);
+          } else {
+            hex.push(`0x${value.toString(16)}`);
+          }
         }
         let line = '  ' + hex.join(', ');
         if (limit !== blob.length) {
