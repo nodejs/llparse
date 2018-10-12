@@ -37,3 +37,9 @@ UNSIGNED_TYPES.set('i8', 'uint8_t');
 UNSIGNED_TYPES.set('i16', 'uint16_t');
 UNSIGNED_TYPES.set('i32', 'uint32_t');
 UNSIGNED_TYPES.set('i64', 'uint64_t');
+
+export const SIGNED_TYPES: Map<string, string> = new Map();
+SIGNED_TYPES.set('i8', 'int8_t');
+SIGNED_TYPES.set('i16', 'int16_t');
+SIGNED_TYPES.set('i32', 'int32_t');
+SIGNED_TYPES.set('i64', 'int64_t');

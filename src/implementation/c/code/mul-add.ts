@@ -2,7 +2,7 @@ import * as assert from 'assert';
 import * as frontend from 'llparse-frontend';
 
 import { Compilation } from '../compilation';
-import { SIGNED_LIMITS, UNSIGNED_LIMITS, UNSIGNED_TYPES } from '../constants';
+import { SIGNED_LIMITS, UNSIGNED_LIMITS, SIGNED_TYPES } from '../constants';
 import { Field } from './field';
 
 export class MulAdd extends Field<frontend.code.MulAdd> {
@@ -11,9 +11,9 @@ export class MulAdd extends Field<frontend.code.MulAdd> {
     const ty = ctx.getFieldType(this.ref.field);
 
     let field = this.field(ctx);
-    if (!options.signed) {
-      assert(UNSIGNED_TYPES.has(ty), `Unexpected mulAdd type "${ty}"`);
-      const targetTy = UNSIGNED_TYPES.get(ty)!;
+    if (options.signed) {
+      assert(SIGNED_TYPES.has(ty), `Unexpected mulAdd type "${ty}"`);
+      const targetTy = SIGNED_TYPES.get(ty)!;
       out.push(`${targetTy}* field = (${targetTy}*) &${field};`);
       field = '(*field)';
     }

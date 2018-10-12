@@ -46,13 +46,13 @@ export class HeaderBuilder {
     for (const prop of options.properties) {
       let ty: string;
       if (prop.ty === 'i8') {
-        ty = 'int8_t';
+        ty = 'uint8_t';
       } else if (prop.ty === 'i16') {
-        ty = 'int16_t';
+        ty = 'uint16_t';
       } else if (prop.ty === 'i32') {
-        ty = 'int32_t';
+        ty = 'uint32_t';
       } else if (prop.ty === 'i64') {
-        ty = 'int64_t';
+        ty = 'uint64_t';
       } else if (prop.ty === 'ptr') {
         ty = 'void*';
       } else {
