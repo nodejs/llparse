@@ -28,7 +28,8 @@ export class CCompiler {
   }
 
   public compile(info: frontend.IFrontendResult): string {
-    const compilation = new Compilation(info.prefix, info.properties);
+    const compilation = new Compilation(info.prefix, info.properties,
+        info.resumptionTargets);
     const out: string[] = [];
 
     out.push('#include <stdlib.h>');
@@ -68,15 +69,21 @@ export class CCompiler {
         `${compilation.currentField()}) {`);
 
     let tmp: string[] = [];
-    compilation.buildStates(tmp);
+    compilation.buildResumptionStates(tmp);
     compilation.indent(out, tmp, '    ');
 
     out.push('    default:');
-    out.push('      /* Unreachable */');
+    out.push('      /* UNREACHABLE */');
     out.push('      abort();');
     out.push('  }');
+
+    tmp = [];
+    compilation.buildInternalStates(tmp);
+    compilation.indent(out, tmp, '  ');
+
     out.push('}');
     out.push('');
+
 
     out.push(`int ${info.prefix}_execute(${info.prefix}_t* ${ARG_STATE}, ` +
              `const char* ${ARG_POS}, const char* ${ARG_ENDPOS}) {`);

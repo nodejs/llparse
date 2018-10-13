@@ -6,7 +6,7 @@ import {
   CONTAINER_KEY, STATE_ERROR,
   ARG_STATE, ARG_POS, ARG_ENDPOS,
   VAR_MATCH,
-  LABEL_PREFIX, BLOB_PREFIX,
+  STATE_PREFIX, LABEL_PREFIX, BLOB_PREFIX,
   SEQUENCE_COMPLETE, SEQUENCE_MISMATCH, SEQUENCE_PAUSE,
 } from './constants';
 import { Code } from './code';
@@ -16,6 +16,8 @@ import { MatchSequence } from './helpers/match-sequence';
 
 // Number of hex words per line of blob declaration
 const BLOB_GROUP_SIZE = 11;
+
+type WrappedNode = frontend.IWrap<frontend.node.Node>;
 
 // TODO(indutny): deduplicate
 export interface ICompilationProperty {
@@ -29,16 +31,23 @@ export class Compilation {
   private readonly codeMap: Map<string, Code<frontend.code.Code>> = new Map();
   private readonly matchSequence:
       Map<string, MatchSequence> = new Map();
+  private readonly resumptionTargets: Set<string> = new Set();
 
   constructor(public readonly prefix: string,
-      private readonly properties: ReadonlyArray<ICompilationProperty>) {
+      private readonly properties: ReadonlyArray<ICompilationProperty>,
+      resumptionTargets: ReadonlySet<WrappedNode>) {
+    for (const node of resumptionTargets) {
+      this.resumptionTargets.add(STATE_PREFIX + node.ref.id.name);
+    }
   }
 
   private buildStateEnum(out: string[]): void {
     out.push('enum llparse_state_e {');
     out.push(`  ${STATE_ERROR},`);
     for (const stateName of this.stateMap.keys()) {
-      out.push(`  ${stateName},`);
+      if (this.resumptionTargets.has(stateName)) {
+        out.push(`  ${stateName},`);
+      }
     }
     out.push('};');
     out.push('typedef enum llparse_state_e llparse_state_t;');
@@ -113,12 +122,29 @@ export class Compilation {
     }
   }
 
-  public buildStates(out: string[]): void {
+  public buildResumptionStates(out: string[]): void {
     this.stateMap.forEach((lines, name) => {
+      if (!this.resumptionTargets.has(name)) {
+        return;
+      }
       out.push(`case ${name}:`);
       out.push(`${LABEL_PREFIX}${name}: {`);
       lines.forEach((line) => out.push(`  ${line}`));
-      out.push('  break;');
+      out.push('  /* UNREACHABLE */;');
+      out.push('  abort();');
+      out.push('}');
+    });
+  }
+
+  public buildInternalStates(out: string[]): void {
+    this.stateMap.forEach((lines, name) => {
+      if (this.resumptionTargets.has(name)) {
+        return;
+      }
+      out.push(`${LABEL_PREFIX}${name}: {`);
+      lines.forEach((line) => out.push(`  ${line}`));
+      out.push('  /* UNREACHABLE */;');
+      out.push('  abort();');
       out.push('}');
     });
   }
@@ -155,8 +181,7 @@ export class Compilation {
     return container.get(CONTAINER_KEY);
   }
 
-  public unwrapNode(node: frontend.IWrap<frontend.node.Node>)
-    : Node<frontend.node.Node> {
+  public unwrapNode(node: WrappedNode): Node<frontend.node.Node> {
     const container = node as frontend.ContainerWrap<frontend.node.Node>;
     return container.get(CONTAINER_KEY);
   }
