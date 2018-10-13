@@ -51,8 +51,5 @@ export class Sequence extends Node<frontend.node.Sequence> {
     out.push('  }');
 
     out.push('}');
-
-    out.push('/* UNREACHABLE */');
-    out.push('abort();');
   }
 }
