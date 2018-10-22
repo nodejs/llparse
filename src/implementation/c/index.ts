@@ -29,7 +29,7 @@ export class CCompiler {
 
   public compile(info: frontend.IFrontendResult): string {
     const compilation = new Compilation(info.prefix, info.properties,
-        info.resumptionTargets);
+        info.resumptionTargets, this.options);
     const out: string[] = [];
 
     out.push('#include <stdlib.h>');

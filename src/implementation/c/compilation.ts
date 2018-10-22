@@ -20,6 +20,11 @@ const BLOB_GROUP_SIZE = 11;
 type WrappedNode = frontend.IWrap<frontend.node.Node>;
 
 // TODO(indutny): deduplicate
+export interface ICompilationOptions {
+  readonly debug?: string;
+}
+
+// TODO(indutny): deduplicate
 export interface ICompilationProperty {
   readonly name: string;
   readonly ty: string;
@@ -35,7 +40,8 @@ export class Compilation {
 
   constructor(public readonly prefix: string,
       private readonly properties: ReadonlyArray<ICompilationProperty>,
-      resumptionTargets: ReadonlySet<WrappedNode>) {
+      resumptionTargets: ReadonlySet<WrappedNode>,
+      private readonly options: ICompilationOptions) {
     for (const node of resumptionTargets) {
       this.resumptionTargets.add(STATE_PREFIX + node.ref.id.name);
     }
@@ -111,7 +117,28 @@ export class Compilation {
     }
   }
 
+  public debug(out: string[], message: string): void {
+    if (this.options.debug === undefined) {
+      return;
+    }
+
+    const args = [
+      this.stateArg(),
+      this.posArg(),
+      this.endPosArg(),
+      this.cstring(message),
+    ];
+
+    out.push(`${this.options.debug}(${args.join(', ')})`);
+  }
+
   public buildGlobals(out: string[]): void {
+    if (this.options.debug !== undefined) {
+      out.push(`void ${this.options.debug}(`);
+      out.push(`    ${this.prefix}_t* s, const char* p, const char* endp,`);
+      out.push('    const char* msg);');
+    }
+
     this.buildBlobs(out);
     this.buildMatchSequence(out);
     this.buildStateEnum(out);
