@@ -124,12 +124,12 @@ export class Compilation {
 
     const args = [
       this.stateArg(),
-      this.posArg(),
-      this.endPosArg(),
-      this.cstring(message),
+      `(const char*) ${this.posArg()}`,
+      `(const char*) ${this.endPosArg()}`,
     ];
 
-    out.push(`${this.options.debug}(${args.join(', ')})`);
+    out.push(`${this.options.debug}(${args.join(', ')},`);
+    out.push(`  ${this.cstring(message)});`);
   }
 
   public buildGlobals(out: string[]): void {
