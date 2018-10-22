@@ -28,7 +28,10 @@ export abstract class Node<T extends frontend.node.Node> {
     this.cachedDecl = res;
 
     this.privCompilation = compilation;
+
     const out: string[] = [];
+    compilation.debug(out,
+      `Entering node "${this.ref.id.originalName}" ("${this.ref.id.name}")`);
     this.doBuild(out);
 
     compilation.addState(res, out);
