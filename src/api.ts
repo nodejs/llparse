@@ -6,6 +6,8 @@ import { Compiler, ICompilerOptions, ICompilerResult } from './compiler';
 
 export { source, ICompilerOptions, ICompilerResult };
 
+// TODO(indutny): API for disabling/short-circuiting spans
+
 /**
  * LLParse graph builder and compiler.
  */
