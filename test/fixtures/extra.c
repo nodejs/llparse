@@ -57,6 +57,7 @@ int llparse__on_underscore(llparse_t* s, const char* p,
 
 /* A span callback, really */
 int llparse__please_fail(llparse_t* s, const char* p, const char* endp) {
+  s->reason = "please fail";
   if (llparse__in_bench)
     return 1;
   return 1;

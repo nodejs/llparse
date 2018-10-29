@@ -64,7 +64,7 @@ describe('llparse/spans', () => {
 
     await binary.check(
       '....a',
-      /off=\d+ error code=1 reason="Span callback error"\n/);
+      /off=\d+ error code=1 reason="please fail"\n/);
   });
 
   it('should not invoke spurious span callback', async () => {

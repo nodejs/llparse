@@ -38,7 +38,6 @@ export class SpanEnd extends Node<frontend.node.SpanEnd> {
     const ctx = this.compilation;
 
     out.push(`${ctx.errorField()} = ${code};`);
-    out.push(`${ctx.reasonField()} = "Span callback error";`);
 
     const otherwise = this.ref.otherwise!;
     let resumePos = ctx.posArg();

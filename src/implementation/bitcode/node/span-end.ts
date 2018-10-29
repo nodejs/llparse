@@ -45,15 +45,8 @@ export class SpanEnd extends Node<frontend.node.SpanEnd> {
   private buildError(bb: IRBasicBlock, pos: INodePosition, code: IRValue): void {
     const ctx = this.compilation;
 
-    // NOTE: We could print detailed error here, but it would generate
-    // inconsistent messages (see `execute` in `compiler/`)
-    const reason = ctx.cstring('Span callback error');
-    const cast = bb.getelementptr(reason, GEP_OFF.val(0), GEP_OFF.val(0),
-      true);
-
     const errorField = ctx.errorField(bb);
     bb.store(ctx.truncate(bb, code, errorField.ty.toPointer().to), errorField);
-    bb.store(cast, ctx.reasonField(bb));
 
     const otherwise = this.ref.otherwise!;
     bb.store(otherwise.noAdvance ? pos.current : pos.next,

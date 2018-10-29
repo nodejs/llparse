@@ -143,11 +143,7 @@ export class ExecuteBuilder {
 
   // TODO(indutny): de-duplicate this here and in SpanEnd
   private buildError(ctx: Compilation, bb: IRBasicBlock, code: IRValue): void {
-    const reason = ctx.cstring('Span callback error');
-    const cast = bb.getelementptr(reason, GEP_OFF.val(0), GEP_OFF.val(0), true);
-
     bb.store(code, ctx.errorField(bb));
-    bb.store(cast, ctx.reasonField(bb));
     bb.store(ctx.endPosArg(bb), ctx.errorPosField(bb));
   }
 }

@@ -168,7 +168,6 @@ export class CCompiler {
       // TODO(indutny): de-duplicate this here and in SpanEnd
       out.push('  if (error != 0) {');
       out.push(`    ${ctx.errorField()} = error;`);
-      out.push(`    ${ctx.reasonField()} = "Span callback error";`);
       out.push(`    ${ctx.errorPosField()} = ${ctx.endPosArg()};`);
       out.push('  }');
       out.push('}');
