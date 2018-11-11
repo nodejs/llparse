@@ -2,9 +2,8 @@
 [![Build Status](https://secure.travis-ci.org/indutny/llparse.svg)](http://travis-ci.org/indutny/llparse)
 [![NPM version](https://badge.fury.io/js/llparse.svg)](https://badge.fury.io/js/llparse)
 
-An API for compiling an incremental parser into [LLVM bitcode][3].
-
-**NOTE: The resulting bitcode works with `clang` 6.0.1 or later**
+An API for compiling an incremental parser into C output and/or
+[LLVM bitcode][3].
 
 ## Usage
 
