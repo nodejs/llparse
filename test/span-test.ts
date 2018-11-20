@@ -67,6 +67,27 @@ describe('llparse/spans', () => {
       /off=\d+ error code=1 reason="please fail"\n/);
   });
 
+  it('should return error at `executeSpans()`', async () => {
+    const start = p.node('start');
+    const dot = p.node('dot');
+
+    const span = {
+      pleaseFail: p.span(p.code.span('llparse__please_fail')),
+    };
+
+    start.otherwise(span.pleaseFail.start(dot));
+
+    dot
+      .match('.', dot)
+      .skipTo(span.pleaseFail.end(start));
+
+    const binary = build(p, start, 'span-error-execute');
+
+    await binary.check(
+      '.........',
+      /off=9 error code=1 reason="please fail"\n/, { scan: 100 });
+  });
+
   it('should not invoke spurious span callback', async () => {
     const start = p.node('start');
     const dot = p.node('dot');

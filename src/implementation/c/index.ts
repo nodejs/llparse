@@ -169,6 +169,7 @@ export class CCompiler {
       out.push('  if (error != 0) {');
       out.push(`    ${ctx.errorField()} = error;`);
       out.push(`    ${ctx.errorPosField()} = ${ctx.endPosArg()};`);
+      out.push('    return error;');
       out.push('  }');
       out.push('}');
     }
