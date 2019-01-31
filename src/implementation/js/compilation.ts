@@ -4,10 +4,10 @@ import * as frontend from 'llparse-frontend';
 
 import {
   CONTAINER_KEY, STATE_ERROR,
-  ARG_BUF, ARG_OFF,
+  ARG_CURRENT, ARG_BUF, ARG_OFF,
   ARG_STATE, ARG_POS, ARG_ENDPOS,
   VAR_MATCH,
-  STATE_PREFIX, LABEL_PREFIX, BLOB_PREFIX,
+  STATE_PREFIX, BLOB_PREFIX,
   SEQUENCE_COMPLETE, SEQUENCE_MISMATCH, SEQUENCE_PAUSE,
 } from './constants';
 import { Code } from './code';
@@ -37,15 +37,10 @@ export class Compilation {
   private readonly codeMap: Map<string, Code<frontend.code.Code>> = new Map();
   private readonly matchSequence:
       Map<string, MatchSequence> = new Map();
-  private readonly resumptionTargets: Set<string> = new Set();
 
   constructor(public readonly prefix: string,
       private readonly properties: ReadonlyArray<ICompilationProperty>,
-      resumptionTargets: ReadonlySet<WrappedNode>,
       private readonly options: ICompilationOptions) {
-    for (const node of resumptionTargets) {
-      this.resumptionTargets.add(STATE_PREFIX + node.ref.id.name.toUpperCase());
-    }
   }
 
   private buildStateEnum(out: string[]): void {
@@ -53,9 +48,7 @@ export class Compilation {
 
     out.push(`const ${STATE_ERROR} = ${index++};`);
     for (const stateName of this.stateMap.keys()) {
-      if (this.resumptionTargets.has(stateName)) {
-        out.push(`const ${stateName} = ${index++};`);
-      }
+      out.push(`const ${stateName} = ${index++};`);
     }
   }
 
@@ -115,6 +108,7 @@ export class Compilation {
     }
   }
 
+  // TODO(indutny): make this work
   public debug(out: string[], message: string): void {
     if (this.options.debug === undefined) {
       return;
@@ -131,11 +125,10 @@ export class Compilation {
   }
 
   public buildGlobals(out: string[]): void {
-    if (this.options.debug !== undefined) {
-      out.push(`void ${this.options.debug}(`);
-      out.push(`    ${this.prefix}_t* s, const char* p, const char* endp,`);
-      out.push('    const char* msg);');
-    }
+    out.push('function unreachable() {');
+    out.push('  throw new Error(\'Unreachable\');');
+    out.push('}');
+    out.push('');
 
     this.buildBlobs(out);
 
@@ -156,29 +149,11 @@ export class Compilation {
     this.buildMatchSequence(out);
   }
 
-  public buildResumptionStates(out: string[]): void {
+  public buildStates(out: string[]): void {
     this.stateMap.forEach((lines, name) => {
-      if (!this.resumptionTargets.has(name)) {
-        return;
-      }
-      out.push(`case ${name}:`);
-      out.push(`${LABEL_PREFIX}${name}: {`);
+      out.push(`case ${name}: {`);
       lines.forEach((line) => out.push(`  ${line}`));
-      out.push('  /* UNREACHABLE */;');
-      out.push('  abort();');
-      out.push('}');
-    });
-  }
-
-  public buildInternalStates(out: string[]): void {
-    this.stateMap.forEach((lines, name) => {
-      if (this.resumptionTargets.has(name)) {
-        return;
-      }
-      out.push(`${LABEL_PREFIX}${name}: {`);
-      lines.forEach((line) => out.push(`  ${line}`));
-      out.push('  /* UNREACHABLE */;');
-      out.push('  abort();');
+      out.push('  unreachable();');
       out.push('}');
     });
   }
@@ -263,21 +238,29 @@ export class Compilation {
     return ARG_OFF;
   }
 
-  public stateArg(): string {
-    return ARG_STATE;
-  }
-
-  public posArg(): string {
-    return ARG_POS;
-  }
-
-  public endPosArg(): string {
-    return ARG_ENDPOS;
+  public currentArg(): string {
+    return ARG_CURRENT;
   }
 
   public matchVar(): string {
     return VAR_MATCH;
   }
+
+  // TODO(indutny): remove me
+  public stateArg(): string {
+    return ARG_STATE;
+  }
+
+  // TODO(indutny): remove me
+  public posArg(): string {
+    return ARG_POS;
+  }
+
+  // TODO(indutny): remove me
+  public endPosArg(): string {
+    return ARG_ENDPOS;
+  }
+
 
   // State fields
 
@@ -297,6 +280,11 @@ export class Compilation {
     return this.stateField('reason');
   }
 
+  public errorOffField(): string {
+    return this.stateField('error_off');
+  }
+
+  // TODO(indutny): remove me
   public errorPosField(): string {
     return this.stateField('error_pos');
   }
@@ -315,6 +303,7 @@ export class Compilation {
 
   // Globals
 
+  // TODO(indutny): remove me
   public cstring(value: string): string {
     return JSON.stringify(value);
   }

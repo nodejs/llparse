@@ -3,7 +3,6 @@ import * as frontend from 'llparse-frontend';
 import {
   ARG_STATE, ARG_POS, ARG_ENDPOS,
   STATE_ERROR,
-  VAR_MATCH,
   CONTAINER_KEY,
 } from './constants';
 import { Compilation } from './compilation';
@@ -26,8 +25,7 @@ export class JSCompiler {
   }
 
   public compile(info: frontend.IFrontendResult): string {
-    const ctx = new Compilation(info.prefix, info.properties,
-        info.resumptionTargets, this.options);
+    const ctx = new Compilation(info.prefix, info.properties, this.options);
     const out: string[] = [];
 
     // Queue span callbacks to be built before `executeSpans()` code gets called
@@ -45,6 +43,7 @@ export class JSCompiler {
     out.push('  constructor() {');
     out.push(`    ${ctx.currentField()} = ${rootState};`);
     out.push(`    ${ctx.indexField()} = 0;`);
+    out.push(`    ${ctx.errorOffField()} = 0;`);
     out.push('  }');
     out.push('');
 
@@ -54,7 +53,18 @@ export class JSCompiler {
 
     // Run
 
-    out.push(`  _run(${ctx.bufArg()}, ${ctx.offArg()}) {`);
+    out.push(`  _run(${ctx.currentArg()}, ${ctx.bufArg()}, ${ctx.offArg()}) {`);
+    out.push(`    let ${ctx.matchVar()};`);
+    out.push('    for (;;) {');
+    out.push(`      switch (${ctx.currentArg()}) {`);
+
+    tmp = [];
+    ctx.buildStates(tmp);
+    ctx.indent(out, tmp, '        ');
+
+    out.push('      }');
+    out.push('    }');
+    out.push('    unreachable();');
     out.push('  }');
     out.push('');
 
@@ -72,30 +82,6 @@ export class JSCompiler {
     out.push('  return 0;');
     out.push('}');
     out.push('');
-
-    out.push(`static llparse_state_t ${info.prefix}__run(`);
-    out.push(`    ${info.prefix}_t* ${ARG_STATE},`);
-    out.push(`    const unsigned char* ${ARG_POS},`);
-    out.push(`    const unsigned char* ${ARG_ENDPOS}) {`);
-    out.push(`  int ${VAR_MATCH};`);
-    out.push(`  switch ((llparse_state_t) (intptr_t) ${ctx.currentField()}) {`);
-
-    tmp = [];
-    ctx.buildResumptionStates(tmp);
-    ctx.indent(out, tmp, '    ');
-
-    out.push('    default:');
-    out.push('      /* UNREACHABLE */');
-    out.push('      abort();');
-    out.push('  }');
-
-    tmp = [];
-    ctx.buildInternalStates(tmp);
-    ctx.indent(out, tmp, '  ');
-
-    out.push('}');
-    out.push('');
-
 
     out.push(`int ${info.prefix}_execute(${info.prefix}_t* ${ARG_STATE}, ` +
              `const char* ${ARG_POS}, const char* ${ARG_ENDPOS}) {`);

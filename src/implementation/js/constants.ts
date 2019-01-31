@@ -1,14 +1,15 @@
 export const CONTAINER_KEY = 'js';
 
-export const LABEL_PREFIX = '';
 export const STATE_PREFIX = 'S_N_';
 export const STATE_ERROR = 'S_ERROR';
 
 export const BLOB_PREFIX = 'BLOB_';
 
+export const ARG_CURRENT = 'current';
 export const ARG_BUF = 'buf';
 export const ARG_OFF = 'off';
 
+// TODO(indutny): remove those
 export const ARG_STATE = 'state';
 export const ARG_POS = 'p';
 export const ARG_ENDPOS = 'endp';

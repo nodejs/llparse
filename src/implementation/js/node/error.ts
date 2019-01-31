@@ -16,16 +16,15 @@ class ErrorNode<T extends frontend.node.Error> extends Node<T> {
     }
 
     out.push(`${ctx.errorField()} = ${hexCode};`);
-    out.push(`${ctx.reasonField()} = ${ctx.cstring(this.ref.reason)};`);
-    out.push(`${ctx.errorPosField()} = (const char*) ${ctx.posArg()};`);
+    out.push(`${ctx.reasonField()} = ${JSON.stringify(this.ref.reason)};`);
+    out.push(`${ctx.errorOffField()} = ${ctx.offArg()};`);
   }
 
   public doBuild(out: string[]): void {
     this.storeError(out);
 
     // Non-recoverable state
-    out.push(`${this.compilation.currentField()} = ` +
-        `(void*) (intptr_t) ${STATE_ERROR};`);
+    out.push(`${this.compilation.currentField()} = ${STATE_ERROR};`);
     out.push(`return ${STATE_ERROR};`);
   }
 }

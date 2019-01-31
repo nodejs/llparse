@@ -3,7 +3,7 @@ import * as frontend from 'llparse-frontend';
 
 import { Compilation } from '../compilation';
 import {
-  STATE_PREFIX, LABEL_PREFIX,
+  STATE_PREFIX,
 } from '../constants';
 
 export interface INodeEdge {
@@ -47,7 +47,7 @@ export abstract class Node<T extends frontend.node.Node> {
   protected prologue(out: string[]): void {
     const ctx = this.compilation;
 
-    out.push(`if (${ctx.posArg()} == ${ctx.endPosArg()}) {`);
+    out.push(`if (${ctx.offArg()} === ${ctx.bufArg()}.length) {`);
 
     const tmp: string[] = [];
     this.pause(tmp);
@@ -70,7 +70,8 @@ export abstract class Node<T extends frontend.node.Node> {
     if (edge.value !== undefined) {
       out.push(`${ctx.matchVar()} = ${edge.value};`);
     }
-    out.push(`goto ${LABEL_PREFIX}${target};`);
+    out.push(`${ctx.currentArg()} = ${STATE_PREFIX}${target.toUpperCase()};`);
+    out.push('continue;');
   }
 
   protected abstract doBuild(out: string[]): void;
