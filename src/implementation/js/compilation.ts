@@ -7,7 +7,7 @@ import {
   ARG_CURRENT, ARG_BUF, ARG_OFF,
   ARG_STATE, ARG_POS, ARG_ENDPOS,
   VAR_MATCH,
-  STATE_PREFIX, BLOB_PREFIX,
+  STATE_PREFIX, BLOB_PREFIX, TABLE_PREFIX,
   SEQUENCE_COMPLETE, SEQUENCE_MISMATCH, SEQUENCE_PAUSE,
 } from './constants';
 import { Code } from './code';
@@ -17,6 +17,7 @@ import { MatchSequence } from './helpers/match-sequence';
 
 // Number of hex words per line of blob declaration
 const BLOB_GROUP_SIZE = 4;
+const TABLE_GROUP_SIZE = 16;
 
 type WrappedNode = frontend.IWrap<frontend.node.Node>;
 
@@ -31,9 +32,15 @@ export interface ICompilationProperty {
   readonly ty: string;
 }
 
+interface ITable {
+  readonly name: string;
+  readonly value: ReadonlyArray<number>;
+}
+
 export class Compilation {
   private readonly stateMap: Map<string, ReadonlyArray<string>> = new Map();
   private readonly blobs: Map<Buffer, string> = new Map();
+  private readonly tables: ITable[] = [];
   private readonly codeMap: Map<string, Code<frontend.code.Code>> = new Map();
   private readonly matchSequence:
       Map<string, MatchSequence> = new Map();
@@ -89,6 +96,25 @@ export class Compilation {
     out.push('');
   }
 
+  private buildTables(out: string[]): void {
+    if (this.tables.length === 0) {
+      return;
+    }
+
+    for (const { name, value } of this.tables) {
+      out.push(`const ${name} = [`);
+      for (let i = 0; i < value.length; i += TABLE_GROUP_SIZE) {
+        let line = `  ${value.slice(i, i + TABLE_GROUP_SIZE).join(', ')}`;
+        if (i + TABLE_GROUP_SIZE < value.length) {
+          line += ',';
+        }
+        out.push(line);
+      }
+      out.push('];');
+    }
+    out.push('');
+  }
+
   private buildMatchSequence(out: string[]): void {
     if (this.matchSequence.size === 0) {
       return;
@@ -131,6 +157,7 @@ export class Compilation {
     out.push('');
 
     this.buildBlobs(out);
+    this.buildTables(out);
 
     if (this.matchSequence.size !== 0) {
       MatchSequence.buildGlobals(out);
@@ -319,5 +346,11 @@ export class Compilation {
     const res = BLOB_PREFIX + this.blobs.size;
     this.blobs.set(value, res);
     return res;
+  }
+
+  public table(value: ReadonlyArray<number>): string {
+    const name = TABLE_PREFIX + this.tables.length;
+    this.tables.push({ name, value });
+    return name;
   }
 }

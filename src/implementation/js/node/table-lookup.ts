@@ -5,28 +5,19 @@ import { Compilation } from '../compilation';
 import { Node } from './base';
 
 const MAX_CHAR = 0xff;
-const TABLE_GROUP = 16;
-
-interface ITable {
-  readonly name: string;
-  readonly declaration: ReadonlyArray<string>;
-}
 
 export class TableLookup extends Node<frontend.node.TableLookup> {
   public doBuild(out: string[]): void {
     const ctx = this.compilation;
 
     const table = this.buildTable();
-    for (const line of table.declaration) {
-      out.push(line);
-    }
 
     this.prologue(out);
 
     const transform = ctx.unwrapTransform(this.ref.transform!);
-    const current = transform.build(ctx, `*${ctx.posArg()}`);
+    const current = transform.build(ctx, `${ctx.bufArg()}[${ctx.offArg()}]`);
 
-    out.push(`switch (${table.name}[(uint8_t) ${current}]) {`);
+    out.push(`switch (${table}[${current}]) {`);
 
     for (const [ index, edge ] of this.ref.edges.entries()) {
       out.push(`  case ${index + 1}: {`);
@@ -54,7 +45,7 @@ export class TableLookup extends Node<frontend.node.TableLookup> {
   }
 
   // TODO(indutny): reduce copy-paste between `C` and `bitcode` implementations
-  private buildTable(): ITable {
+  private buildTable(): string {
     const table: number[] = new Array(MAX_CHAR + 1).fill(0);
 
     for (const [ index, edge ] of this.ref.edges.entries()) {
@@ -64,21 +55,6 @@ export class TableLookup extends Node<frontend.node.TableLookup> {
       });
     }
 
-    const lines = [
-      'static uint8_t lookup_table[] = {',
-    ];
-    for (let i = 0; i < table.length; i += TABLE_GROUP) {
-      let line = `  ${table.slice(i, i + TABLE_GROUP).join(', ')}`;
-      if (i + TABLE_GROUP < table.length) {
-        line += ',';
-      }
-      lines.push(line);
-    }
-    lines.push('};');
-
-    return {
-      name: 'lookup_table',
-      declaration: lines,
-    };
+    return this.compilation.table(table);
   }
 }

@@ -4,6 +4,7 @@ export const STATE_PREFIX = 'S_N_';
 export const STATE_ERROR = 'S_ERROR';
 
 export const BLOB_PREFIX = 'BLOB_';
+export const TABLE_PREFIX = 'LOOKUP_TABLE_';
 
 export const ARG_CURRENT = 'current';
 export const ARG_BUF = 'buf';
