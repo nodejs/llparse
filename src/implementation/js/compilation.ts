@@ -16,7 +16,7 @@ import { Transform } from './transform';
 import { MatchSequence } from './helpers/match-sequence';
 
 // Number of hex words per line of blob declaration
-const BLOB_GROUP_SIZE = 11;
+const BLOB_GROUP_SIZE = 4;
 
 type WrappedNode = frontend.IWrap<frontend.node.Node>;
 
@@ -65,7 +65,7 @@ export class Compilation {
     }
 
     for (const [ blob, name ] of this.blobs) {
-      out.push(`static const unsigned char ${name}[] = {`);
+      out.push(`const ${name} = new Uint8Array([`);
 
       for (let i = 0; i < blob.length; i += BLOB_GROUP_SIZE) {
         const limit = Math.min(blob.length, i + BLOB_GROUP_SIZE);
@@ -74,14 +74,15 @@ export class Compilation {
           const value = blob[j] as number;
 
           const ch = String.fromCharCode(value);
+          let enc = `0x${value.toString(16)}`;
+
           // `'`, `\`
           if (value === 0x27 || value === 0x5c) {
-            hex.push(`'\\${ch}'`);
+            enc = `/* '\\${ch}' */ ` + enc;
           } else if (value >= 0x20 && value <= 0x7e) {
-            hex.push(`'${ch}'`);
-          } else {
-            hex.push(`0x${value.toString(16)}`);
+            enc = `/* '${ch}' */ ` + enc;
           }
+          hex.push(enc);
         }
         let line = '  ' + hex.join(', ');
         if (limit !== blob.length) {
@@ -90,7 +91,7 @@ export class Compilation {
         out.push(line);
       }
 
-      out.push(`};`);
+      out.push(`];`);
     }
     out.push('');
   }

@@ -4,7 +4,7 @@ export const LABEL_PREFIX = '';
 export const STATE_PREFIX = 'S_N_';
 export const STATE_ERROR = 'S_ERROR';
 
-export const BLOB_PREFIX = 'llparse_blob';
+export const BLOB_PREFIX = 'BLOB_';
 
 export const ARG_BUF = 'buf';
 export const ARG_OFF = 'off';
