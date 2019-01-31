@@ -12,18 +12,16 @@ import node from './node';
 import { Node } from './node';
 import transform from './transform';
 
-export interface ICCompilerOptions {
+export interface IJSCompilerOptions {
   readonly debug?: string;
-  readonly header?: string;
-}
 
-export interface ICPublicOptions {
+  // TODO(indutny): remove this
   readonly header?: string;
 }
 
 export class JSCompiler {
   constructor(container: frontend.Container,
-              public readonly options: ICCompilerOptions) {
+              public readonly options: IJSCompilerOptions) {
     container.add(CONTAINER_KEY, { code, node, transform });
   }
 
