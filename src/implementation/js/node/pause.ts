@@ -12,8 +12,7 @@ export class Pause extends ErrorNode<frontend.node.Pause> {
 
     // Recoverable state
     const otherwise = ctx.unwrapNode(this.ref.otherwise!.node).build(ctx);
-    out.push(`${ctx.currentField()} = ` +
-        `(void*) (intptr_t) ${otherwise};`);
+    out.push(`${ctx.currentField()} = ${otherwise}`);
     out.push(`return ${STATE_ERROR};`);
   }
 }

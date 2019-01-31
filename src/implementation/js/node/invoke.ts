@@ -11,9 +11,9 @@ export class Invoke extends Node<frontend.node.Invoke> {
     const codeDecl = ctx.buildCode(code);
 
     const args: string[] = [
-      ctx.stateArg(),
-      ctx.posArg(),
-      ctx.endPosArg(),
+      ctx.stateVar(),
+      ctx.bufArg(),
+      ctx.offArg(),
     ];
 
     const signature = code.ref.signature;

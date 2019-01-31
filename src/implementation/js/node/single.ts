@@ -12,17 +12,15 @@ export class Single extends Node<frontend.node.Single> {
     this.prologue(out);
 
     const transform = ctx.unwrapTransform(this.ref.transform!);
-    const current = transform.build(ctx, `*${ctx.posArg()}`);
+    const current = transform.build(ctx, `${ctx.bufArg()}[${ctx.offArg()}]`);
 
     out.push(`switch (${current}) {`)
     this.ref.edges.forEach((edge) => {
-      let ch: string;
+      let ch: string = edge.key.toString();
 
       // Non-printable ASCII, or single-quote
-      if (edge.key < 0x20 || edge.key > 0x7e || edge.key === 0x27) {
-        ch = edge.key.toString();
-      } else {
-        ch = `'${String.fromCharCode(edge.key)}'`;
+      if (!(edge.key < 0x20 || edge.key > 0x7e || edge.key === 0x27)) {
+        ch = `/* '${String.fromCharCode(edge.key)}' */ ` + ch;
       }
       out.push(`  case ${ch}: {`);
 

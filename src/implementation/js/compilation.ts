@@ -225,7 +225,7 @@ export class Compilation {
       this.matchSequence.set(wrap.ref.name, res);
     }
 
-    return res.getName();
+    return 'this.' + res.getName();
   }
 
   // Arguments
@@ -240,6 +240,10 @@ export class Compilation {
 
   public currentArg(): string {
     return ARG_CURRENT;
+  }
+
+  public stateVar(): string {
+    return 'this';
   }
 
   public matchVar(): string {

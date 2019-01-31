@@ -65,7 +65,7 @@ export abstract class Node<T extends frontend.node.Node> {
     const target = ctx.unwrapNode(edge.node).build(ctx);
 
     if (!edge.noAdvance) {
-      out.push(`${ctx.posArg()}++;`);
+      out.push(`${ctx.offArg()}++;`);
     }
     if (edge.value !== undefined) {
       out.push(`${ctx.matchVar()} = ${edge.value};`);
