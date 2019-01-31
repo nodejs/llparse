@@ -65,7 +65,7 @@ export class Compilation {
     }
 
     for (const [ blob, name ] of this.blobs) {
-      out.push(`const ${name} = new Uint8Array([`);
+      out.push(`const ${name} = [`);
 
       for (let i = 0; i < blob.length; i += BLOB_GROUP_SIZE) {
         const limit = Math.min(blob.length, i + BLOB_GROUP_SIZE);
