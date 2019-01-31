@@ -5,6 +5,7 @@ import source = frontend.source;
 
 import * as bitcodeImpl from '../implementation/bitcode';
 import * as cImpl from '../implementation/c';
+import * as jsImpl from '../implementation/js';
 import { HeaderBuilder } from './header-builder';
 
 const debug = debugAPI('llparse:compiler');
@@ -37,6 +38,9 @@ export interface ICompilerOptions {
   /** Generate C (`true` by default) */
   readonly generateC?: boolean;
 
+  /** Generate JS (`true` by default) */
+  readonly generateJS?: boolean;
+
   /** Optional frontend configuration */
   readonly frontend?: frontend.IFrontendLazyOptions;
 
@@ -56,6 +60,11 @@ export interface ICompilerResult {
   readonly c?: string;
 
   /**
+   * Textual JS code, if `generateJS` option was `true`
+   */
+  readonly js?: string;
+
+  /**
    * Textual C header file
    */
   readonly header: string;
@@ -64,6 +73,7 @@ export interface ICompilerResult {
 interface IWritableCompilerResult {
   bitcode?: Buffer;
   c?: string;
+  js?: string;
   header: string;
 }
 
@@ -89,6 +99,13 @@ export class Compiler {
       c = new cImpl.CCompiler(container, Object.assign({
         debug: this.options.debug,
       }, this.options.c));
+    }
+
+    let js: jsImpl.JSCompiler | undefined;
+    if (this.options.generateJS !== false) {
+      js = new jsImpl.JSCompiler(container, {
+        debug: this.options.debug,
+      });
     }
 
     debug('Running frontend pass');
@@ -120,6 +137,11 @@ export class Compiler {
     debug('Building C');
     if (c) {
       result.c = c.compile(info);
+    }
+
+    debug('Building JS');
+    if (js) {
+      result.js = js.compile(info);
     }
 
     return result;
