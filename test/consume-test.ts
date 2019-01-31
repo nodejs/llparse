@@ -43,7 +43,7 @@ describe('llparse/consume', () => {
     consume
       .otherwise(printOff(p, start));
 
-    const binary = build(p, start, 'consume');
+    const binary = build(p, start, 'consume-i64');
     await binary.check('3aaa2bb1a01b', 'off=4\noff=7\noff=9\noff=10\noff=12\n');
   });
 });
