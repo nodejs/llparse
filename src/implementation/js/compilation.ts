@@ -304,7 +304,7 @@ export class Compilation {
   }
 
   public stateField(name: string): string {
-    return `${this.stateArg()}->${name}`;
+    return `this.${name}`;
   }
 
   // Globals
