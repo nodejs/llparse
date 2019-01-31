@@ -24,7 +24,7 @@ export abstract class Node<T extends frontend.node.Node> {
       return this.cachedDecl;
     }
 
-    const res = STATE_PREFIX + this.ref.id.name;
+    const res = STATE_PREFIX + this.ref.id.name.toUpperCase();
     this.cachedDecl = res;
 
     this.privCompilation = compilation;

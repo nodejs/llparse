@@ -4,6 +4,7 @@ import * as frontend from 'llparse-frontend';
 
 import {
   CONTAINER_KEY, STATE_ERROR,
+  ARG_BUF, ARG_OFF,
   ARG_STATE, ARG_POS, ARG_ENDPOS,
   VAR_MATCH,
   STATE_PREFIX, LABEL_PREFIX, BLOB_PREFIX,
@@ -43,20 +44,19 @@ export class Compilation {
       resumptionTargets: ReadonlySet<WrappedNode>,
       private readonly options: ICompilationOptions) {
     for (const node of resumptionTargets) {
-      this.resumptionTargets.add(STATE_PREFIX + node.ref.id.name);
+      this.resumptionTargets.add(STATE_PREFIX + node.ref.id.name.toUpperCase());
     }
   }
 
   private buildStateEnum(out: string[]): void {
-    out.push('enum llparse_state_e {');
-    out.push(`  ${STATE_ERROR},`);
+    let index = 0;
+
+    out.push(`const ${STATE_ERROR} = ${index++};`);
     for (const stateName of this.stateMap.keys()) {
       if (this.resumptionTargets.has(stateName)) {
-        out.push(`  ${stateName},`);
+        out.push(`const ${stateName} = ${index++};`);
       }
     }
-    out.push('};');
-    out.push('typedef enum llparse_state_e llparse_state_t;');
   }
 
   private buildBlobs(out: string[]): void {
@@ -247,6 +247,14 @@ export class Compilation {
   }
 
   // Arguments
+
+  public bufArg(): string {
+    return ARG_BUF;
+  }
+
+  public offArg(): string {
+    return ARG_OFF;
+  }
 
   public stateArg(): string {
     return ARG_STATE;

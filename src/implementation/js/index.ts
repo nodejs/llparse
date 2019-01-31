@@ -26,30 +26,40 @@ export class JSCompiler {
   }
 
   public compile(info: frontend.IFrontendResult): string {
-    const compilation = new Compilation(info.prefix, info.properties,
+    const ctx = new Compilation(info.prefix, info.properties,
         info.resumptionTargets, this.options);
     const out: string[] = [];
 
-    out.push('#include <stdlib.h>');
-    out.push('#include <stdint.h>');
-    out.push('#include <string.h>');
-    out.push('');
-    out.push(`#include "${this.options.header || info.prefix}.h"`);
-    out.push(``);
-    out.push(`typedef int (*${info.prefix}__span_cb)(`);
-    out.push(`             ${info.prefix}_t*, const char*, const char*);`);
-    out.push('');
-
     // Queue span callbacks to be built before `executeSpans()` code gets called
     // below.
-    compilation.reserveSpans(info.spans);
+    ctx.reserveSpans(info.spans);
 
     const root = info.root as frontend.ContainerWrap<frontend.node.Node>;
     const rootState = root.get<Node<frontend.node.Node>>(CONTAINER_KEY)
-        .build(compilation);
+        .build(ctx);
 
-    compilation.buildGlobals(out);
+    ctx.buildGlobals(out);
     out.push('');
+
+    out.push('export default class Parser {');
+    out.push('  constructor() {');
+    out.push(`    ${ctx.currentField()} = ${rootState};`);
+    out.push('  }');
+    out.push('');
+
+    // Run
+
+    out.push(`  _run(${ctx.bufArg()}, ${ctx.offArg()}) {`);
+    out.push('  }');
+    out.push('');
+
+    // Execute
+
+    out.push(`  execute(${ctx.bufArg()}) {`);
+    out.push(`    return this._run(${ctx.bufArg()}, 0);`);
+    out.push('  }');
+
+    out.push('}');
 
     out.push(`int ${info.prefix}_init(${info.prefix}_t* ${ARG_STATE}) {`);
     out.push(`  memset(${ARG_STATE}, 0, sizeof(*${ARG_STATE}));`);
@@ -63,12 +73,11 @@ export class JSCompiler {
     out.push(`    const unsigned char* ${ARG_POS},`);
     out.push(`    const unsigned char* ${ARG_ENDPOS}) {`);
     out.push(`  int ${VAR_MATCH};`);
-    out.push(`  switch ((llparse_state_t) (intptr_t) ` +
-        `${compilation.currentField()}) {`);
+    out.push(`  switch ((llparse_state_t) (intptr_t) ${ctx.currentField()}) {`);
 
     let tmp: string[] = [];
-    compilation.buildResumptionStates(tmp);
-    compilation.indent(out, tmp, '    ');
+    ctx.buildResumptionStates(tmp);
+    ctx.indent(out, tmp, '    ');
 
     out.push('    default:');
     out.push('      /* UNREACHABLE */');
@@ -76,8 +85,8 @@ export class JSCompiler {
     out.push('  }');
 
     tmp = [];
-    compilation.buildInternalStates(tmp);
-    compilation.indent(out, tmp, '  ');
+    ctx.buildInternalStates(tmp);
+    ctx.indent(out, tmp, '  ');
 
     out.push('}');
     out.push('');
@@ -89,30 +98,30 @@ export class JSCompiler {
     out.push('');
 
     out.push('  /* check lingering errors */');
-    out.push(`  if (${compilation.errorField()} != 0) {`);
-    out.push(`    return ${compilation.errorField()};`);
+    out.push(`  if (${ctx.errorField()} != 0) {`);
+    out.push(`    return ${ctx.errorField()};`);
     out.push('  }');
     out.push('');
 
     tmp = [];
-    this.restartSpans(compilation, info, tmp);
-    compilation.indent(out, tmp, '  ');
+    this.restartSpans(ctx, info, tmp);
+    ctx.indent(out, tmp, '  ');
 
     const args = [
-      compilation.stateArg(),
-      `(const unsigned char*) ${compilation.posArg()}`,
-      `(const unsigned char*) ${compilation.endPosArg()}`,
+      ctx.stateArg(),
+      `(const unsigned char*) ${ctx.posArg()}`,
+      `(const unsigned char*) ${ctx.endPosArg()}`,
     ];
     out.push(`  next = ${info.prefix}__run(${args.join(', ')});`);
     out.push(`  if (next == ${STATE_ERROR}) {`);
-    out.push(`    return ${compilation.errorField()};`);
+    out.push(`    return ${ctx.errorField()};`);
     out.push('  }');
-    out.push(`  ${compilation.currentField()} = (void*) (intptr_t) next;`);
+    out.push(`  ${ctx.currentField()} = (void*) (intptr_t) next;`);
     out.push('');
 
     tmp = [];
-    this.executeSpans(compilation, info, tmp);
-    compilation.indent(out, tmp, '  ');
+    this.executeSpans(ctx, info, tmp);
+    ctx.indent(out, tmp, '  ');
 
     out.push('  return 0;');
     out.push('}');

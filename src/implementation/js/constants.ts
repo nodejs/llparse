@@ -1,10 +1,13 @@
 export const CONTAINER_KEY = 'js';
 
 export const LABEL_PREFIX = '';
-export const STATE_PREFIX = 's_n_';
-export const STATE_ERROR = 's_error';
+export const STATE_PREFIX = 'S_N_';
+export const STATE_ERROR = 'S_ERROR';
 
 export const BLOB_PREFIX = 'llparse_blob';
+
+export const ARG_BUF = 'buf';
+export const ARG_OFF = 'off';
 
 export const ARG_STATE = 'state';
 export const ARG_POS = 'p';
