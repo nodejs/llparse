@@ -17,9 +17,9 @@ export const VAR_MATCH = 'match';
 
 // MatchSequence
 
-export const SEQUENCE_COMPLETE = 'kMatchComplete';
-export const SEQUENCE_MISMATCH = 'kMatchMismatch';
-export const SEQUENCE_PAUSE = 'kMatchPause';
+export const SEQUENCE_COMPLETE = 'SEQUENCE_COMPLETE';
+export const SEQUENCE_MISMATCH = 'SEQUENCE_MISMATCH';
+export const SEQUENCE_PAUSE = 'SEQUENCE_PAUSE';
 
 export const SIGNED_LIMITS: Map<string, [ string, string ]> = new Map();
 SIGNED_LIMITS.set('i8', [ '-0x80', '0x7f' ]);

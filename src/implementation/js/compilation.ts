@@ -101,9 +101,6 @@ export class Compilation {
       return;
     }
 
-    MatchSequence.buildGlobals(out);
-    out.push('');
-
     for (const match of this.matchSequence.values()) {
       match.build(this, out);
       out.push('');
@@ -141,13 +138,22 @@ export class Compilation {
     }
 
     this.buildBlobs(out);
-    this.buildMatchSequence(out);
+
+    if (this.matchSequence.size !== 0) {
+      MatchSequence.buildGlobals(out);
+      out.push('');
+    }
+
     this.buildStateEnum(out);
 
     for (const code of this.codeMap.values()) {
       out.push('');
       code.build(this, out);
     }
+  }
+
+  public buildMethods(out: string[]): void {
+    this.buildMatchSequence(out);
   }
 
   public buildResumptionStates(out: string[]): void {

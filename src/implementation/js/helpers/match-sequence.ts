@@ -15,61 +15,39 @@ export class MatchSequence {
   }
 
   public static buildGlobals(out: string[]): void {
-    out.push('enum llparse_match_status_e {');
-    out.push(`  ${SEQUENCE_COMPLETE},`);
-    out.push(`  ${SEQUENCE_PAUSE},`);
-    out.push(`  ${SEQUENCE_MISMATCH}`);
-    out.push('};');
-    out.push('typedef enum llparse_match_status_e llparse_match_status_t;');
-    out.push('');
-    out.push('struct llparse_match_s {');
-    out.push('  llparse_match_status_t status;');
-    out.push('  const unsigned char* current;');
-    out.push('};');
-    out.push('typedef struct llparse_match_s llparse_match_t;');
+    out.push(`const ${SEQUENCE_COMPLETE} = 0;`);
+    out.push(`const ${SEQUENCE_PAUSE} = 1;`);
+    out.push(`const ${SEQUENCE_MISMATCH} = 2;`);
   }
 
   public getName(): string {
-    return `llparse__match_sequence_${this.transform.ref.name}`;
+    return `_match_sequence_${this.transform.ref.name}`;
   }
 
   public build(ctx: Compilation, out: string[]): void {
-    out.push(`static llparse_match_t ${this.getName()}(`);
-    out.push(`    ${ctx.prefix}_t* s, const unsigned char* p,`);
-    out.push('    const unsigned char* endp,');
-    out.push('    const unsigned char* seq, uint32_t seq_len) {');
+    const buf = ctx.bufArg();
+    const off = ctx.offArg();
 
-    // Vars
-    out.push('  uint32_t index;');
-    out.push('  llparse_match_t res;');
-    out.push('');
+    out.push(`${this.getName()}(${buf}, ${off}, seq) {`);
 
     // Body
-    out.push('  index = s->_index;');
-    out.push('  for (; p != endp; p++) {');
-    out.push('    unsigned char current;');
-    out.push('');
-    out.push(`    current = ${this.transform.build(ctx, '*p')};`);
-    out.push('    if (current == seq[index]) {');
-    out.push('      if (++index == seq_len) {');
-    out.push(`        res.status = ${SEQUENCE_COMPLETE};`);
-    out.push('        goto reset;');
+    out.push(`  let index = ${ctx.indexField()};`);
+    out.push(`  for (; ${off} !== ${buf}.length; ${off}++) {`);
+    const single = this.transform.build(ctx, `${buf}[${off}]`);
+    out.push(`    const current = ${single};`);
+    out.push('    if (current === seq[index]) {');
+    out.push('      if (++index == seq.length) {');
+    out.push(`        ${ctx.indexField()} = 0;`);
+    out.push(`        return { status: ${SEQUENCE_COMPLETE}, off: ${off} };`);
     out.push('      }');
     out.push('    } else {');
-    out.push(`      res.status = ${SEQUENCE_MISMATCH};`);
-    out.push('      goto reset;');
+    out.push(`      ${ctx.indexField()} = 0;`);
+    out.push(`      return { status: ${SEQUENCE_MISMATCH}, off: ${off} };`);
     out.push('    }');
     out.push('  }');
 
-    out.push('  s->_index = index;');
-    out.push(`  res.status = ${SEQUENCE_PAUSE};`);
-    out.push('  res.current = p;');
-    out.push('  return res;');
-
-    out.push('reset:');
-    out.push('  s->_index = 0;');
-    out.push('  res.current = p;');
-    out.push('  return res;');
+    out.push(`  ${ctx.indexField()} = index;`);
+    out.push(`  return { status: ${SEQUENCE_PAUSE}, off: ${off} };`);
     out.push('}');
   }
 }

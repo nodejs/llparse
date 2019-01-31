@@ -44,8 +44,13 @@ export class JSCompiler {
     out.push('export default class Parser {');
     out.push('  constructor() {');
     out.push(`    ${ctx.currentField()} = ${rootState};`);
+    out.push(`    ${ctx.indexField()} = 0;`);
     out.push('  }');
     out.push('');
+
+    let tmp: string[] = [];
+    ctx.buildMethods(tmp);
+    ctx.indent(out, tmp, '  ');
 
     // Run
 
@@ -75,7 +80,7 @@ export class JSCompiler {
     out.push(`  int ${VAR_MATCH};`);
     out.push(`  switch ((llparse_state_t) (intptr_t) ${ctx.currentField()}) {`);
 
-    let tmp: string[] = [];
+    tmp = [];
     ctx.buildResumptionStates(tmp);
     ctx.indent(out, tmp, '    ');
 
