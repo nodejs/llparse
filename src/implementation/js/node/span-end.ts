@@ -6,25 +6,22 @@ import { Node } from './base';
 
 export class SpanEnd extends Node<frontend.node.SpanEnd> {
   public doBuild(out: string[]): void {
-    out.push('const unsigned char* start;');
-    out.push('int err;');
-    out.push('');
-
     const ctx = this.compilation;
     const field = this.ref.field;
-    const posField = ctx.spanPosField(field.index);
+    const offField = ctx.spanOffField(field.index);
 
     // Load start position
-    out.push(`start = ${posField};`);
+    out.push(`const start = ${offField};`);
 
     // ...and reset
-    out.push(`${posField} = NULL;`);
+    out.push(`${offField} = -1;`);
 
     // Invoke callback
     const callback = ctx.buildCode(ctx.unwrapCode(this.ref.callback));
-    out.push(`err = ${callback}(${ctx.stateArg()}, start, ${ctx.posArg()});`);
+    out.push(`const err = ${callback}(${ctx.stateVar()}, ` +
+      `${ctx.bufArg()}, start, ${ctx.offArg()});`);
 
-    out.push('if (err != 0) {');
+    out.push('if (err !== 0) {');
     const tmp: string[] = [];
     this.buildError(tmp, 'err');
     ctx.indent(out, tmp, '  ');
@@ -40,17 +37,15 @@ export class SpanEnd extends Node<frontend.node.SpanEnd> {
     out.push(`${ctx.errorField()} = ${code};`);
 
     const otherwise = this.ref.otherwise!;
-    let resumePos = ctx.posArg();
+    let resumeOff = ctx.offArg();
     if (!otherwise.noAdvance) {
-      resumePos = `(${resumePos} + 1)`;
+      resumeOff = `(${resumeOff} + 1)`;
     }
 
-    out.push(`${ctx.errorPosField()} = (const char*) ${resumePos};`);
+    out.push(`${ctx.errorOffField()} = ${resumeOff};`);
 
     const resumptionTarget = ctx.unwrapNode(otherwise.node).build(ctx);
-    out.push(`${ctx.currentField()} = ` +
-        `(void*) (intptr_t) ${resumptionTarget};`);
-
+    out.push(`${ctx.currentField()} = ${resumptionTarget};`);
     out.push(`return ${STATE_ERROR};`);
   }
 }

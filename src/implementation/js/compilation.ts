@@ -285,20 +285,20 @@ export class Compilation {
   }
 
   public errorOffField(): string {
-    return this.stateField('error_off');
+    return this.stateField('errorOff');
+  }
+
+  public spanOffField(index: number): string {
+    return this.stateField(`_spanOff${index}`);
   }
 
   // TODO(indutny): remove me
   public errorPosField(): string {
-    return this.stateField('error_pos');
-  }
-
-  public spanPosField(index: number): string {
-    return this.stateField(`_span_pos${index}`);
+    return this.stateField('errorPos');
   }
 
   public spanCbField(index: number): string {
-    return this.stateField(`_span_cb${index}`);
+    return this.stateField(`_spanCb${index}`);
   }
 
   public stateField(name: string): string {

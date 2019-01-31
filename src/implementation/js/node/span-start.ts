@@ -11,8 +11,8 @@ export class SpanStart extends Node<frontend.node.SpanStart> {
     const ctx = this.compilation;
     const field = this.ref.field;
 
-    const posField = ctx.spanPosField(field.index);
-    out.push(`${posField} = (void*) ${ctx.posArg()};`);
+    const offField = ctx.spanOffField(field.index);
+    out.push(`${offField} = ${ctx.offArg()};`);
 
     if (field.callbacks.length > 1) {
       const cbField = ctx.spanCbField(field.index);

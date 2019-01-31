@@ -43,6 +43,7 @@ export class JSCompiler {
     out.push('  constructor() {');
     out.push(`    ${ctx.currentField()} = ${rootState};`);
     out.push(`    ${ctx.indexField()} = 0;`);
+    out.push(`    ${ctx.errorField()} = 0;`);
     out.push(`    ${ctx.errorOffField()} = 0;`);
     out.push('  }');
     out.push('');
@@ -71,50 +72,30 @@ export class JSCompiler {
     // Execute
 
     out.push(`  execute(${ctx.bufArg()}) {`);
-    out.push(`    return this._run(${ctx.bufArg()}, 0);`);
-    out.push('  }');
-
-    out.push('}');
-
-    out.push(`int ${info.prefix}_init(${info.prefix}_t* ${ARG_STATE}) {`);
-    out.push(`  memset(${ARG_STATE}, 0, sizeof(*${ARG_STATE}));`);
-    out.push(`  ${ARG_STATE}->_current = (void*) (intptr_t) ${rootState};`);
-    out.push('  return 0;');
-    out.push('}');
-    out.push('');
-
-    out.push(`int ${info.prefix}_execute(${info.prefix}_t* ${ARG_STATE}, ` +
-             `const char* ${ARG_POS}, const char* ${ARG_ENDPOS}) {`);
-    out.push('  llparse_state_t next;');
-    out.push('');
-
-    out.push('  /* check lingering errors */');
-    out.push(`  if (${ctx.errorField()} != 0) {`);
-    out.push(`    return ${ctx.errorField()};`);
-    out.push('  }');
+    out.push('    // check lingering errors');
+    out.push(`    if (${ctx.errorField()} !== 0) {`);
+    out.push(`      return ${ctx.errorField()};`);
+    out.push('    }');
     out.push('');
 
     tmp = [];
     this.restartSpans(ctx, info, tmp);
-    ctx.indent(out, tmp, '  ');
+    ctx.indent(out, tmp, '    ');
 
-    const args = [
-      ctx.stateArg(),
-      `(const unsigned char*) ${ctx.posArg()}`,
-      `(const unsigned char*) ${ctx.endPosArg()}`,
-    ];
-    out.push(`  next = ${info.prefix}__run(${args.join(', ')});`);
-    out.push(`  if (next == ${STATE_ERROR}) {`);
-    out.push(`    return ${ctx.errorField()};`);
-    out.push('  }');
-    out.push(`  ${ctx.currentField()} = (void*) (intptr_t) next;`);
+    out.push(`    const next = this._run(${ctx.bufArg()}, 0);`);
+    out.push(`    if (next == ${STATE_ERROR}) {`);
+    out.push(`      return ${ctx.errorField()};`);
+    out.push('    }');
+    out.push(`    ${ctx.currentField()} = next;`);
     out.push('');
 
     tmp = [];
     this.executeSpans(ctx, info, tmp);
-    ctx.indent(out, tmp, '  ');
+    ctx.indent(out, tmp, '    ');
 
-    out.push('  return 0;');
+    out.push('    return 0;');
+
+    out.push('  }');
     out.push('}');
 
     return out.join('\n');
@@ -126,12 +107,12 @@ export class JSCompiler {
       return;
     }
 
-    out.push('/* restart spans */');
+    out.push('// restart spans');
     for (const span of info.spans) {
-      const posField = ctx.spanPosField(span.index);
+      const offField = ctx.spanOffField(span.index);
 
-      out.push(`if (${posField} != NULL) {`);
-      out.push(`  ${posField} = (void*) ${ctx.posArg()};`);
+      out.push(`if (${offField} !== -1) {`);
+      out.push(`  ${offField} = 0;`);
       out.push('}');
     }
     out.push('');
@@ -143,30 +124,27 @@ export class JSCompiler {
       return;
     }
 
-    out.push('/* execute spans */');
+    out.push('// execute spans');
     for (const span of info.spans) {
-      const posField = ctx.spanPosField(span.index);
+      const offField = ctx.spanOffField(span.index);
       let callback: string;
       if (span.callbacks.length === 1) {
         callback = ctx.buildCode(ctx.unwrapCode(span.callbacks[0]));
       } else {
-        callback = `(${info.prefix}__span_cb) ` + ctx.spanCbField(span.index);
-        callback = `(${callback})`;
+        callback = ctx.spanCbField(span.index);
       }
 
       const args = [
-        ctx.stateArg(), posField, `(const char*) ${ctx.endPosArg()}`,
+        ctx.stateVar(), ctx.bufArg(), offField, `${ctx.bufArg()}.length`,
       ];
 
-      out.push(`if (${posField} != NULL) {`);
-      out.push('  int error;');
-      out.push('');
-      out.push(`  error = ${callback}(${args.join(', ')});`);
+      out.push(`if (${offField} !== -1) {`);
+      out.push(`  const error = ${callback}(${args.join(', ')});`);
 
       // TODO(indutny): de-duplicate this here and in SpanEnd
-      out.push('  if (error != 0) {');
+      out.push('  if (error !== 0) {');
       out.push(`    ${ctx.errorField()} = error;`);
-      out.push(`    ${ctx.errorPosField()} = ${ctx.endPosArg()};`);
+      out.push(`    ${ctx.errorOffField()} = ${ctx.bufArg()}.length;`);
       out.push('    return error;');
       out.push('  }');
       out.push('}');
