@@ -5,14 +5,12 @@ import { Code } from './base';
 
 export abstract class Field<T extends frontend.code.Field> extends Code<T> {
   public build(ctx: Compilation, out: string[]): void {
-    out.push(`int ${this.ref.name}(`);
-    out.push(`    ${ctx.prefix}_t* ${ctx.stateArg()},`);
-    out.push(`    const unsigned char* ${ctx.posArg()},`);
+    out.push(`function ${this.ref.name}(${ctx.bufArg()},`);
     if (this.ref.signature === 'value') {
-      out.push(`    const unsigned char* ${ctx.endPosArg()},`);
-      out.push(`    int ${ctx.matchVar()}) {`);
+      out.push(`    ${ctx.offArg()},`);
+      out.push(`    ${ctx.matchVar()}) {`);
     } else {
-      out.push(`    const unsigned char* ${ctx.endPosArg()}) {`);
+      out.push(`    ${ctx.offArg()}) {`);
     }
     const tmp: string[] = [];
     this.doBuild(ctx, tmp);
@@ -23,6 +21,6 @@ export abstract class Field<T extends frontend.code.Field> extends Code<T> {
   protected abstract doBuild(ctx: Compilation, out: string[]): void;
 
   protected field(ctx: Compilation): string {
-    return `${ctx.stateArg()}->${this.ref.field}`;
+    return ctx.stateField(this.ref.field);
   }
 }

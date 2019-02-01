@@ -18,7 +18,7 @@ export class SpanEnd extends Node<frontend.node.SpanEnd> {
 
     // Invoke callback
     const callback = ctx.buildCode(ctx.unwrapCode(this.ref.callback));
-    out.push(`const err = ${callback}(${ctx.stateVar()}, ` +
+    out.push(`const err = ${callback}.call(${ctx.stateVar()}, ` +
       `${ctx.bufArg()}, start, ${ctx.offArg()});`);
 
     out.push('if (err !== 0) {');
