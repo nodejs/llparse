@@ -36,7 +36,7 @@ export class MatchSequence {
     const single = this.transform.build(ctx, `${buf}[${off}]`);
     out.push(`    const current = ${single};`);
     out.push('    if (current === seq[index]) {');
-    out.push('      if (++index == seq.length) {');
+    out.push('      if (++index === seq.length) {');
     out.push(`        ${ctx.indexField()} = 0;`);
     out.push(`        ${ctx.statusField()} = ${SEQUENCE_COMPLETE};`);
     out.push('        return off;');
