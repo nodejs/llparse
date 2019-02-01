@@ -1,9 +1,9 @@
 import * as frontend from 'llparse-frontend';
 
 import { Compilation } from '../compilation';
-import { Field } from './field';
+import { FieldValue } from './field-value';
 
-export class Test extends Field<frontend.code.Test> {
+export class Test extends FieldValue<frontend.code.Test> {
   protected doBuild(ctx: Compilation, out: string[]): void {
     const value = this.ref.value;
     out.push(`return (${this.field(ctx)} & ${value}) == ${value};`);
