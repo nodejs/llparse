@@ -24,7 +24,6 @@ type WrappedNode = frontend.IWrap<frontend.node.Node>;
 export interface ICompilationOptions {
   readonly debug?: string;
   readonly module: 'esm' | 'commonjs';
-  readonly binding?: string;
 }
 
 // TODO(indutny): deduplicate
@@ -180,8 +179,8 @@ export class Compilation {
     this.buildMatchSequence(out);
 
     for (const code of this.codeMap.values()) {
-      out.push('');
       code.build(this, out);
+      out.push('');
     }
   }
 
@@ -219,26 +218,25 @@ export class Compilation {
     throw new Error(`Field "${field}" not found`);
   }
 
-  public exportDefault(name: string, out: string[]) {
+  public exportDefault(lines: string[]): string {
+    const out: string[] = [];
+
+    out.push('\'use strict\'');
+    out.push('');
+
     if (this.options.module === 'esm') {
-      out.push(`export default ${name};`);
+      out.push(`export default (binding) => {`);
     } else {
-      out.push(`module.exports = ${name};`);
+      out.push(`module.exports = (binding) => {`);
     }
+    this.indent(out, lines, '  ');
+    out.push('};');
+
+    return out.join('\n');
   }
 
   public importCode(name: string, out: string[]) {
-    if (!this.options.binding) {
-      // Assume bindings are global
-      return;
-    }
-
-    const path = JSON.stringify(this.options.binding);
-    if (this.options.module === 'esm') {
-      out.push(`import { ${name} } from ${path};`);
-    } else {
-      out.push(`const ${name} = require(${path}).${name};`);
-    }
+    out.push(`const ${name} = binding.${name};`);
   }
 
   // Helpers
