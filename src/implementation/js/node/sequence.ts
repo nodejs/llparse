@@ -16,7 +16,7 @@ export class Sequence extends Node<frontend.node.Sequence> {
         this.ref.select);
 
     out.push(`${ctx.offArg()} = ${matchSequence}(${ctx.bufArg()}, ` +
-        `${ctx.offArg()}, ${ctx.blob(this.ref.select)})`);
+        `${ctx.offArg()}, ${ctx.blob(this.ref.select)});`);
 
     let tmp: string[];
 
