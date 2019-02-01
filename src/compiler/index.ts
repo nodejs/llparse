@@ -46,6 +46,9 @@ export interface ICompilerOptions {
 
   /** Optional C-backend configuration */
   readonly c?: cImpl.ICPublicOptions;
+
+  /** Optional JS-backend configuration */
+  readonly js?: jsImpl.IJSPublicOptions;
 }
 
 export interface ICompilerResult {
@@ -103,9 +106,9 @@ export class Compiler {
 
     let js: jsImpl.JSCompiler | undefined;
     if (this.options.generateJS !== false) {
-      js = new jsImpl.JSCompiler(container, {
+      js = new jsImpl.JSCompiler(container, Object.assign({
         debug: this.options.debug,
-      });
+      }, this.options.js!));
     }
 
     debug('Running frontend pass');

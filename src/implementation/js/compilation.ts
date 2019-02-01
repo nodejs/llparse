@@ -24,6 +24,8 @@ type WrappedNode = frontend.IWrap<frontend.node.Node>;
 // TODO(indutny): deduplicate
 export interface ICompilationOptions {
   readonly debug?: string;
+  readonly module: 'esm' | 'commonjs';
+  readonly binding?: string;
 }
 
 // TODO(indutny): deduplicate
@@ -197,6 +199,7 @@ export class Compilation {
     } else {
       this.codeMap.set(code.ref.name, code);
     }
+
     return code.ref.name;
   }
 
@@ -207,6 +210,28 @@ export class Compilation {
       }
     }
     throw new Error(`Field "${field}" not found`);
+  }
+
+  public exportDefault(name: string, out: string[]) {
+    if (this.options.module === 'esm') {
+      out.push(`export default ${name};`);
+    } else {
+      out.push(`module.exports = ${name};`);
+    }
+  }
+
+  public importCode(name: string, out: string[]) {
+    if (!this.options.binding) {
+      throw new Error(
+        'External JS code is used, but path to binding is not supplied');
+    }
+
+    const path = JSON.stringify(this.options.binding);
+    if (this.options.module === 'esm') {
+      out.push(`import { ${name} } from ${path};`);
+    } else {
+      out.push(`const ${name} = require(${path}).${name};`);
+    }
   }
 
   // Helpers

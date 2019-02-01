@@ -20,6 +20,9 @@ export function build(llparse: LLParse, node: source.node.Node, outFile: string)
     c: {
       header: outFile,
     },
+    js: {
+      binding: path.join(__dirname, 'js-binding.js'),
+    },
   }), outFile);
 }
 

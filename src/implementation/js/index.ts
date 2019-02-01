@@ -13,9 +13,13 @@ import transform from './transform';
 
 export interface IJSCompilerOptions {
   readonly debug?: string;
+  readonly module?: 'esm' | 'commonjs';
+  readonly binding?: string;
+}
 
-  // TODO(indutny): remove this
-  readonly header?: string;
+export interface IJSPublicOptions {
+  readonly module?: 'esm' | 'commonjs';
+  readonly binding?: string;
 }
 
 export class JSCompiler {
@@ -25,8 +29,13 @@ export class JSCompiler {
   }
 
   public compile(info: frontend.IFrontendResult): string {
-    const ctx = new Compilation(info.prefix, info.properties, this.options);
+    const ctx = new Compilation(info.prefix, info.properties, Object.assign({
+      module: 'commonjs',
+    }, this.options));
     const out: string[] = [];
+
+    out.push('\'use strict\';');
+    out.push('');
 
     // Queue span callbacks to be built before `executeSpans()` code gets called
     // below.
@@ -39,8 +48,8 @@ export class JSCompiler {
     ctx.buildGlobals(out);
     out.push('');
 
-    out.push('export default class Parser {');
-    out.push('  constructor() {');
+    out.push('class Parser {');
+    out.push('  constructor(binding) {');
     out.push(`    ${ctx.currentField()} = ${rootState};`);
     out.push(`    ${ctx.indexField()} = 0;`);
     out.push(`    ${ctx.errorField()} = 0;`);
@@ -99,6 +108,8 @@ export class JSCompiler {
 
     out.push('  }');
     out.push('}');
+
+    ctx.exportDefault('Parser', out);
 
     return out.join('\n');
   }

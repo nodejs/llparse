@@ -7,6 +7,6 @@ export abstract class External<T extends frontend.code.External>
   extends Code<T> {
 
   public build(ctx: Compilation, out: string[]): void {
-    // No-op
+    ctx.importCode(this.ref.name, out);
   }
 }
