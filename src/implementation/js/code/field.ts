@@ -10,7 +10,7 @@ export abstract class Field<T extends frontend.code.Field> extends Code<T> {
     if (this.ref.signature === 'value') {
       args.push(ctx.matchVar());
     }
-    out.push(`function ${this.ref.name}(${args.join(', ')}) {`);
+    out.push(`_${this.ref.name}(${args.join(', ')}) {`);
     const tmp: string[] = [];
     this.doBuild(ctx, tmp);
     ctx.indent(out, tmp, '  ');

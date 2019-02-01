@@ -11,7 +11,6 @@ export class Invoke extends Node<frontend.node.Invoke> {
     const codeDecl = ctx.buildCode(code);
 
     const args: string[] = [
-      ctx.stateVar(),
       ctx.bufArg(),
       ctx.offArg(),
     ];
@@ -21,7 +20,7 @@ export class Invoke extends Node<frontend.node.Invoke> {
       args.push(ctx.matchVar());
     }
 
-    out.push(`switch (${codeDecl}.call(${args.join(', ')}) | 0) {`);
+    out.push(`switch (${codeDecl}(${args.join(', ')}) | 0) {`);
     let tmp: string[];
 
     for (const edge of this.ref.edges) {

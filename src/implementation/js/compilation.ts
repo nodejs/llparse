@@ -147,7 +147,7 @@ export class Compilation {
       JSON.stringify(message),
     ];
 
-    out.push(`${this.options.debug}.call(${args.join(', ')});`);
+    out.push(`${this.options.debug}(${args.join(', ')});`);
   }
 
   public buildGlobals(out: string[]): void {
@@ -167,13 +167,22 @@ export class Compilation {
     this.buildStateEnum(out);
 
     for (const code of this.codeMap.values()) {
-      out.push('');
-      code.build(this, out);
+      const tmp: string[] = [];
+      code.buildGlobal(this, tmp);
+      if (tmp.length !== 0) {
+        out.push('');
+        out.push(...tmp);
+      }
     }
   }
 
   public buildMethods(out: string[]): void {
     this.buildMatchSequence(out);
+
+    for (const code of this.codeMap.values()) {
+      out.push('');
+      code.build(this, out);
+    }
   }
 
   public buildStates(out: string[]): void {
@@ -198,7 +207,7 @@ export class Compilation {
       this.codeMap.set(code.ref.name, code);
     }
 
-    return code.ref.name;
+    return `this._${code.ref.name}`;
   }
 
   public getFieldType(field: string): string {

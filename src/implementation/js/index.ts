@@ -161,11 +161,11 @@ export class JSCompiler {
       }
 
       const args = [
-        ctx.stateVar(), ctx.bufArg(), offField, `${ctx.bufArg()}.length`,
+        ctx.bufArg(), offField, `${ctx.bufArg()}.length`,
       ];
 
       out.push(`if (${offField} !== -1) {`);
-      out.push(`  const error = ${callback}.call(${args.join(', ')});`);
+      out.push(`  const error = ${callback}(${args.join(', ')});`);
 
       // TODO(indutny): de-duplicate this here and in SpanEnd
       out.push('  if (error !== 0) {');
