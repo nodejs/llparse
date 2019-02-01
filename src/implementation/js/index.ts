@@ -82,8 +82,9 @@ export class JSCompiler {
     this.restartSpans(ctx, info, tmp);
     ctx.indent(out, tmp, '    ');
 
-    out.push(`    const next = this._run(${ctx.bufArg()}, 0);`);
-    out.push(`    if (next == ${STATE_ERROR}) {`);
+    out.push(`    const next = this._run(` +
+      `${ctx.currentField()}, ${ctx.bufArg()}, 0);`);
+    out.push(`    if (next === ${STATE_ERROR}) {`);
     out.push(`      return ${ctx.errorField()};`);
     out.push('    }');
     out.push(`    ${ctx.currentField()} = next;`);

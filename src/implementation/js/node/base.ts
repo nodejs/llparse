@@ -70,7 +70,7 @@ export abstract class Node<T extends frontend.node.Node> {
     if (edge.value !== undefined) {
       out.push(`${ctx.matchVar()} = ${edge.value};`);
     }
-    out.push(`${ctx.currentArg()} = ${STATE_PREFIX}${target.toUpperCase()};`);
+    out.push(`${ctx.currentArg()} = ${target}`);
     out.push('continue;');
   }
 
