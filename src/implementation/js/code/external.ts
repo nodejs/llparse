@@ -10,11 +10,17 @@ export abstract class External<T extends frontend.code.External>
     ctx.importCode(this.ref.name, out);
   }
 
-  public build(ctx: Compilation, out: string[]): void {
+  // NOTE: Overridden in Span
+  protected getArgs(ctx: Compilation): ReadonlyArray<string> {
     const args = [ ctx.bufArg(), ctx.offArg() ];
     if (this.ref.signature === 'value') {
       args.push(ctx.matchVar());
     }
+    return args;
+  }
+
+  public build(ctx: Compilation, out: string[]): void {
+    const args = this.getArgs(ctx);
 
     out.push(`_${this.ref.name}(${args.join(', ')}) {`);
     out.push(`  return ${this.ref.name}(this, ${args.join(', ')});`);

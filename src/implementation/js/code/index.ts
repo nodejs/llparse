@@ -1,6 +1,7 @@
 import * as frontend from 'llparse-frontend';
 
 import { External } from './external';
+import { Span } from './span';
 import { IsEqual } from './is-equal';
 import { Load } from './load';
 import { MulAdd } from './mul-add';
@@ -17,7 +18,7 @@ export default {
   Match: class Match extends External<frontend.code.External> {},
   MulAdd,
   Or,
-  Span: class Span extends External<frontend.code.Span> {},
+  Span,
   Store,
   Test,
   Update,
