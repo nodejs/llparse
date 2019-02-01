@@ -1,9 +1,4 @@
-import { ID } from './id';
-import { ToLowerUnsafe } from './to-lower-unsafe';
+import CTransform from '../../c/transform';
 
-export { Transform } from './base';
-
-export default {
-  ID,
-  ToLowerUnsafe,
-};
+// The transforms are literally the same for now
+export default CTransform;
