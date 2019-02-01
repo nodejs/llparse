@@ -42,7 +42,7 @@ export default (binding, inBench) => {
   /* A span callback, really */
   let onceCounter = 0;
 
-  binding.llparse__pause_once(p, buf, off, offLen) => {
+  binding.llparse__pause_once = (p, buf, off, offLen) => {
     if (!inBench) {
       binding.llparse__print_span('pause', buf, off, offLen);
     }
