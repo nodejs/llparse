@@ -136,20 +136,19 @@ export class Compilation {
     }
   }
 
-  // TODO(indutny): make this work
   public debug(out: string[], message: string): void {
     if (this.options.debug === undefined) {
       return;
     }
 
     const args = [
-      this.stateArg(),
-      `(const char*) ${this.posArg()}`,
-      `(const char*) ${this.endPosArg()}`,
+      this.stateVar(),
+      this.bufArg(),
+      this.offArg(),
+      JSON.stringify(message),
     ];
 
-    out.push(`${this.options.debug}(${args.join(', ')},`);
-    out.push(`  ${this.cstring(message)});`);
+    out.push(`${this.options.debug}.call(${args.join(', ')});`);
   }
 
   public buildGlobals(out: string[]): void {
@@ -302,22 +301,6 @@ export class Compilation {
     return VAR_MATCH;
   }
 
-  // TODO(indutny): remove me
-  public stateArg(): string {
-    return ARG_STATE;
-  }
-
-  // TODO(indutny): remove me
-  public posArg(): string {
-    return ARG_POS;
-  }
-
-  // TODO(indutny): remove me
-  public endPosArg(): string {
-    return ARG_ENDPOS;
-  }
-
-
   // State fields
 
   public indexField(): string {
@@ -348,11 +331,6 @@ export class Compilation {
     return this.stateField(`_spanOff${index}`);
   }
 
-  // TODO(indutny): remove me
-  public errorPosField(): string {
-    return this.stateField('errorPos');
-  }
-
   public spanCbField(index: number): string {
     return this.stateField(`_spanCb${index}`);
   }
@@ -362,11 +340,6 @@ export class Compilation {
   }
 
   // Globals
-
-  // TODO(indutny): remove me
-  public cstring(value: string): string {
-    return JSON.stringify(value);
-  }
 
   public blob(value: Buffer): string {
     if (this.blobs.has(value)) {

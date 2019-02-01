@@ -10,11 +10,6 @@ export const ARG_CURRENT = 'current';
 export const ARG_BUF = 'buf';
 export const ARG_OFF = 'off';
 
-// TODO(indutny): remove those
-export const ARG_STATE = 'state';
-export const ARG_POS = 'p';
-export const ARG_ENDPOS = 'endp';
-
 export const VAR_MATCH = 'match';
 
 // MatchSequence
