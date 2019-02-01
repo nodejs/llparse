@@ -145,7 +145,6 @@ export class Compiler {
     debug('Building JS');
     if (js) {
       result.js = js.compile(info);
-      console.log(result.js);
     }
 
     return result;
