@@ -220,8 +220,8 @@ export class Compilation {
 
   public importCode(name: string, out: string[]) {
     if (!this.options.binding) {
-      throw new Error(
-        'External JS code is used, but path to binding is not supplied');
+      // Assume bindings are global
+      return;
     }
 
     const path = JSON.stringify(this.options.binding);
