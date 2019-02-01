@@ -1,7 +1,6 @@
 import * as frontend from 'llparse-frontend';
 
 import {
-  ARG_STATE, ARG_POS, ARG_ENDPOS,
   STATE_ERROR,
   CONTAINER_KEY,
 } from './constants';
@@ -50,11 +49,25 @@ export class JSCompiler {
 
     out.push('class Parser {');
     out.push('  constructor(binding) {');
-    out.push(`    ${ctx.currentField()} = ${rootState};`);
     out.push(`    ${ctx.indexField()} = 0;`);
-    out.push(`    ${ctx.errorField()} = 0;`);
-    out.push(`    ${ctx.errorOffField()} = 0;`);
+    out.push(`    ${ctx.currentField()} = ${rootState};`);
     out.push(`    ${ctx.statusField()} = 0;`);
+    out.push(`    ${ctx.errorField()} = 0;`);
+    out.push(`    ${ctx.reasonField()} = null;`);
+    out.push(`    ${ctx.errorOffField()} = 0;`);
+
+    for (const { ty, name } of info.properties) {
+      let value;
+      if (ty === 'i64') {
+        value = '0n';
+      } else if (ty === 'ptr') {
+        value = 'null';
+      } else {
+        value = '0';
+      }
+      out.push(`    ${ctx.stateField(name)} = ${value};`);
+    }
+
     out.push('  }');
     out.push('');
 
