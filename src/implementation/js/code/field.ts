@@ -5,13 +5,12 @@ import { Code } from './base';
 
 export abstract class Field<T extends frontend.code.Field> extends Code<T> {
   public build(ctx: Compilation, out: string[]): void {
-    out.push(`function ${this.ref.name}(${ctx.bufArg()},`);
+    const args = [ ctx.bufArg(), ctx.offArg() ];
+
     if (this.ref.signature === 'value') {
-      out.push(`    ${ctx.offArg()},`);
-      out.push(`    ${ctx.matchVar()}) {`);
-    } else {
-      out.push(`    ${ctx.offArg()}) {`);
+      args.push(ctx.matchVar());
     }
+    out.push(`function ${this.ref.name}(${args.join(', ')}) {`);
     const tmp: string[] = [];
     this.doBuild(ctx, tmp);
     ctx.indent(out, tmp, '  ');
