@@ -21,7 +21,7 @@ export class Invoke extends Node<frontend.node.Invoke> {
       args.push(ctx.matchVar());
     }
 
-    out.push(`switch (${codeDecl}.call(${args.join(', ')})) {`);
+    out.push(`switch (${codeDecl}.call(${args.join(', ')}) | 0) {`);
     let tmp: string[];
 
     for (const edge of this.ref.edges) {

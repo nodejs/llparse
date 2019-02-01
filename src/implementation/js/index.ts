@@ -58,7 +58,7 @@ export class JSCompiler {
     out.push(`  _run(${ctx.currentArg()}, ${ctx.bufArg()}, ${ctx.offArg()}) {`);
     out.push(`    let ${ctx.matchVar()};`);
     out.push('    for (;;) {');
-    out.push(`      switch (${ctx.currentArg()}) {`);
+    out.push(`      switch (${ctx.currentArg()} | 0) {`);
 
     tmp = [];
     ctx.buildStates(tmp);
