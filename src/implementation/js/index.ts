@@ -29,7 +29,7 @@ export class JSCompiler {
 
   public compile(info: frontend.IFrontendResult): string {
     const ctx = new Compilation(info.prefix, info.properties, Object.assign({
-      module: 'commonjs',
+      module: 'esm',
     }, this.options));
     const out: string[] = [];
 
