@@ -45,6 +45,7 @@ export class JSCompiler {
     out.push(`    ${ctx.indexField()} = 0;`);
     out.push(`    ${ctx.errorField()} = 0;`);
     out.push(`    ${ctx.errorOffField()} = 0;`);
+    out.push(`    ${ctx.statusField()} = 0;`);
     out.push('  }');
     out.push('');
 

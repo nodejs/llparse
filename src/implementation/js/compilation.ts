@@ -303,6 +303,10 @@ export class Compilation {
     return this.stateField('_current');
   }
 
+  public statusField(): string {
+    return this.stateField('_status');
+  }
+
   public errorField(): string {
     return this.stateField('error');
   }

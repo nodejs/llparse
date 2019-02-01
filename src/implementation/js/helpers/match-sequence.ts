@@ -38,16 +38,19 @@ export class MatchSequence {
     out.push('    if (current === seq[index]) {');
     out.push('      if (++index == seq.length) {');
     out.push(`        ${ctx.indexField()} = 0;`);
-    out.push(`        return { status: ${SEQUENCE_COMPLETE}, off: ${off} };`);
+    out.push(`        ${ctx.statusField()} = ${SEQUENCE_COMPLETE};`);
+    out.push('        return off;');
     out.push('      }');
     out.push('    } else {');
     out.push(`      ${ctx.indexField()} = 0;`);
-    out.push(`      return { status: ${SEQUENCE_MISMATCH}, off: ${off} };`);
+    out.push(`      ${ctx.statusField()} = ${SEQUENCE_MISMATCH};`);
+    out.push('      return off;');
     out.push('    }');
     out.push('  }');
 
     out.push(`  ${ctx.indexField()} = index;`);
-    out.push(`  return { status: ${SEQUENCE_PAUSE}, off: ${off} };`);
+    out.push(`  ${ctx.statusField()} = ${SEQUENCE_PAUSE};`);
+    out.push('  return off;');
     out.push('}');
   }
 }

@@ -15,35 +15,34 @@ export class Sequence extends Node<frontend.node.Sequence> {
     const matchSequence = ctx.getMatchSequence(this.ref.transform!,
         this.ref.select);
 
-    out.push(`const matchSeq = ${matchSequence}(${ctx.bufArg()}, ` +
+    out.push(`${ctx.offArg()} = ${matchSequence}(${ctx.bufArg()}, ` +
         `${ctx.offArg()}, ${ctx.blob(this.ref.select)})`);
-    out.push(`${ctx.offArg()} = matchSeq.off;`);
 
     let tmp: string[];
 
-    out.push('switch (matchSeq.status) {');
+    out.push(`const status = ${ctx.statusField()};`);
 
-    out.push(`  case ${SEQUENCE_COMPLETE}: {`);
+    out.push(`if (status === ${SEQUENCE_COMPLETE}) {`);
+
     tmp = [];
     this.tailTo(tmp, {
       noAdvance: false,
       node: this.ref.edge!.node,
       value: this.ref.edge!.value,
     });
-    ctx.indent(out, tmp, '    ');
-    out.push('  }');
+    ctx.indent(out, tmp, '  ');
 
-    out.push(`  case ${SEQUENCE_PAUSE}: {`);
+    out.push(`} else if (status === ${SEQUENCE_PAUSE}) {`);
+
     tmp = [];
     this.pause(tmp);
-    ctx.indent(out, tmp, '    ');
-    out.push('  }');
+    ctx.indent(out, tmp, '  ');
 
-    out.push(`  case ${SEQUENCE_MISMATCH}: {`);
+    out.push('} else {');
+
     tmp = [];
     this.tailTo(tmp, this.ref.otherwise!);
-    ctx.indent(out, tmp, '    ');
-    out.push('  }');
+    ctx.indent(out, tmp, '  ');
 
     out.push('}');
   }
