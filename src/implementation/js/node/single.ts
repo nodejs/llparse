@@ -14,7 +14,7 @@ export class Single extends Node<frontend.node.Single> {
     const transform = ctx.unwrapTransform(this.ref.transform!);
     const current = transform.build(ctx, `${ctx.bufArg()}[${ctx.offArg()}]`);
 
-    out.push(`switch (${current}) {`)
+    out.push(`switch (${current} | 0) {`)
     this.ref.edges.forEach((edge) => {
       let ch: string = edge.key.toString();
 
