@@ -48,7 +48,7 @@ export class JSCompiler {
     out.push('');
 
     out.push('class Parser {');
-    out.push('  constructor(binding) {');
+    out.push('  constructor() {');
     out.push(`    ${ctx.indexField()} = 0;`);
     out.push(`    ${ctx.currentField()} = ${rootState};`);
     out.push(`    ${ctx.statusField()} = 0;`);
