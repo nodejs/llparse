@@ -170,7 +170,7 @@ export class JSCompiler {
       ];
 
       out.push(`if (${offField} !== -1) {`);
-      out.push(`  const error = ${callback}(${args.join(', ')});`);
+      out.push(`  const error = ${callback}(${args.join(', ')}) | 0;`);
 
       // TODO(indutny): de-duplicate this here and in SpanEnd
       out.push('  if (error !== 0) {');

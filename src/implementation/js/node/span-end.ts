@@ -19,7 +19,7 @@ export class SpanEnd extends Node<frontend.node.SpanEnd> {
     // Invoke callback
     const callback = ctx.buildCode(ctx.unwrapCode(this.ref.callback));
     out.push(`const err = ${callback}(${ctx.bufArg()}, ` +
-      `start, ${ctx.offArg()});`);
+      `start, ${ctx.offArg()}) | 0;`);
 
     out.push('if (err !== 0) {');
     const tmp: string[] = [];
