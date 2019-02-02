@@ -221,12 +221,11 @@ export class Compilation {
   public exportDefault(lines: string[]): string {
     const out: string[] = [];
 
-    out.push('\'use strict\'');
-    out.push('');
-
     if (this.options.module === 'esm') {
       out.push(`export default (binding) => {`);
     } else {
+      out.push('\'use strict\';');
+      out.push('');
       out.push(`module.exports = (binding) => {`);
     }
     this.indent(out, lines, '  ');

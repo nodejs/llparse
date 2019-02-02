@@ -1,4 +1,4 @@
-module.exports = (binding, inBench) => {
+export default (binding, inBench) => {
   const nop = () => 0;
 
   binding.llparse__print_zero = inBench ? nop : (_, buf, off) => {

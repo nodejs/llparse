@@ -33,6 +33,7 @@
   },
   "homepage": "https://github.com/indutny/llparse#readme",
   "devDependencies": {
+    "esm": "^3.2.0",
     "@types/debug": "0.0.30",
     "@types/mocha": "^5.2.5",
     "@types/node": "^10.12.21",
