@@ -18,8 +18,9 @@ export class Single extends Node<frontend.node.Single> {
     this.ref.edges.forEach((edge) => {
       let ch: string;
 
-      // Non-printable ASCII, or single-quote
-      if (edge.key < 0x20 || edge.key > 0x7e || edge.key === 0x27) {
+      // Non-printable ASCII, or single-quote, or forward slash
+      if (edge.key < 0x20 || edge.key > 0x7e || edge.key === 0x27 ||
+          edge.key === 0x5c) {
         ch = edge.key.toString();
       } else {
         ch = `'${String.fromCharCode(edge.key)}'`;

@@ -187,6 +187,19 @@ describe('llparse/Compiler', () => {
       const binary = build(p, start, 'match-bit-check');
       await binary.check('Düsseldorf.', 'off=12\n');
     });
+
+    it('should match single quotes and forward slashes', async () => {
+      const start = p.node('start');
+
+      start
+        .match('\'', printOff(p, start))
+        .match('\\', printOff(p, start))
+        .otherwise(p.error(3, 'Invalid char'));
+
+      // TODO(indutny): validate compilation result?
+      const binary = build(p, start, 'escape-char');
+      await binary.check('\\\'', 'off=1\noff=2\n');
+    });
   });
 
   describe('`.peek()`', () => {
