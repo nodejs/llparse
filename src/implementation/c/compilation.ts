@@ -19,6 +19,12 @@ const BLOB_GROUP_SIZE = 11;
 
 type WrappedNode = frontend.IWrap<frontend.node.Node>;
 
+interface IBlob {
+  readonly alignment: number | undefined;
+  readonly buffer: Buffer;
+  readonly name: string;
+}
+
 // TODO(indutny): deduplicate
 export interface ICompilationOptions {
   readonly debug?: string;
@@ -32,7 +38,7 @@ export interface ICompilationProperty {
 
 export class Compilation {
   private readonly stateMap: Map<string, ReadonlyArray<string>> = new Map();
-  private readonly blobs: Map<Buffer, string> = new Map();
+  private readonly blobs: Map<Buffer, IBlob> = new Map();
   private readonly codeMap: Map<string, Code<frontend.code.Code>> = new Map();
   private readonly matchSequence:
       Map<string, MatchSequence> = new Map();
@@ -64,14 +70,20 @@ export class Compilation {
       return;
     }
 
-    for (const [ blob, name ] of this.blobs) {
-      out.push(`static const unsigned char ${name}[] = {`);
+    for (const blob of this.blobs.values()) {
+      const buffer = blob.buffer;
+      let align = '';
+      if (blob.alignment) {
+        align = ` ALIGN(${blob.alignment})`;
+      }
 
-      for (let i = 0; i < blob.length; i += BLOB_GROUP_SIZE) {
-        const limit = Math.min(blob.length, i + BLOB_GROUP_SIZE);
+      out.push(`static const unsigned char${align} ${blob.name}[] = {`);
+
+      for (let i = 0; i < buffer.length; i += BLOB_GROUP_SIZE) {
+        const limit = Math.min(buffer.length, i + BLOB_GROUP_SIZE);
         const hex: string[] = [];
         for (let j = i; j < limit; j++) {
-          const value = blob[j] as number;
+          const value = buffer[j] as number;
 
           const ch = String.fromCharCode(value);
           // `'`, `\`
@@ -84,7 +96,7 @@ export class Compilation {
           }
         }
         let line = '  ' + hex.join(', ');
-        if (limit !== blob.length) {
+        if (limit !== buffer.length) {
           line += ',';
         }
         out.push(line);
@@ -304,12 +316,17 @@ export class Compilation {
     return JSON.stringify(value);
   }
 
-  public blob(value: Buffer): string {
+  public blob(value: Buffer, alignment?: number): string {
     if (this.blobs.has(value)) {
-      return this.blobs.get(value)!;
+      return this.blobs.get(value)!.name;
     }
+
     const res = BLOB_PREFIX + this.blobs.size;
-    this.blobs.set(value, res);
+    this.blobs.set(value, {
+      alignment,
+      buffer: value,
+      name: res,
+    });
     return res;
   }
 }
