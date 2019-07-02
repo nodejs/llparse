@@ -200,6 +200,19 @@ describe('llparse/Compiler', () => {
       const binary = build(p, start, 'escape-char');
       await binary.check('\\\'', 'off=1\noff=2\n');
     });
+
+    it('should hit SSE4.2 optimization for table-lookup', async () => {
+      const start = p.node('start');
+
+      start
+        .match(ALPHA, start)
+        .skipTo(printOff(p, start));
+
+      // TODO(indutny): validate compilation result?
+      const binary = build(p, start, 'match-bit-check-sse');
+      await binary.check('abcdabcdabcdabcdabcdabcdabcd.abcd.',
+        'off=29\noff=34\n');
+    });
   });
 
   describe('`.peek()`', () => {

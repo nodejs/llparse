@@ -36,6 +36,27 @@ export class CCompiler {
     out.push('#include <stdint.h>');
     out.push('#include <string.h>');
     out.push('');
+
+    // NOTE: Inspired by https://github.com/h2o/picohttpparser
+    // TODO(indutny): Windows support for SSE4.2.
+    // See: https://github.com/nodejs/llparse/pull/24#discussion_r299789676
+    // (There is no `__SSE4_2__` define for MSVC)
+    out.push('#ifdef __SSE4_2__');
+    out.push(' #ifdef _MSC_VER');
+    out.push('  #include <nmmintrin.h>');
+    out.push(' #else  /* !_MSC_VER */');
+    out.push('  #include <x86intrin.h>');
+    out.push(' #endif  /* _MSC_VER */');
+    out.push('#endif  /* __SSE4_2__ */');
+    out.push('');
+
+    out.push('#ifdef _MSC_VER');
+    out.push(' #define ALIGN(n) _declspec(align(n))');
+    out.push('#else  /* !_MSC_VER */');
+    out.push(' #define ALIGN(n) __attribute__((aligned(n)))');
+    out.push('#endif  /* _MSC_VER */');
+
+    out.push('');
     out.push(`#include "${this.options.header || info.prefix}.h"`);
     out.push(``);
     out.push(`typedef int (*${info.prefix}__span_cb)(`);

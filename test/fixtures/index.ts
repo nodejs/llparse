@@ -9,6 +9,7 @@ export { ERROR_PAUSE } from 'llparse-test-fixture';
 const fixtures = new Fixture({
   buildDir: path.join(__dirname, '..', 'tmp'),
   extra: [
+    '-msse4.2',
     '-DLLPARSE__TEST_INIT=llparse__test_init',
     path.join(__dirname, 'extra.c'),
   ],
