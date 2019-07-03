@@ -43,6 +43,7 @@ export default (binding, inBench) => {
   let onceCounter = 0;
 
   binding.llparse__pause_once = (_, buf, off, offLen) => {
+    console.error('llparse__pause_once', onceCounter, JSON.stringify(buf.slice(off, off + offLen).toString()));
     if (!inBench) {
       binding.llparse__print_span('pause', buf, off, offLen);
     }
