@@ -37,7 +37,7 @@
     "@types/debug": "0.0.30",
     "@types/mocha": "^5.2.5",
     "@types/node": "^10.12.21",
-    "llparse-test-fixture": "git://github.com/indutny/llparse-test-fixture.git#master",
+    "llparse-test-fixture": "^3.3.0",
     "mocha": "^5.2.0",
     "ts-node": "^7.0.1",
     "tslint": "^5.12.1",
