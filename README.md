@@ -1,5 +1,5 @@
 # llparse
-[![Build Status](https://secure.travis-ci.org/indutny/llparse.svg)](http://travis-ci.org/indutny/llparse)
+[![Build Status](https://secure.travis-ci.org/nodejs/llparse.svg)](http://travis-ci.org/nodejs/llparse)
 [![NPM version](https://badge.fury.io/js/llparse.svg)](https://badge.fury.io/js/llparse)
 
 An API for compiling an incremental parser into C output and/or
