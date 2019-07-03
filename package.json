@@ -33,15 +33,15 @@
   },
   "homepage": "https://github.com/indutny/llparse#readme",
   "devDependencies": {
-    "esm": "^3.2.0",
     "@types/debug": "0.0.30",
-    "@types/mocha": "^5.2.5",
-    "@types/node": "^10.12.21",
-    "llparse-test-fixture": "^3.3.0",
+    "@types/mocha": "^5.2.7",
+    "@types/node": "^10.14.10",
+    "esm": "^3.2.25",
+    "llparse-test-fixture": "^3.3.1",
     "mocha": "^5.2.0",
     "ts-node": "^7.0.1",
-    "tslint": "^5.12.1",
-    "typescript": "^3.3.1"
+    "tslint": "^5.18.0",
+    "typescript": "^3.5.2"
   },
   "dependencies": {
     "bitcode": "^1.2.0",
