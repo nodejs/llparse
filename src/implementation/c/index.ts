@@ -37,17 +37,40 @@ export class CCompiler {
     out.push('#include <string.h>');
     out.push('');
 
-    // NOTE: Inspired by https://github.com/h2o/picohttpparser
-    // TODO(indutny): Windows support for SSE4.2.
-    // See: https://github.com/nodejs/llparse/pull/24#discussion_r299789676
-    // (There is no `__SSE4_2__` define for MSVC)
-    out.push('#ifdef __SSE4_2__');
+    out.push('#if defined(__x86_64__) || defined(_M_AMD64)');
     out.push(' #ifdef _MSC_VER');
-    out.push('  #include <nmmintrin.h>');
-    out.push(' #else  /* !_MSC_VER */');
-    out.push('  #include <x86intrin.h>');
-    out.push(' #endif  /* _MSC_VER */');
-    out.push('#endif  /* __SSE4_2__ */');
+    out.push('  #include <intrin.h>');
+    out.push('  #define cpuid(info, x) __cpuidex(info, x, 0)');
+    out.push(' #else /* _MSC_VER (GCC, Clang, ICC) */');
+    out.push('  #include <cpuid.h>');
+    out.push('  static void cpuid(int info[4], int eax) {');
+    out.push('    __cpuid_count(eax, 0, info[0], info[1], info[2], info[3]);');
+    out.push('  }');
+    out.push(' #endif /* _MSC_VER */');
+    out.push('');
+    out.push(' inline static int SupportsSSE42() {');
+    out.push('   static int supported; /* 0=first call, 1=yes, -1=no */');
+    out.push('   if (supported == 0) {');
+    out.push('     int info[4];');
+    out.push('     cpuid(info, 0);');
+    out.push('     int nIds = info[0];');
+    out.push('     if (nIds >= 1) {');
+    out.push('       cpuid(info, 1);');
+    out.push('       if ((info[2] & (1 << 20)) != 0) {');
+    out.push('         supported = 1;');
+    out.push('       } else {');
+    out.push('         supported = -1;');
+    out.push('       }');
+    out.push('     }');
+    out.push('   }');
+    out.push('   return supported == 1;');
+    out.push(' }');
+    out.push('');
+    out.push('#else /* defined(__x86_64__) || defined(_M_AMD64) */');
+    out.push(' inline static int SupportsSSE42() {');
+    out.push('   return 0;');
+    out.push(' }');
+    out.push('#endif /* defined(__x86_64__) || defined(_M_AMD64) */');
     out.push('');
 
     out.push('#ifdef _MSC_VER');
@@ -55,8 +78,63 @@ export class CCompiler {
     out.push('#else  /* !_MSC_VER */');
     out.push(' #define ALIGN(n) __attribute__((aligned(n)))');
     out.push('#endif  /* _MSC_VER */');
-
     out.push('');
+
+    out.push('typedef int FindRanges1T(const unsigned char* p,');
+    out.push('                         const unsigned char* a,');
+    out.push('                         int nRanges);');
+    out.push('FindRanges1T FindRanges1Dispatch;');
+    out.push('FindRanges1T* findRanges1 = FindRanges1Dispatch;');
+    out.push('');
+
+    // SSE4.2-specific impl of findRanges1
+    out.push('#if defined(__x86_64__) || defined(_M_AMD64)');
+    out.push(' #ifdef __GNUC__');
+    out.push('  #include <x86intrin.h>');
+    out.push('  int findRanges1_SSE42(const unsigned char* p,');
+    out.push('                        const unsigned char* a,');
+    out.push('                        int nRanges) __attribute__ ((__target__ ("sse4.2")));');
+    out.push(' #else /* __GNUC__ */')
+    out.push('  #include <nmmintrin.h>');
+    out.push(' #endif /* __GNUC__ */');
+    out.push('');
+    out.push(' int findRanges1_SSE42(const unsigned char* p,');
+    out.push('                       const unsigned char* a,');
+    out.push('                       int nRanges) {');
+    out.push('   __m128i ranges;');
+    out.push('   __m128i input;');
+    out.push('');
+    out.push('   input = _mm_loadu_si128((__m128i const*) p);');
+    out.push('   ranges = _mm_loadu_si128((__m128i const*) a);');
+    out.push('   return _mm_cmpestri(ranges, nRanges, input, 16,');
+    out.push('     _SIDD_UBYTE_OPS | _SIDD_CMP_RANGES | ');
+    out.push('       _SIDD_NEGATIVE_POLARITY);');
+    out.push(' }');
+    out.push('#else /* __x86_64__ */');
+    out.push(' int findRanges1_SSE42(const unsigned char* p,');
+    out.push('                       const unsigned char* a,');
+    out.push('                       int nRanges);'); // declaration only
+    out.push('#endif /* __x86_64__ */');
+    out.push('');
+
+    out.push('int findRanges1_NoSSE42(const unsigned char* p,');
+    out.push('                        const unsigned char* a,');
+    out.push('                        int nRanges) {');
+    out.push('  return -1;')
+    out.push('}');
+    out.push('');
+    
+    // dispatch for findRanges1
+    out.push('int FindRanges1Dispatch(const unsigned char* p, const unsigned char* a, int nRanges) {');
+    out.push('  if (SupportsSSE42()) {');
+    out.push('    findRanges1 = findRanges1_SSE42;');
+    out.push('  } else {');
+    out.push('    findRanges1 = findRanges1_NoSSE42;');
+    out.push('  }');
+    out.push('  return (*findRanges1)(p, a, nRanges);');
+    out.push('}');
+    out.push('');
+
     out.push(`#include "${this.options.header || info.prefix}.h"`);
     out.push(``);
     out.push(`typedef int (*${info.prefix}__span_cb)(`);

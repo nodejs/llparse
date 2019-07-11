@@ -33,7 +33,7 @@ export class TableLookup extends Node<frontend.node.TableLookup> {
     // Try to vectorize nodes matching characters and looping to themselves
     // NOTE: `switch` below triggers when there is not enough characters in the
     // stream for vectorized processing.
-    this.buildSSE(out);
+    this.buildSSE42(out);
 
     const current = transform.build(ctx, `*${ctx.posArg()}`);
     out.push(`switch (${table.name}[(uint8_t) ${current}]) {`);
@@ -63,7 +63,7 @@ export class TableLookup extends Node<frontend.node.TableLookup> {
     out.push('}');
   }
 
-  private buildSSE(out: string[]): boolean {
+  private buildSSE42(out: string[]): boolean {
     const ctx = this.compilation;
 
     // Transformation is not supported atm
@@ -111,29 +111,17 @@ export class TableLookup extends Node<frontend.node.TableLookup> {
       return false;
     }
 
-    out.push('#ifdef __SSE4_2__');
     out.push(`if (${ctx.endPosArg()} - ${ctx.posArg()} >= 16) {`);
-    out.push('  __m128i ranges;');
-    out.push('  __m128i input;');
-    out.push('  int avail;');
     out.push('  int match_len;');
-    out.push('');
-    out.push('  /* Load input */');
-    out.push(`  input = _mm_loadu_si128((__m128i const*) ${ctx.posArg()});`);
+    let n = 0; // TODO
     for (let off = 0; off < ranges.length; off += SSE_RANGES_LEN) {
+      n++; // TODO
       const subRanges = ranges.slice(off, off + SSE_RANGES_LEN);
 
       const blob = ctx.blob(Buffer.from(subRanges), SSE_ALIGNMENT);
-      out.push(`  ranges = _mm_loadu_si128((__m128i const*) ${blob});`);
       out.push('');
-
-      out.push('  /* Find first character that does not match `ranges` */');
-      out.push(`  match_len = _mm_cmpestri(ranges, ${subRanges.length},`);
-      out.push('      input, 16,');
-      out.push('      _SIDD_UBYTE_OPS | _SIDD_CMP_RANGES |');
-      out.push('        _SIDD_NEGATIVE_POLARITY);');
-      out.push('');
-      out.push('  if (match_len != 0) {');
+      out.push(`  match_len = findRanges1(${ctx.posArg()}, ${blob}, ${subRanges.length});`);
+      out.push('  if (match_len > 0) {');
       out.push(`    ${ctx.posArg()} += match_len;`);
 
       const tmp: string[] = [];
@@ -144,17 +132,18 @@ export class TableLookup extends Node<frontend.node.TableLookup> {
       });
       ctx.indent(out, tmp, '    ');
 
-      out.push('  }');
+      out.push('  } else if (match_len == 0) {');
     }
 
     {
       const tmp: string[] = [];
       this.tailTo(tmp, this.ref.otherwise!);
-      ctx.indent(out, tmp, '  ');
+      ctx.indent(out, tmp, '    ');
     }
+    out.push('  }');
     out.push('}');
-
-    out.push('#endif  /* __SSE4_2__ */');
+    if (n == 2)
+      out.push('}'); // TODO ugly and not correctly indented
 
     return true;
   }
