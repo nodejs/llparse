@@ -46,6 +46,6 @@
   "dependencies": {
     "bitcode": "^1.2.0",
     "debug": "^3.2.6",
-    "llparse-frontend": "^1.2.1"
+    "llparse-frontend": "git+https://github.com/arthurschreiber/llparse-frontend.git#arthur/binary-parsing"
   }
 }

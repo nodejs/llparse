@@ -4,6 +4,7 @@ import { Consume } from './consume';
 import { Empty } from './empty';
 import { Error as ErrorNode } from './error';
 import { Invoke } from './invoke';
+import { Int } from './int';
 import { Pause } from './pause';
 import { Sequence } from './sequence';
 import { Single } from './single';
@@ -17,6 +18,7 @@ export default {
   Consume,
   Empty,
   Error: class Error extends ErrorNode<frontend.node.Error> {},
+  Int,
   Invoke,
   Pause,
   Sequence,
