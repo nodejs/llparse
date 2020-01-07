@@ -18,27 +18,51 @@ export class Int extends Node<frontend.node.Int> {
 
       case 2: {
         if (this.ref.littleEndian) {
-          this.readUInt16LE(out);
+          if (this.ref.signed) {
+            this.readInt16LE(out);
+          } else {
+            this.readUInt16LE(out);
+          }
         } else {
-          this.readUInt16BE(out);
+          if (this.ref.signed) {
+            this.readInt16BE(out);
+          } else {
+            this.readUInt16BE(out);
+          }
         }
         break;
       }
 
       case 3: {
         if (this.ref.littleEndian) {
-          this.readUInt24LE(out);
+          if (this.ref.signed) {
+            this.readInt24LE(out);
+          } else {
+            this.readUInt24LE(out);
+          }
         } else {
-          this.readUInt24BE(out);
+          if (this.ref.signed) {
+            this.readInt24BE(out);
+          } else {
+            this.readUInt24BE(out);
+          }
         }
         break;
       }
 
       case 4: {
         if (this.ref.littleEndian) {
-          this.readUInt32LE(out);
+          if (this.ref.signed) {
+            this.readInt32LE(out);
+          } else {
+            this.readUInt32LE(out);
+          }
         } else {
-          this.readUInt32BE(out);
+          if (this.ref.signed) {
+            this.readInt32BE(out);
+          } else {
+            this.readUInt32BE(out);
+          }
         }
         break;
       }
@@ -51,14 +75,32 @@ export class Int extends Node<frontend.node.Int> {
     const ctx = this.compilation;
     const index = ctx.stateField(this.ref.field);
 
-    out.push(`${index} = (${ctx.bufArg()}[${ctx.offArg()}] & 2 ** 7) * 0x1fffffe;`)
+    out.push(`${index} = (${ctx.bufArg()}[${ctx.offArg()}] & 2 ** 7) * 0x1fffffe;`);
   }
 
   private readUInt8(out: string[]) {
     const ctx = this.compilation;
     const index = ctx.stateField(this.ref.field);
 
-    out.push(`${index} = ${ctx.bufArg()}[${ctx.offArg()}];`)
+    out.push(`${index} = ${ctx.bufArg()}[${ctx.offArg()}];`);
+  }
+
+  private readInt16LE(out: string[]) {
+    const ctx = this.compilation;
+    const index = ctx.stateField(this.ref.field);
+
+    switch (this.ref.byteOffset) {
+      case 0: {
+        out.push(`${index} = ${ctx.bufArg()}[${ctx.offArg()}];`);
+        break;
+      }
+
+      case 1: {
+        out.push(`${index} += ${ctx.bufArg()}[${ctx.offArg()}] * 2 ** 8;`);
+        out.push(`${index} |= (${index} & 2 ** 15) * 0x1fffe;`);
+        break;
+      }
+    }
   }
 
   private readUInt16LE(out: string[]) {
@@ -67,12 +109,35 @@ export class Int extends Node<frontend.node.Int> {
 
     switch (this.ref.byteOffset) {
       case 0: {
-        out.push(`${index} = ${ctx.bufArg()}[${ctx.offArg()}];`)
+        out.push(`${index} = ${ctx.bufArg()}[${ctx.offArg()}];`);
         break;
       }
 
       case 1: {
         out.push(`${index} += ${ctx.bufArg()}[${ctx.offArg()}] * 2 ** 8;`);
+        break;
+      }
+    }
+  }
+
+  private readInt24LE(out: string[]) {
+    const ctx = this.compilation;
+    const index = ctx.stateField(this.ref.field);
+
+    switch (this.ref.byteOffset) {
+      case 0: {
+        out.push(`${index} = ${ctx.bufArg()}[${ctx.offArg()}];`);
+        break;
+      }
+
+      case 1: {
+        out.push(`${index} += ${ctx.bufArg()}[${ctx.offArg()}] * 2 ** 8;`);
+        break;
+      }
+
+      case 2: {
+        out.push(`${index} += ${ctx.bufArg()}[${ctx.offArg()}] * 2 ** 16;`);
+        out.push(`${index} |= (${index} & 2 ** 23) * 0x1fe`);
         break;
       }
     }
@@ -84,7 +149,7 @@ export class Int extends Node<frontend.node.Int> {
 
     switch (this.ref.byteOffset) {
       case 0: {
-        out.push(`${index} = ${ctx.bufArg()}[${ctx.offArg()}];`)
+        out.push(`${index} = ${ctx.bufArg()}[${ctx.offArg()}];`);
         break;
       }
 
@@ -100,13 +165,40 @@ export class Int extends Node<frontend.node.Int> {
     }
   }
 
+  private readInt32LE(out: string[]) {
+    const ctx = this.compilation;
+    const index = ctx.stateField(this.ref.field);
+
+    switch (this.ref.byteOffset) {
+      case 0: {
+        out.push(`${index} = ${ctx.bufArg()}[${ctx.offArg()}];`);
+        break;
+      }
+
+      case 1: {
+        out.push(`${index} += ${ctx.bufArg()}[${ctx.offArg()}] * 2 ** 8;`);
+        break;
+      }
+
+      case 2: {
+        out.push(`${index} += ${ctx.bufArg()}[${ctx.offArg()}] * 2 ** 16;`);
+        break;
+      }
+
+      case 3: {
+        out.push(`${index} += ${ctx.bufArg()}[${ctx.offArg()}] << 24;`); // Overflow
+        break;
+      }
+    }
+  }
+
   private readUInt32LE(out: string[]) {
     const ctx = this.compilation;
     const index = ctx.stateField(this.ref.field);
 
     switch (this.ref.byteOffset) {
       case 0: {
-        out.push(`${index} = ${ctx.bufArg()}[${ctx.offArg()}];`)
+        out.push(`${index} = ${ctx.bufArg()}[${ctx.offArg()}];`);
         break;
       }
 
@@ -127,6 +219,24 @@ export class Int extends Node<frontend.node.Int> {
     }
   }
 
+  private readInt16BE(out: string[]) {
+    const ctx = this.compilation;
+    const index = ctx.stateField(this.ref.field);
+
+    switch (this.ref.byteOffset) {
+      case 0: {
+        out.push(`${index} = ${ctx.bufArg()}[${ctx.offArg()}] * 2 ** 8;`);
+        break;
+      }
+
+      case 1: {
+        out.push(`${index} += ${ctx.bufArg()}[${ctx.offArg()}];`);
+        out.push(`${index} |= (${index} & 2 ** 15) * 0x1fffe;`);
+        break;
+      }
+    }
+  }
+
   private readUInt16BE(out: string[]) {
     const ctx = this.compilation;
     const index = ctx.stateField(this.ref.field);
@@ -138,7 +248,30 @@ export class Int extends Node<frontend.node.Int> {
       }
 
       case 1: {
-        out.push(`${index} += ${ctx.bufArg()}[${ctx.offArg()}];`)
+        out.push(`${index} += ${ctx.bufArg()}[${ctx.offArg()}];`);
+        break;
+      }
+    }
+  }
+
+  private readInt24BE(out: string[]) {
+    const ctx = this.compilation;
+    const index = ctx.stateField(this.ref.field);
+
+    switch (this.ref.byteOffset) {
+      case 0: {
+        out.push(`${index} = ${ctx.bufArg()}[${ctx.offArg()}] * 2 ** 16;`);
+        break;
+      }
+
+      case 1: {
+        out.push(`${index} += ${ctx.bufArg()}[${ctx.offArg()}] * 2 ** 8;`);
+        break;
+      }
+
+      case 2: {
+        out.push(`${index} += ${ctx.bufArg()}[${ctx.offArg()}];`);
+        out.push(`${index} |= (${index} & 2 ** 23) * 0x1fe;`);
         break;
       }
     }
@@ -160,7 +293,34 @@ export class Int extends Node<frontend.node.Int> {
       }
 
       case 2: {
-        out.push(`${index} += ${ctx.bufArg()}[${ctx.offArg()}];`)
+        out.push(`${index} += ${ctx.bufArg()}[${ctx.offArg()}];`);
+        break;
+      }
+    }
+  }
+
+  private readInt32BE(out: string[]) {
+    const ctx = this.compilation;
+    const index = ctx.stateField(this.ref.field);
+
+    switch (this.ref.byteOffset) {
+      case 0: {
+        out.push(`${index} = ${ctx.bufArg()}[${ctx.offArg()}] << 24;`); // Overflow
+        break;
+      }
+
+      case 1: {
+        out.push(`${index} += ${ctx.bufArg()}[${ctx.offArg()}] * 2 ** 16;`);
+        break;
+      }
+
+      case 2: {
+        out.push(`${index} += ${ctx.bufArg()}[${ctx.offArg()}] * 2 ** 8;`);
+        break;
+      }
+
+      case 3: {
+        out.push(`${index} += ${ctx.bufArg()}[${ctx.offArg()}];`);
         break;
       }
     }
@@ -187,7 +347,7 @@ export class Int extends Node<frontend.node.Int> {
       }
 
       case 3: {
-        out.push(`${index} += ${ctx.bufArg()}[${ctx.offArg()}];`)
+        out.push(`${index} += ${ctx.bufArg()}[${ctx.offArg()}];`);
         break;
       }
     }
