@@ -1,6 +1,6 @@
 {
   "name": "llparse",
-  "version": "6.2.0",
+  "version": "6.2.1",
   "description": "Compile parsers to LLVM bitcode",
   "main": "lib/api.js",
   "types": "lib/api.d.ts",
