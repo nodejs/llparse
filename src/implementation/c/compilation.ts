@@ -77,6 +77,9 @@ export class Compilation {
         align = ` ALIGN(${blob.alignment})`;
       }
 
+      if (blob.alignment) {
+        out.push('#ifdef __SSE4_2__');
+      }
       out.push(`static const unsigned char${align} ${blob.name}[] = {`);
 
       for (let i = 0; i < buffer.length; i += BLOB_GROUP_SIZE) {
@@ -103,6 +106,9 @@ export class Compilation {
       }
 
       out.push(`};`);
+      if (blob.alignment) {
+        out.push('#endif  /* __SSE4_2__ */');
+      }
     }
     out.push('');
   }
