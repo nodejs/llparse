@@ -7,6 +7,7 @@ import {
 import { Buffer } from 'buffer';
 import * as frontend from 'llparse-frontend';
 
+import { IStructStateFields } from '../../compiler/struct-state-fields-builder'
 import * as constants from './constants';
 import { MatchSequence } from './helpers/match-sequence';
 import { Code } from './code';
@@ -83,8 +84,8 @@ export class Compilation {
   private debugMethod: IRDeclaration | undefined = undefined;
 
   constructor(public readonly prefix: string,
+              fields: IStructStateFields,
               private readonly properties: ReadonlyArray<ICompilationProperty>,
-              spans: ReadonlyArray<frontend.SpanField>,
               public readonly options: ICompilationOptions) {
     this.ir = this.bitcode.createBuilder();
     this.invariantGroup = this.ir.metadata([
@@ -120,36 +121,42 @@ export class Compilation {
       ]),
     };
 
-    // Put most used fields first
-    this.state.addField(constants.TYPE_INDEX, constants.STATE_INDEX);
+    const propTypeMap: { [key: string]: IRType } = {
+      uint8_t: constants.I8,
+      uint16_t: constants.I16,
+      uint32_t: constants.I32,
+      uint64_t: constants.I64,
+      'void*': constants.PTR,
+    };
 
-    spans.forEach((span) => {
-      this.state.addField(constants.TYPE_SPAN_POS,
-        constants.STATE_SPAN_POS + span.index);
-      if (span.callbacks.length > 1) {
-        this.state.addField(this.signature.callback.span.ptr(),
-          constants.STATE_SPAN_CB + span.index);
-      }
-    });
+    const typeMap: { [key: string]: IRType } = {
+      [constants.STATE_INDEX]: constants.TYPE_INDEX,
+      [constants.STATE_ERROR]: constants.TYPE_ERROR,
+      [constants.STATE_REASON]: constants.TYPE_REASON,
+      [constants.STATE_ERROR_POS]: constants.TYPE_ERROR_POS,
+      [constants.STATE_DATA]: constants.TYPE_DATA,
+      [constants.STATE_CURRENT]: this.signature.node.ptr(),
+    };
 
-    this.state.addField(constants.TYPE_ERROR, constants.STATE_ERROR);
-    this.state.addField(constants.TYPE_REASON, constants.STATE_REASON);
-    this.state.addField(constants.TYPE_ERROR_POS, constants.STATE_ERROR_POS);
-    this.state.addField(constants.TYPE_DATA, constants.STATE_DATA);
-    this.state.addField(this.signature.node.ptr(), constants.STATE_CURRENT);
-
-    for (const property of properties) {
-      let ty: IRType;
-      switch (property.ty) {
-        case 'i8': ty = constants.I8; break;
-        case 'i16': ty = constants.I16; break;
-        case 'i32': ty = constants.I32; break;
-        case 'i64': ty = constants.I64; break;
-        case 'ptr': ty = constants.PTR; break;
-        default: throw new Error(`Unsupported user type: "${property.ty}"`);
+    for (const { name, type } of fields) {
+      const isProp = properties.some((p) => p.name === name);
+      if (isProp) {
+        this.state.addField(propTypeMap[type], name);
+        continue;
       }
 
-      this.state.addField(ty, property.name);
+      let ty = typeMap[name];
+      if (!ty) {
+        if (name.startsWith(constants.STATE_SPAN_POS)) {
+          ty = constants.TYPE_SPAN_POS;
+        } else if (name.startsWith(constants.STATE_SPAN_CB)) {
+          ty = this.signature.callback.span.ptr();
+        } else {
+          throw new Error(`Unknow field: "${name}"`);
+        }
+      }
+
+      this.state.addField(ty, name);
     }
 
     this.state.finalize();

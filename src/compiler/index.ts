@@ -7,6 +7,7 @@ import * as bitcodeImpl from '../implementation/bitcode';
 import * as cImpl from '../implementation/c';
 import * as jsImpl from '../implementation/js';
 import { HeaderBuilder } from './header-builder';
+import { StructStateFieldsBuilder } from './struct-state-fields-builder';
 
 const debug = debugAPI('llparse:compiler');
 
@@ -117,15 +118,13 @@ export class Compiler {
                                     this.options.frontend);
     const info = f.compile(root, properties);
 
-    debug('Building header');
-    const hb = new HeaderBuilder();
+    debug('Building fields for state struct');
+    const fields = new StructStateFieldsBuilder().build(info);
 
-    const header = hb.build({
-      headerGuard: this.options.headerGuard,
-      prefix: this.prefix,
-      properties,
-      spans: info.spans,
-    });
+    debug('Building header');
+    const header = new HeaderBuilder().build(this.options.headerGuard,
+                                             fields,
+                                             info);
 
     const result: IWritableCompilerResult = {
       bitcode: undefined,
@@ -134,7 +133,7 @@ export class Compiler {
 
     debug('Building bitcode');
     if (bitcode) {
-      result.bitcode = bitcode.compile(info);
+      result.bitcode = bitcode.compile(fields, info);
     }
 
     debug('Building C');
