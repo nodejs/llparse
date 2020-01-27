@@ -9,6 +9,8 @@ const TABLE_GROUP = 16;
 
 // _mm_cmpestri takes 8 ranges
 const SSE_RANGES_LEN = 16;
+// _mm_cmpestri takes 128bit input
+const SSE_RANGES_PAD = 16;
 const MAX_SSE_CALLS = 2;
 const SSE_ALIGNMENT = 16;
 
@@ -123,7 +125,12 @@ export class TableLookup extends Node<frontend.node.TableLookup> {
     for (let off = 0; off < ranges.length; off += SSE_RANGES_LEN) {
       const subRanges = ranges.slice(off, off + SSE_RANGES_LEN);
 
-      const blob = ctx.blob(Buffer.from(subRanges), SSE_ALIGNMENT);
+      let paddedRanges = subRanges.slice();
+      while (paddedRanges.length < SSE_RANGES_PAD) {
+        paddedRanges.push(0);
+      }
+
+      const blob = ctx.blob(Buffer.from(paddedRanges), SSE_ALIGNMENT);
       out.push(`  ranges = _mm_loadu_si128((__m128i const*) ${blob});`);
       out.push('');
 
