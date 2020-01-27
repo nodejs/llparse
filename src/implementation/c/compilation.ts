@@ -77,10 +77,16 @@ export class Compilation {
         align = ` ALIGN(${blob.alignment})`;
       }
 
+      let size = '';
       if (blob.alignment) {
         out.push('#ifdef __SSE4_2__');
+        if (buffer.length < blob.alignment) {
+          // SSE4.2 instructions may read up to 16 bytes at once, so we need
+          // to make sure our static strings are at least 16 bytes long
+          size = blob.alignment;
+        }
       }
-      out.push(`static const unsigned char${align} ${blob.name}[] = {`);
+      out.push(`static const unsigned char${align} ${blob.name}[${size}] = {`);
 
       for (let i = 0; i < buffer.length; i += BLOB_GROUP_SIZE) {
         const limit = Math.min(buffer.length, i + BLOB_GROUP_SIZE);
