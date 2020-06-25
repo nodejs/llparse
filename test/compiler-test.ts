@@ -213,6 +213,18 @@ describe('llparse/Compiler', () => {
       await binary.check('abcdabcdabcdabcdabcdabcdabcd.abcd.',
         'off=29\noff=34\n');
     });
+
+    it('should compile overlapping matches', async () => {
+      const start = p.node('start');
+
+      start.match('aab', printOff(p, start));
+      start.match('aa', start);
+
+      start.otherwise(p.error(3, 'Invalid word'));
+
+      const binary = build(p, start, 'overlapping-matches');
+      await binary.check('aaaabaa', 'off=5\n');
+    });
   });
 
   describe('`.peek()`', () => {
