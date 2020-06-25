@@ -217,13 +217,15 @@ describe('llparse/Compiler', () => {
     it('should compile overlapping matches', async () => {
       const start = p.node('start');
 
-      start.match('aab', printOff(p, start));
-      start.match('aa', start);
+      start.select({
+        aa: 1,
+        aab: 2,
+      }, printMatch(p, start));
 
       start.otherwise(p.error(3, 'Invalid word'));
 
       const binary = build(p, start, 'overlapping-matches');
-      await binary.check('aaaabaa', 'off=5\n');
+      await binary.check('aaaabaa', 'off=2 match=1\noff=5 match=2\n');
     });
   });
 
