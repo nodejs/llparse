@@ -2,6 +2,7 @@ import { Buffer } from 'buffer';
 import * as debugAPI from 'debug';
 import * as frontend from 'llparse-frontend';
 
+import { IStructStateFields } from '../../compiler/struct-state-fields-builder'
 import { Compilation } from './compilation';
 import { CONTAINER_KEY } from './constants';
 import code from './code';
@@ -23,10 +24,10 @@ export class BitcodeCompiler {
     container.add(CONTAINER_KEY, { code, node, transform });
   }
 
-  public compile(info: frontend.IFrontendResult): Buffer {
+  public compile(fields: IStructStateFields, info: frontend.IFrontendResult): Buffer {
     // Compile to bitcode
-    const compilation = new Compilation(info.prefix, info.properties,
-        info.spans, this.options);
+    const compilation = new Compilation(info.prefix, fields, info.properties,
+        this.options);
 
     debug('building root');
     const root = info.root as frontend.ContainerWrap<frontend.node.Node>;
