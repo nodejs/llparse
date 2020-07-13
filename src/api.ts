@@ -33,7 +33,7 @@ export class LLParse extends source.Builder {
   }
 
   /**
-   * Compile LLParse graph to the bitcode and C headers
+   * Compile LLParse graph to the C code and C headers
    *
    * @param root  Root node of the parse graph (see `.node()`)
    * @param options Compiler options.

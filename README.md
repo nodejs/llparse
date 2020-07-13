@@ -2,8 +2,7 @@
 [![Build Status](https://secure.travis-ci.org/nodejs/llparse.svg)](http://travis-ci.org/nodejs/llparse)
 [![NPM version](https://badge.fury.io/js/llparse.svg)](https://badge.fury.io/js/llparse)
 
-An API for compiling an incremental parser into C output and/or
-[LLVM bitcode][3].
+An API for compiling an incremental parser into a C output.
 
 ## Usage
 
@@ -51,9 +50,9 @@ http
   .otherwise(p.error(6, 'Expected HTTP/1.1 and two newlines'));
 
 const artifacts = p.build(method);
-console.log('----- BITCODE -----');
-console.log(artifacts.bitcode);  // buffer
-console.log('----- BITCODE END -----');
+console.log('----- C -----');
+console.log(artifacts.c);  // string
+console.log('----- C END -----');
 console.log('----- HEADER -----');
 console.log(artifacts.header);
 console.log('----- HEADER END -----');
@@ -63,7 +62,7 @@ console.log('----- HEADER END -----');
 
 This software is licensed under the MIT License.
 
-Copyright Fedor Indutny, 2018.
+Copyright Fedor Indutny, 2020.
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the

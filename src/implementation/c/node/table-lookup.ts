@@ -166,7 +166,6 @@ export class TableLookup extends Node<frontend.node.TableLookup> {
     return true;
   }
 
-  // TODO(indutny): reduce copy-paste between `C` and `bitcode` implementations
   private buildTable(): ITable {
     const table: number[] = new Array(MAX_CHAR + 1).fill(0);
 

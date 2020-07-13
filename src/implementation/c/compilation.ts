@@ -246,8 +246,6 @@ export class Compilation {
 
   // MatchSequence cache
 
-  // TODO(indutny): this is practically a copy from `bitcode/compilation.ts`
-  // Unify it somehow?
   public getMatchSequence(
     transform: frontend.IWrap<frontend.transform.Transform>, select: Buffer)
     : string {
