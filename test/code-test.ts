@@ -32,7 +32,7 @@ describe('llparse/code', () => {
         .match('.', is1337)
         .otherwise(p.error(1, 'Unexpected'));
 
-      const binary = build(p, start, 'mul-add');
+      const binary = await build(p, start, 'mul-add');
       await binary.check('1337.', 'off=5\n');
     });
 
@@ -49,7 +49,7 @@ describe('llparse/code', () => {
         .select(NUM_SELECT, count)
         .otherwise(p.error(1, 'Unexpected'));
 
-      const binary = build(p, start, 'mul-add-overflow');
+      const binary = await build(p, start, 'mul-add-overflow');
       await binary.check('1111', 'off=4\n');
     });
 
@@ -69,7 +69,7 @@ describe('llparse/code', () => {
         .select(NUM_SELECT, count)
         .otherwise(p.error(1, 'Unexpected'));
 
-      const binary = build(p, start, 'mul-add-max-overflow');
+      const binary = await build(p, start, 'mul-add-max-overflow');
       await binary.check('1111', 'off=4\n');
     });
   });
@@ -90,7 +90,7 @@ describe('llparse/code', () => {
           42: printOff(p, start),
         }, p.error(1, 'Unexpected')));
 
-      const binary = build(p, start, 'update');
+      const binary = await build(p, start, 'update');
       await binary.check('.', 'off=1\n');
     });
   });
@@ -110,7 +110,7 @@ describe('llparse/code', () => {
         .select(NUM_SELECT, p.invoke(p.code.store('counter'), check))
         .otherwise(p.error(1, 'Unexpected'));
 
-      const binary = build(p, start, 'is-equal');
+      const binary = await build(p, start, 'is-equal');
       await binary.check('010', 'off=1\noff=3\n');
     });
   });
@@ -153,7 +153,7 @@ describe('llparse/code', () => {
         .match('.', start)
         .otherwise(p.error(6, 'test'));
 
-      const binary = build(p, start, 'or-test');
+      const binary = await build(p, start, 'or-test');
       await binary.check('1-124.2-1247.4-1247.r4-124.', [
         'off=3',
         'off=9', 'off=10',

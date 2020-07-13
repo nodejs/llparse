@@ -3,9 +3,7 @@ import * as frontend from 'llparse-frontend';
 
 import source = frontend.source;
 
-import * as bitcodeImpl from '../implementation/bitcode';
 import * as cImpl from '../implementation/c';
-import * as jsImpl from '../implementation/js';
 import { HeaderBuilder } from './header-builder';
 
 const debug = debugAPI('llparse:compiler');
@@ -32,52 +30,23 @@ export interface ICompilerOptions {
    */
   readonly headerGuard?: string;
 
-  /** Generate bitcode (`true` by default) */
-  readonly generateBitcode?: boolean;
-
-  /** Generate C (`true` by default) */
-  readonly generateC?: boolean;
-
-  /** Generate JS (`true` by default) */
-  readonly generateJS?: boolean;
-
   /** Optional frontend configuration */
   readonly frontend?: frontend.IFrontendLazyOptions;
 
   /** Optional C-backend configuration */
   readonly c?: cImpl.ICPublicOptions;
-
-  /** Optional JS-backend configuration */
-  readonly js?: jsImpl.IJSPublicOptions;
 }
 
 export interface ICompilerResult {
   /**
-   * Binary LLVM bitcode, if `generateBitcode` option was `true`
+   * Textual C code
    */
-  readonly bitcode?: Buffer;
-
-  /**
-   * Textual C code, if `generateC` option was `true`
-   */
-  readonly c?: string;
-
-  /**
-   * Textual JS code, if `generateJS` option was `true`
-   */
-  readonly js?: string;
+  readonly c: string;
 
   /**
    * Textual C header file
    */
   readonly header: string;
-}
-
-interface IWritableCompilerResult {
-  bitcode?: Buffer;
-  c?: string;
-  js?: string;
-  header: string;
 }
 
 export class Compiler {
@@ -90,26 +59,9 @@ export class Compiler {
     debug('Combining implementations');
     const container = new frontend.Container();
 
-    let bitcode: bitcodeImpl.BitcodeCompiler | undefined;
-    if (this.options.generateBitcode !== false) {
-      bitcode = new bitcodeImpl.BitcodeCompiler(container, {
-        debug: this.options.debug,
-      });
-    }
-
-    let c: cImpl.CCompiler | undefined;
-    if (this.options.generateC !== false) {
-      c = new cImpl.CCompiler(container, Object.assign({
-        debug: this.options.debug,
-      }, this.options.c));
-    }
-
-    let js: jsImpl.JSCompiler | undefined;
-    if (this.options.generateJS !== false) {
-      js = new jsImpl.JSCompiler(container, Object.assign({
-        debug: this.options.debug,
-      }, this.options.js!));
-    }
+    const c = new cImpl.CCompiler(container, Object.assign({
+      debug: this.options.debug,
+    }, this.options.c));
 
     debug('Running frontend pass');
     const f = new frontend.Frontend(this.prefix,
@@ -127,26 +79,10 @@ export class Compiler {
       spans: info.spans,
     });
 
-    const result: IWritableCompilerResult = {
-      bitcode: undefined,
-      header,
-    };
-
-    debug('Building bitcode');
-    if (bitcode) {
-      result.bitcode = bitcode.compile(info);
-    }
-
     debug('Building C');
-    if (c) {
-      result.c = c.compile(info);
-    }
-
-    debug('Building JS');
-    if (js) {
-      result.js = js.compile(info);
-    }
-
-    return result;
+    return {
+      header,
+      c: c.compile(info),
+    };
   }
 }

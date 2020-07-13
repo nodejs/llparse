@@ -39,7 +39,7 @@ describe('llparse/spans', () => {
       .match('_', underscore)
       .otherwise(span.underscore.end(dot));
 
-    const binary = build(p, start, 'span');
+    const binary = await build(p, start, 'span');
     await binary.check('..--..__..',
       'off=2 len=2 span[dash]="--"\n' +
       'off=6 len=2 span[underscore]="__"\n' +
@@ -60,7 +60,7 @@ describe('llparse/spans', () => {
       .match('.', dot)
       .skipTo(span.pleaseFail.end(start));
 
-    const binary = build(p, start, 'span-error');
+    const binary = await build(p, start, 'span-error');
 
     await binary.check(
       '....a',
@@ -81,7 +81,7 @@ describe('llparse/spans', () => {
       .match('.', dot)
       .skipTo(span.pleaseFail.end(start));
 
-    const binary = build(p, start, 'span-error-execute');
+    const binary = await build(p, start, 'span-error-execute');
 
     await binary.check(
       '.........',
@@ -101,7 +101,7 @@ describe('llparse/spans', () => {
       .match('.', dot)
       .skipTo(span.end(start));
 
-    const binary = build(p, start, 'span-spurious');
+    const binary = await build(p, start, 'span-spurious');
     await binary.check('hello', [ '' ]);
   });
 });

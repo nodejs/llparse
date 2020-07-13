@@ -24,7 +24,7 @@ describe('llparse/resumption', () => {
       .match('a', a)
       .otherwise(span.end(start));
 
-    const binary = build(p, start, 'resume-span');
+    const binary = await build(p, start, 'resume-span');
 
     await binary.check('baaab',
       new RegExp(
@@ -47,7 +47,7 @@ describe('llparse/resumption', () => {
     pause
       .otherwise(printOff(p, start));
 
-    const binary = build(p, start, 'resume-pause');
+    const binary = await build(p, start, 'resume-pause');
 
     await binary.check('..p....p..',
       'off=3 pause\noff=3\noff=8 pause\noff=8\n');

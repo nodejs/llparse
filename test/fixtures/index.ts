@@ -13,13 +13,10 @@ const fixtures = new Fixture({
     '-DLLPARSE__TEST_INIT=llparse__test_init',
     path.join(__dirname, 'extra.c'),
   ],
-  extraJS: [
-    path.join(__dirname, 'extra.js'),
-  ],
 });
 
 export function build(llparse: LLParse, node: source.node.Node, outFile: string)
-  : FixtureResult {
+  : Promise<FixtureResult> {
   return fixtures.build(llparse.build(node, {
     c: {
       header: outFile,
