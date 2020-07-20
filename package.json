@@ -19,7 +19,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/indutny/llparse.git"
+    "url": "git+ssh://git@github.com/nodejs/llparse.git"
   },
   "keywords": [
     "llparse",
@@ -28,9 +28,9 @@
   "author": "Fedor Indutny <fedor@indutny.com> (http://darksi.de/)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/indutny/llparse/issues"
+    "url": "https://github.com/nodejs/llparse/issues"
   },
-  "homepage": "https://github.com/indutny/llparse#readme",
+  "homepage": "https://github.com/nodejs/llparse#readme",
   "devDependencies": {
     "@types/debug": "0.0.30",
     "@types/mocha": "^5.2.7",
