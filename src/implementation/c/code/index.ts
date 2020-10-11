@@ -1,5 +1,6 @@
 import * as frontend from 'llparse-frontend';
 
+import { And } from './and';
 import { External } from './external';
 import { IsEqual } from './is-equal';
 import { Load } from './load';
@@ -12,6 +13,7 @@ import { Update } from './update';
 export * from './base';
 
 export default {
+  And,
   IsEqual,
   Load,
   Match: class Match extends External<frontend.code.External> {},

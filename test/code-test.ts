@@ -115,7 +115,7 @@ describe('llparse/code', () => {
     });
   });
 
-  describe('`.or()`/`.test()`', () => {
+  describe('`.or()`/`.and()`/`.test()`', () => {
     it('should set and retrieve bits', async () => {
       const start = p.node('start');
       const test = p.node('test');
@@ -128,6 +128,8 @@ describe('llparse/code', () => {
         .match('4', p.invoke(p.code.or('flag', 4), start))
         // Reset
         .match('r', p.invoke(p.code.update('flag', 0), start))
+        // Partial Reset
+        .match('p', p.invoke(p.code.and('flag', ~1), start))
         // Test
         .match('-', test)
         .otherwise(p.error(1, 'start'));
@@ -154,11 +156,12 @@ describe('llparse/code', () => {
         .otherwise(p.error(6, 'test'));
 
       const binary = await build(p, start, 'or-test');
-      await binary.check('1-124.2-1247.4-1247.r4-124.', [
+      await binary.check('1-124.2-1247.4-1247.r4-124.r12p-12', [
         'off=3',
         'off=9', 'off=10',
         'off=16', 'off=17', 'off=18', 'off=19',
         'off=26',
+        'off=34',
       ]);
     });
   });
