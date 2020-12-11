@@ -48,4 +48,4 @@ const path = require('path');
 
 const artifacts = p.build(method);
 fs.writeFileSync(path.join(__dirname, 'http_parser.h'), artifacts.header);
-fs.writeFileSync(path.join(__dirname, 'http_parser.bc'), artifacts.bitcode);
+fs.writeFileSync(path.join(__dirname, 'http_parser.c'), artifacts.c);

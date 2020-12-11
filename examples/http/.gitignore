@@ -1,5 +1,5 @@
 http
-*.bc
+*.c
 *.ll
 *.h
 *.o
