@@ -21,7 +21,7 @@ type WrappedNode = frontend.IWrap<frontend.node.Node>;
 
 // The SSE versions in use with the generator.
 export enum SseFamily {
-  SSE2 = 'SSE2',
+  SSSE3 = 'SSSE3',
   SSE4_2 = 'SSE4_2',
 }
  

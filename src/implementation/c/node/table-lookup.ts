@@ -66,7 +66,7 @@ export class TableLookup extends Node<frontend.node.TableLookup> {
     out.push('}');
   }
 
-  private buildSSE2(out: string[]): boolean {
+  private buildSSSE3(out: string[]): boolean {
     // return false;
     const ctx = this.compilation;
 
@@ -99,10 +99,10 @@ export class TableLookup extends Node<frontend.node.TableLookup> {
       return false;
     }
 
-    const blob1 = ctx.blob(Buffer.from(result[0]), SSE_ALIGNMENT, SseFamily.SSE2);
-    const blob2 = ctx.blob(Buffer.from(result[1]), SSE_ALIGNMENT, SseFamily.SSE2);
+    const blob1 = ctx.blob(Buffer.from(result[0]), SSE_ALIGNMENT, SseFamily.SSSE3);
+    const blob2 = ctx.blob(Buffer.from(result[1]), SSE_ALIGNMENT, SseFamily.SSSE3);
 
-    out.push('#ifdef __SSE2__');
+    out.push('#ifdef __SSSE3__');
     out.push(`if (${ctx.endPosArg()} - ${ctx.posArg()} >= 16) {`);
     out.push('  int index;');
     out.push('  __m128i lut_tlo;');
@@ -141,7 +141,7 @@ export class TableLookup extends Node<frontend.node.TableLookup> {
     });
     ctx.indent(out, tmp, '  ');
     out.push('}');
-    out.push('#endif /* __SSE2__ */');
+    out.push('#endif /* __SSSE3__ */');
     return true;
   }
 
@@ -248,7 +248,7 @@ export class TableLookup extends Node<frontend.node.TableLookup> {
   }
 
   private buildSSE(out: string[]): boolean {
-    if (this.buildSSE2(out)){
+    if (this.buildSSSE3(out)){
       return true;
     }
     return this.buildSSE42(out);
