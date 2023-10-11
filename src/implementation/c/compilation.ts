@@ -19,10 +19,17 @@ const BLOB_GROUP_SIZE = 11;
 
 type WrappedNode = frontend.IWrap<frontend.node.Node>;
 
+// The SSE versions in use with the generator.
+export enum SseFamily {
+  SSSE3 = 'SSSE3',
+  SSE4_2 = 'SSE4_2',
+}
+ 
 interface IBlob {
   readonly alignment: number | undefined;
   readonly buffer: Buffer;
   readonly name: string;
+  sseFamily: SseFamily;
 }
 
 // TODO(indutny): deduplicate
@@ -78,7 +85,7 @@ export class Compilation {
       }
 
       if (blob.alignment) {
-        out.push('#ifdef __SSE4_2__');
+        out.push(`#ifdef __${blob.sseFamily.toString()}__`);
       }
       out.push(`static const unsigned char${align} ${blob.name}[] = {`);
 
@@ -107,7 +114,7 @@ export class Compilation {
 
       out.push(`};`);
       if (blob.alignment) {
-        out.push('#endif  /* __SSE4_2__ */');
+        out.push(`#endif /*  __${blob.sseFamily.toString()}__ */`);
       }
     }
     out.push('');
@@ -320,9 +327,17 @@ export class Compilation {
     return JSON.stringify(value);
   }
 
-  public blob(value: Buffer, alignment?: number): string {
+  public blob(value: Buffer, alignment?: number, sseFamily?: SseFamily): string {
+    if(!sseFamily) {
+      sseFamily = SseFamily.SSE4_2
+    }
     if (this.blobs.has(value)) {
-      return this.blobs.get(value)!.name;
+      let b = this.blobs.get(value)!;
+      if( b.sseFamily > sseFamily ) {
+        b.sseFamily = sseFamily;
+      }
+
+      return b.name;
     }
 
     const res = BLOB_PREFIX + this.blobs.size;
@@ -330,6 +345,7 @@ export class Compilation {
       alignment,
       buffer: value,
       name: res,
+      sseFamily: sseFamily,
     });
     return res;
   }
