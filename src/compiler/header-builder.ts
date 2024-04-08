@@ -10,71 +10,59 @@ export interface IHeaderBuilderOptions {
 
 export class HeaderBuilder {
   public build(options: IHeaderBuilderOptions): string {
-    let res = '';
     const PREFIX = options.prefix.toUpperCase().replace(/[^a-z]/gi, '_');
-    const DEFINE = options.headerGuard === undefined ?
-      `INCLUDE_${PREFIX}_H_` : options.headerGuard;
+    const DEFINE = options.headerGuard ?? `INCLUDE_${PREFIX}_H_`;
+    const defineGuard = `#ifndef ${DEFINE}\n#define ${DEFINE}\n`;
 
-    res += `#ifndef ${DEFINE}\n`;
-    res += `#define ${DEFINE}\n`;
-    res += '#ifdef __cplusplus\n';
-    res += 'extern "C" {\n';
-    res += '#endif\n';
-    res += '\n';
-
-    res += '#include <stdint.h>\n';
-    res += '\n';
-
-    // Structure
-    res += `typedef struct ${options.prefix}_s ${options.prefix}_t;\n`;
-    res += `struct ${options.prefix}_s {\n`;
-    res += '  int32_t _index;\n';
-
-    for (const [ index, field ] of options.spans.entries()) {
-      res += `  void* _span_pos${index};\n`;
+    const structure = options.spans.map((field, index) => {
+      let spanField = `void* _span_pos${index};`;
       if (field.callbacks.length > 1) {
-        res += `  void* _span_cb${index};\n`;
+        spanField += `void* _span_cb${index};`;
       }
-    }
+      return spanField;
+    }).join('\n');
 
-    res += '  int32_t error;\n';
-    res += '  const char* reason;\n';
-    res += '  const char* error_pos;\n';
-    res += '  void* data;\n';
-    res += '  void* _current;\n';
-
-    for (const prop of options.properties) {
+    const properties = options.properties.map(prop => {
       let ty: string;
-      if (prop.ty === 'i8') {
-        ty = 'uint8_t';
-      } else if (prop.ty === 'i16') {
-        ty = 'uint16_t';
-      } else if (prop.ty === 'i32') {
-        ty = 'uint32_t';
-      } else if (prop.ty === 'i64') {
-        ty = 'uint64_t';
-      } else if (prop.ty === 'ptr') {
-        ty = 'void*';
-      } else {
-        throw new Error(
-          `Unknown state property type: "${prop.ty}"`);
+      switch (prop.ty) {
+        case 'i8':
+          ty = 'uint8_t';
+          break;
+        case 'i16':
+          ty = 'uint16_t';
+          break;
+        case 'i32':
+          ty = 'uint32_t';
+          break;
+        case 'i64':
+          ty = 'uint64_t';
+          break;
+        case 'ptr':
+          ty = 'void*';
+          break;
+        default:
+          throw new Error(`Unknown state property type: "${prop.ty}"`);
       }
-      res += `  ${ty} ${prop.name};\n`;
-    }
-    res += '};\n';
+      return `${ty} ${prop.name};`;
+    }).join('\n');
 
-    res += '\n';
-
-    res += `int ${options.prefix}_init(${options.prefix}_t* s);\n`;
-    res += `int ${options.prefix}_execute(${options.prefix}_t* s, ` +
-      'const char* p, const char* endp);\n';
-
-    res += '\n';
-    res += '#ifdef __cplusplus\n';
-    res += '}  /* extern "C" *\/\n';
-    res += '#endif\n';
-    res += `#endif  /* ${DEFINE} *\/\n`;
-
-    return res;
+    return defineGuard +
+      '#ifdef __cplusplus\nextern "C" {\n#endif\n\n' +
+      '#include <stdint.h>\n\n' +
+      `typedef struct ${options.prefix}_s ${options.prefix}_t;\n` +
+      `struct ${options.prefix}_s {\n` +
+      '  int32_t _index;\n' +
+      `  ${structure}\n` +
+      '  int32_t error;\n' +
+      '  const char* reason;\n' +
+      '  const char* error_pos;\n' +
+      '  void* data;\n' +
+      '  void* _current;\n' +
+      `  ${properties}\n` +
+      '};\n\n' +
+      `int ${options.prefix}_init(${options.prefix}_t* s);\n` +
+      `int ${options.prefix}_execute(${options.prefix}_t* s, const char* p, const char* endp);\n\n` +
+      '#ifdef __cplusplus\n}  /* extern "C" */\n#endif\n' +
+      `#endif  /* ${DEFINE} */\n`;
   }
 }
