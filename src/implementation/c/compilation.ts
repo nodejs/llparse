@@ -1,5 +1,4 @@
 import * as assert from 'assert';
-import { Buffer } from 'buffer';
 import * as frontend from 'llparse-frontend';
 
 import {
@@ -7,7 +6,6 @@ import {
   ARG_STATE, ARG_POS, ARG_ENDPOS,
   VAR_MATCH,
   STATE_PREFIX, LABEL_PREFIX, BLOB_PREFIX,
-  SEQUENCE_COMPLETE, SEQUENCE_MISMATCH, SEQUENCE_PAUSE,
 } from './constants';
 import { Code } from './code';
 import { Node } from './node';

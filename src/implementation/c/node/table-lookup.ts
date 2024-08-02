@@ -1,7 +1,6 @@
 import * as assert from 'assert';
 import * as frontend from 'llparse-frontend';
 
-import { Compilation } from '../compilation';
 import { Node } from './base';
 
 const MAX_CHAR = 0xff;
@@ -40,7 +39,7 @@ export class TableLookup extends Node<frontend.node.TableLookup> {
     const current = transform.build(ctx, `*${ctx.posArg()}`);
     out.push(`switch (${table.name}[(uint8_t) ${current}]) {`);
 
-    for (const [ index, edge ] of this.ref.edges.entries()) {
+    for (const [ index ] of this.ref.edges.entries()) {
       out.push(`  case ${index + 1}: {`);
 
       const tmp: string[] = [];
