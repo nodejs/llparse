@@ -81,4 +81,5 @@ int llparse__pause_once(llparse_t* s, const char* p, const char* endp) {
 
 int llparse__test_init() {
   llparse__pause_once_counter = 0;
+  return 0;
 }
