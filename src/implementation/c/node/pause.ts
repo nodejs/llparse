@@ -1,6 +1,5 @@
 import * as frontend from 'llparse-frontend';
 
-import { Compilation } from '../compilation';
 import { STATE_ERROR } from '../constants';
 import { Error as ErrorNode } from './error';
 

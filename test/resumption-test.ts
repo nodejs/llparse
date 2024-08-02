@@ -1,8 +1,6 @@
-import * as assert from 'assert';
-
 import { LLParse } from '../src/api';
 
-import { build, ERROR_PAUSE, printMatch, printOff } from './fixtures';
+import { build, ERROR_PAUSE, printOff } from './fixtures';
 
 describe('llparse/resumption', () => {
   let p: LLParse;
