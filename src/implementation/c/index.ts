@@ -8,8 +8,7 @@ import {
 } from './constants';
 import { Compilation } from './compilation';
 import code from './code';
-import node from './node';
-import { Node } from './node';
+import node, { Node } from './node';
 import transform from './transform';
 
 export interface ICCompilerOptions {
