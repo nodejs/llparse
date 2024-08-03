@@ -84,7 +84,7 @@ export class Compilation {
         const limit = Math.min(buffer.length, i + BLOB_GROUP_SIZE);
         const hex: string[] = [];
         for (let j = i; j < limit; j++) {
-          const value = buffer[j];
+          const value = buffer[j]!;
 
           const ch = String.fromCharCode(value);
           // `'`, `\`
