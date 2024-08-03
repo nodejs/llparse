@@ -27,7 +27,6 @@ SIGNED_LIMITS.set('i64', [ '(-0x7fffffffffffffffLL - 1)',
 
 export const UNSIGNED_LIMITS: Map<string, [ string, string ]> = new Map();
 UNSIGNED_LIMITS.set('i8', [ '0', '0xff' ]);
-UNSIGNED_LIMITS.set('i8', [ '0', '0xff' ]);
 UNSIGNED_LIMITS.set('i16', [ '0', '0xffff' ]);
 UNSIGNED_LIMITS.set('i32', [ '0', '0xffffffff' ]);
 UNSIGNED_LIMITS.set('i64', [ '0ULL', '0xffffffffffffffffULL' ]);
