@@ -39,11 +39,10 @@ export class TableLookup extends Node<frontend.node.TableLookup> {
     const current = transform.build(ctx, `*${ctx.posArg()}`);
     out.push(`switch (${table.name}[(uint8_t) ${current}]) {`);
 
-    for (const [ index ] of this.ref.edges.entries()) {
+    for (const [ index, edge ] of this.ref.edges.entries()) {
       out.push(`  case ${index + 1}: {`);
 
       const tmp: string[] = [];
-      const edge = this.ref.edges[index];
       this.tailTo(tmp, {
         noAdvance: edge.noAdvance,
         node: edge.node,
@@ -77,7 +76,10 @@ export class TableLookup extends Node<frontend.node.TableLookup> {
     }
 
     const edge = this.ref.edges[0];
-    if (edge.node.ref !== this.ref) {
+    if (
+      !edge ||
+      edge.node.ref !== this.ref
+    ) {
       return false;
     }
 

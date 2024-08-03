@@ -171,7 +171,7 @@ export class CCompiler {
       const posField = ctx.spanPosField(span.index);
       let callback: string;
       if (span.callbacks.length === 1) {
-        callback = ctx.buildCode(ctx.unwrapCode(span.callbacks[0]));
+        callback = ctx.buildCode(ctx.unwrapCode(span.callbacks[0]!));
       } else {
         callback = `(${info.prefix}__span_cb) ` + ctx.spanCbField(span.index);
         callback = `(${callback})`;
