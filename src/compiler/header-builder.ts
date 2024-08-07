@@ -12,7 +12,6 @@ export class HeaderBuilder {
   public build(options: IHeaderBuilderOptions): string {
     const PREFIX = options.prefix.toUpperCase().replace(/[^a-z]/gi, '_');
     const DEFINE = options.headerGuard ?? `INCLUDE_${PREFIX}_H_`;
-    const defineGuard = `#ifndef ${DEFINE}\n#define ${DEFINE}\n`;
 
     const structure = options.spans.map((field, index) => {
       let spanField = `void* _span_pos${index};`;
@@ -46,7 +45,7 @@ export class HeaderBuilder {
       return `${ty} ${prop.name};`;
     }).join('\n');
 
-    return defineGuard +
+    return `#ifndef ${DEFINE}\n#define ${DEFINE}\n` +
       '#ifdef __cplusplus\nextern "C" {\n#endif\n\n' +
       '#include <stdint.h>\n\n' +
       `typedef struct ${options.prefix}_s ${options.prefix}_t;\n` +
