@@ -1,8 +1,6 @@
-import * as assert from 'assert';
-
 import { LLParse } from '../src/api';
 
-import { build, NUM_SELECT, printMatch, printOff } from './fixtures';
+import { build, NUM_SELECT, printOff } from './fixtures';
 
 describe('llparse/consume', () => {
   let p: LLParse;

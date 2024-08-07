@@ -1,13 +1,15 @@
 {
   "compilerOptions": {
     "strict": true,
-    "target": "es2017",
+    "target": "es2022",
     "module": "commonjs",
     "moduleResolution": "node",
     "outDir": "./lib",
     "declaration": true,
     "pretty": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true
   },
   "include": [
     "src/**/*.ts"

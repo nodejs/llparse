@@ -9,7 +9,7 @@ import { HeaderBuilder } from './header-builder';
 const debug = debugAPI('llparse:compiler');
 
 export interface ICompilerOptions {
-   /**
+  /**
     * Debug method name
     *
     * The method must have following signature:
@@ -65,8 +65,8 @@ export class Compiler {
 
     debug('Running frontend pass');
     const f = new frontend.Frontend(this.prefix,
-                                    container.build(),
-                                    this.options.frontend);
+      container.build(),
+      this.options.frontend);
     const info = f.compile(root, properties);
 
     debug('Building header');

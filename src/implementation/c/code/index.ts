@@ -12,16 +12,20 @@ import { Update } from './update';
 
 export * from './base';
 
+class Match extends External<frontend.code.External> {}
+class Span extends External<frontend.code.Span> {}
+class Value extends External<frontend.code.Value> {}
+
 export default {
   And,
   IsEqual,
   Load,
-  Match: class Match extends External<frontend.code.External> {},
+  Match,
   MulAdd,
   Or,
-  Span: class Span extends External<frontend.code.Span> {},
+  Span,
   Store,
   Test,
   Update,
-  Value: class Value extends External<frontend.code.Value> {},
+  Value,
 };

@@ -1,6 +1,5 @@
 import * as frontend from 'llparse-frontend';
 
-import { Compilation } from '../compilation';
 import { Node } from './base';
 
 export class Consume extends Node<frontend.node.Consume> {

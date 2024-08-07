@@ -15,8 +15,7 @@ const fixtures = new Fixture({
   ],
 });
 
-export function build(llparse: LLParse, node: source.node.Node, outFile: string)
-  : Promise<FixtureResult> {
+export function build(llparse: LLParse, node: source.node.Node, outFile: string): Promise<FixtureResult> {
   return fixtures.build(llparse.build(node, {
     c: {
       header: outFile,
@@ -24,8 +23,7 @@ export function build(llparse: LLParse, node: source.node.Node, outFile: string)
   }), outFile);
 }
 
-export function printMatch(p: LLParse, next: source.node.Node)
-  : source.node.Node {
+export function printMatch(p: LLParse, next: source.node.Node): source.node.Node {
   const code = p.code.value('llparse__print_match');
   const res = p.invoke(code, next);
   return res;

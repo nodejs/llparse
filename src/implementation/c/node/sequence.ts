@@ -1,6 +1,5 @@
 import * as frontend from 'llparse-frontend';
 
-import { Compilation } from '../compilation';
 import {
   SEQUENCE_COMPLETE, SEQUENCE_MISMATCH, SEQUENCE_PAUSE,
 } from '../constants';

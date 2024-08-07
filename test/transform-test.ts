@@ -1,5 +1,3 @@
-import * as assert from 'assert';
-
 import { LLParse } from '../src/api';
 
 import { build, printMatch, printOff } from './fixtures';

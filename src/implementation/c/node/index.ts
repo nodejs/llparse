@@ -13,10 +13,12 @@ import { TableLookup } from './table-lookup';
 
 export { Node } from './base';
 
+class Error extends ErrorNode<frontend.node.Error> {}
+
 export default {
   Consume,
   Empty,
-  Error: class Error extends ErrorNode<frontend.node.Error> {},
+  Error,
   Invoke,
   Pause,
   Sequence,

@@ -1,7 +1,6 @@
 import * as assert from 'assert';
 import * as frontend from 'llparse-frontend';
 
-import { Compilation } from '../compilation';
 import { Node } from './base';
 
 const MAX_CHAR = 0xff;
@@ -44,7 +43,6 @@ export class TableLookup extends Node<frontend.node.TableLookup> {
       out.push(`  case ${index + 1}: {`);
 
       const tmp: string[] = [];
-      const edge = this.ref.edges[index];
       this.tailTo(tmp, {
         noAdvance: edge.noAdvance,
         node: edge.node,
@@ -78,7 +76,10 @@ export class TableLookup extends Node<frontend.node.TableLookup> {
     }
 
     const edge = this.ref.edges[0];
-    if (edge.node.ref !== this.ref) {
+    if (
+      !edge ||
+      edge.node.ref !== this.ref
+    ) {
       return false;
     }
 
