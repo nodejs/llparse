@@ -92,9 +92,6 @@ export class CCompiler {
     compilation.buildResumptionStates(tmp);
     compilation.indent(out, tmp, '    ');
 
-    out.push('    default:');
-    out.push('      /* UNREACHABLE */');
-    out.push('      abort();');
     out.push('  }');
 
     tmp = [];
