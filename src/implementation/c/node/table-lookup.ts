@@ -201,14 +201,18 @@ export class TableLookup extends Node<frontend.node.TableLookup> {
     }
 
     out.push('#ifdef __wasm_simd128__');
-    out.push(`if (${ctx.endPosArg()} - ${ctx.posArg()} >= 16) {`);
+    out.push('off_t align;');
+    out.push(`align = (intptr_t) ${ctx.posArg()} & 0xf;`);
+    out.push(`if (${ctx.endPosArg()} - ${ctx.posArg()} >= 16 - align) {`);
     out.push('  v128_t input;');
     out.push('  v128_t total;');
     out.push('  v128_t single;');
     out.push('  int match_len;');
     out.push('');
-    out.push('  /* Load input */');
-    out.push(`  input = wasm_v128_load(${ctx.posArg()});`);
+    out.push('  /* Load input - alignment */');
+    out.push('  total = wasm_u8x16_const(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);');
+    out.push('  total = wasm_u8x16_ge(total, wasm_u8x16_splat(align));');
+    out.push(`  input = wasm_v128_load(${ctx.posArg()} - align);`);
 
     out.push('  /* Find first character that does not match `ranges` */');
     function v128(value: number): string {
@@ -221,41 +225,36 @@ export class TableLookup extends Node<frontend.node.TableLookup> {
       assert(start !== undefined);
       assert(end !== undefined);
 
-      const varName = off === 0 ? 'total' : 'single';
-
       // Same character, equality is sufficient (and faster)
       if (start === end) {
-        out.push(`  ${varName} = wasm_i8x16_eq(input, ${v128(start)});`);
+        out.push(`  single = wasm_i8x16_ne(input, ${v128(start)});`);
       } else {
-        out.push(`  ${varName} = wasm_v128_and(`);
-        out.push(`    wasm_i8x16_ge(input, ${v128(start)}),`);
-        out.push(`    wasm_i8x16_le(input, ${v128(end)})`);
+        out.push(`  single = wasm_v128_or(`);
+        out.push(`    wasm_i8x16_lt(input, ${v128(start)}),`);
+        out.push(`    wasm_i8x16_gt(input, ${v128(end)})`);
         out.push('  );');
       }
 
-      if (off !== 0) {
-        out.push('  total = wasm_v128_or(total, single);');
-      }
+      out.push('  total = wasm_v128_and(total, single);');
     }
-    out.push('  total = wasm_v128_not(total);');
-    out.push('  match_len = __builtin_ctz(wasm_i8x16_bitmask(total));');
-    out.push('  if (match_len != 0) {');
-    out.push(`    ${ctx.posArg()} += match_len;`);
+    out.push('  match_len = __builtin_ctz(');
+    out.push('    0x10000 | wasm_i8x16_bitmask(total)');
+    out.push('  );');
+    out.push(`  ${ctx.posArg()} += match_len - align;`);
+    out.push('  if (match_len != 16) {');
+    {
+      const tmp: string[] = [];
+      this.tailTo(tmp, this.ref.otherwise!);
+      ctx.indent(out, tmp, '    ');
+    }
+    out.push('  }');
 
     const tmp: string[] = [];
     this.tailTo(tmp, {
       noAdvance: true,
       node: edge.node,
     });
-    ctx.indent(out, tmp, '    ');
-
-    out.push('  }');
-
-    {
-      const tmp: string[] = [];
-      this.tailTo(tmp, this.ref.otherwise!);
-      ctx.indent(out, tmp, '  ');
-    }
+    ctx.indent(out, tmp, '  ');
     out.push('}');
 
     out.push('#endif  /* __wasm_simd128__ */');

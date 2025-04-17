@@ -50,6 +50,7 @@ export class CCompiler {
     out.push('');
 
     out.push('#ifdef __wasm__');
+    out.push(' #include <sys/types.h>');
     out.push(' #include <wasm_simd128.h>');
     out.push('#endif  /* __wasm__ */');
     out.push('');
