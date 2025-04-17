@@ -49,6 +49,11 @@ export class CCompiler {
     out.push('#endif  /* __SSE4_2__ */');
     out.push('');
 
+    out.push('#ifdef __wasm__');
+    out.push(' #include <wasm_simd128.h>');
+    out.push('#endif  /* __wasm__ */');
+    out.push('');
+
     out.push('#ifdef _MSC_VER');
     out.push(' #define ALIGN(n) _declspec(align(n))');
     out.push('#else  /* !_MSC_VER */');
