@@ -85,16 +85,9 @@ export class Compilation {
         const hex: string[] = [];
         for (let j = i; j < limit; j++) {
           const value = buffer[j];
+          assert(value !== undefined);
 
-          const ch = String.fromCharCode(value);
-          // `'`, `\`
-          if (value === 0x27 || value === 0x5c) {
-            hex.push(`'\\${ch}'`);
-          } else if (value >= 0x20 && value <= 0x7e) {
-            hex.push(`'${ch}'`);
-          } else {
-            hex.push(`0x${value.toString(16)}`);
-          }
+          hex.push(this.toChar(value));
         }
         let line = '  ' + hex.join(', ');
         if (limit !== buffer.length) {
@@ -330,5 +323,17 @@ export class Compilation {
       name: res,
     });
     return res;
+  }
+
+  public toChar(value: number): string {
+    const ch = String.fromCharCode(value);
+    // `'`, `\`
+    if (value === 0x27 || value === 0x5c) {
+      return `'\\${ch}'`;
+    } else if (value >= 0x20 && value <= 0x7e) {
+      return `'${ch}'`;
+    } else {
+      return `0x${value.toString(16)}`;
+    }
   }
 }
