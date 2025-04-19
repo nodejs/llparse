@@ -11,6 +11,7 @@ const SSE_RANGES_LEN = 16;
 // _mm_cmpestri takes 128bit input
 const SSE_RANGES_PAD = 16;
 const MAX_SSE_CALLS = 2;
+const MAX_WASM_RANGES = 6;
 const SSE_ALIGNMENT = 16;
 
 interface ITable {
@@ -34,7 +35,10 @@ export class TableLookup extends Node<frontend.node.TableLookup> {
     // Try to vectorize nodes matching characters and looping to themselves
     // NOTE: `switch` below triggers when there is not enough characters in the
     // stream for vectorized processing.
-    this.buildSSE(out);
+    if (this.canVectorize()) {
+      this.buildSSE(out);
+      this.buildWASM(out);
+    }
 
     const current = transform.build(ctx, `*${ctx.posArg()}`);
     out.push(`switch (${table.name}[(uint8_t) ${current}]) {`);
@@ -63,9 +67,7 @@ export class TableLookup extends Node<frontend.node.TableLookup> {
     out.push('}');
   }
 
-  private buildSSE(out: string[]): boolean {
-    const ctx = this.compilation;
-
+  private canVectorize(): boolean {
     // Transformation is not supported atm
     if (this.ref.transform && this.ref.transform.ref.name !== 'id') {
       return false;
@@ -83,8 +85,14 @@ export class TableLookup extends Node<frontend.node.TableLookup> {
       return false;
     }
 
+    assert.strictEqual(edge.noAdvance, false);
+
+    return true;
+  }
+
+  private buildRanges(edge: frontend.node.TableLookup["edges"][0]): number[] {
     // NOTE: keys are sorted
-    let ranges: number[] = [];
+    const ranges: number[] = [];
     let first: number | undefined;
     let last: number | undefined;
     for (const key of edge.keys) {
@@ -104,6 +112,16 @@ export class TableLookup extends Node<frontend.node.TableLookup> {
     if (first !== undefined && last !== undefined) {
       ranges.push(first, last);
     }
+    return ranges;
+  }
+
+  private buildSSE(out: string[]): boolean {
+    const ctx = this.compilation;
+
+    const edge = this.ref.edges[0];
+    assert(edge !== undefined);
+
+    const ranges = this.buildRanges(edge);
 
     if (ranges.length === 0) {
       return false;
@@ -118,7 +136,6 @@ export class TableLookup extends Node<frontend.node.TableLookup> {
     out.push(`if (${ctx.endPosArg()} - ${ctx.posArg()} >= 16) {`);
     out.push('  __m128i ranges;');
     out.push('  __m128i input;');
-    out.push('  int avail;');
     out.push('  int match_len;');
     out.push('');
     out.push('  /* Load input */');
@@ -145,7 +162,6 @@ export class TableLookup extends Node<frontend.node.TableLookup> {
       out.push(`    ${ctx.posArg()} += match_len;`);
 
       const tmp: string[] = [];
-      assert.strictEqual(edge.noAdvance, false);
       this.tailTo(tmp, {
         noAdvance: true,
         node: edge.node,
@@ -163,6 +179,85 @@ export class TableLookup extends Node<frontend.node.TableLookup> {
     out.push('}');
 
     out.push('#endif  /* __SSE4_2__ */');
+
+    return true;
+  }
+
+  private buildWASM(out: string[]): boolean {
+    const ctx = this.compilation;
+
+    const edge = this.ref.edges[0];
+    assert(edge !== undefined);
+
+    const ranges = this.buildRanges(edge);
+
+    if (ranges.length === 0) {
+      return false;
+    }
+
+    // Way too many calls would be required
+    if (ranges.length > MAX_WASM_RANGES) {
+      return false;
+    }
+
+    out.push('#ifdef __wasm_simd128__');
+    out.push(`if (${ctx.endPosArg()} - ${ctx.posArg()} >= 16) {`);
+    out.push('  v128_t input;');
+    out.push('  v128_t mask;');
+    out.push('  v128_t single;');
+    out.push('  int match_len;');
+    out.push('');
+    out.push('  /* Load input */');
+    out.push(`  input = wasm_v128_load(${ctx.posArg()});`);
+
+    out.push('  /* Find first character that does not match `ranges` */');
+    function v128(value: number): string {
+      return `wasm_u8x16_const_splat(${ctx.toChar(value)})`;
+    }
+
+    for (let off = 0; off < ranges.length; off += 2) {
+      const start = ranges[off];
+      const end = ranges[off + 1];
+      assert(start !== undefined);
+      assert(end !== undefined);
+
+      // Same character, equality is sufficient (and faster)
+      if (start === end) {
+        out.push(`  single = wasm_i8x16_eq(input, ${v128(start)});`);
+      } else {
+        out.push(`  single = wasm_v128_and(`);
+        out.push(`    wasm_i8x16_ge(input, ${v128(start)}),`);
+        out.push(`    wasm_i8x16_le(input, ${v128(end)})`);
+        out.push('  );');
+      }
+
+      if (off === 0) {
+        out.push('  mask = single;');
+      } else {
+        out.push('  mask = wasm_v128_or(mask, single);');
+      }
+    }
+    out.push('  match_len = __builtin_ctz(');
+    out.push('    ~wasm_i8x16_bitmask(mask)');
+    out.push('  );');
+    out.push(`  ${ctx.posArg()} += match_len;`);
+    out.push('  if (match_len != 16) {');
+    {
+      const tmp: string[] = [];
+      this.tailTo(tmp, this.ref.otherwise!);
+      ctx.indent(out, tmp, '    ');
+    }
+    out.push('  }');
+
+    const tmp: string[] = [];
+    this.tailTo(tmp, {
+      noAdvance: true,
+      node: edge.node,
+    });
+    ctx.indent(out, tmp, '  ');
+    out.push('}');
+
+    out.push('#endif  /* __wasm_simd128__ */');
 
     return true;
   }
