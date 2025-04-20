@@ -166,8 +166,7 @@ export class Compilation {
       out.push(`case ${name}:`);
       out.push(`${LABEL_PREFIX}${name}: {`);
       lines.forEach((line) => out.push(`  ${line}`));
-      out.push('  /* UNREACHABLE */;');
-      out.push('  abort();');
+      out.push('  UNREACHABLE;');
       out.push('}');
     });
   }
@@ -179,8 +178,7 @@ export class Compilation {
       }
       out.push(`${LABEL_PREFIX}${name}: {`);
       lines.forEach((line) => out.push(`  ${line}`));
-      out.push('  /* UNREACHABLE */;');
-      out.push('  abort();');
+      out.push('  UNREACHABLE;');
       out.push('}');
     });
   }

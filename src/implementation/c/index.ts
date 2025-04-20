@@ -56,8 +56,10 @@ export class CCompiler {
 
     out.push('#ifdef _MSC_VER');
     out.push(' #define ALIGN(n) _declspec(align(n))');
+    out.push(' #define UNREACHABLE __assume(0)');
     out.push('#else  /* !_MSC_VER */');
     out.push(' #define ALIGN(n) __attribute__((aligned(n)))');
+    out.push(' #define UNREACHABLE __builtin_unreachable()');
     out.push('#endif  /* _MSC_VER */');
 
     out.push('');
@@ -98,8 +100,7 @@ export class CCompiler {
     compilation.indent(out, tmp, '    ');
 
     out.push('    default:');
-    out.push('      /* UNREACHABLE */');
-    out.push('      abort();');
+    out.push('      UNREACHABLE;');
     out.push('  }');
 
     tmp = [];
