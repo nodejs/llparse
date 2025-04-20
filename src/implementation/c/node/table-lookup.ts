@@ -201,7 +201,7 @@ export class TableLookup extends Node<frontend.node.TableLookup> {
     }
 
     out.push('#ifdef __wasm_simd128__');
-    out.push(`if (${ctx.endPosArg()} - ${ctx.posArg()} >= 16) {`);
+    out.push(`while (${ctx.endPosArg()} - ${ctx.posArg()} >= 16) {`);
     out.push('  v128_t input;');
     out.push('  v128_t mask;');
     out.push('  v128_t single;');
@@ -240,21 +240,23 @@ export class TableLookup extends Node<frontend.node.TableLookup> {
     out.push('  match_len = __builtin_ctz(');
     out.push('    ~wasm_i8x16_bitmask(mask)');
     out.push('  );');
-    out.push(`  ${ctx.posArg()} += match_len;`);
     out.push('  if (match_len != 16) {');
+    out.push(`    ${ctx.posArg()} += match_len;`);
     {
       const tmp: string[] = [];
       this.tailTo(tmp, this.ref.otherwise!);
       ctx.indent(out, tmp, '    ');
     }
     out.push('  }');
+    out.push(`  ${ctx.posArg()} += 16;`);
+    out.push('}');
 
-    const tmp: string[] = [];
-    this.tailTo(tmp, {
-      noAdvance: true,
-      node: edge.node,
-    });
-    ctx.indent(out, tmp, '  ');
+    out.push(`if (${ctx.posArg()} == ${ctx.endPosArg()}) {`);
+    {
+      const tmp: string[] = [];
+      this.pause(tmp);
+      this.compilation.indent(out, tmp, '  ');
+    }
     out.push('}');
 
     out.push('#endif  /* __wasm_simd128__ */');
