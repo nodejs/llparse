@@ -49,6 +49,11 @@ export class CCompiler {
     out.push('#endif  /* __SSE4_2__ */');
     out.push('');
 
+    out.push('#ifdef __ARM_NEON__');
+    out.push(' #include <arm_neon.h>');
+    out.push('#endif  /* __ARM_NEON__ */');
+    out.push('');
+
     out.push('#ifdef __wasm__');
     out.push(' #include <wasm_simd128.h>');
     out.push('#endif  /* __wasm__ */');
