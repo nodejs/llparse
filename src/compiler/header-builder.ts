@@ -68,7 +68,7 @@ export class HeaderBuilder {
 
     res += `int ${options.prefix}_init(${options.prefix}_t* s);\n`;
     res += `int ${options.prefix}_execute(${options.prefix}_t* s, ` +
-    'const char* p, const char* endp);\n';
+      'const char* p, const char* endp);\n';
 
     res += '\n';
     res += '#ifdef __cplusplus\n';
