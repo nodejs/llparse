@@ -56,6 +56,8 @@ export class HeaderBuilder {
         ty = 'uint64_t';
       } else if (prop.ty === 'ptr') {
         ty = 'void*';
+      } else if (prop.ty === 'cptr') {
+        ty = 'const void*';
       } else {
         throw new Error(
           `Unknown state property type: "${prop.ty}"`);
