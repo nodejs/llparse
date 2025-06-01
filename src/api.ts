@@ -1,6 +1,4 @@
-import * as frontend from 'llparse-frontend';
-
-import source = frontend.source;
+import { source } from 'llparse-frontend';
 
 import { Compiler, ICompilerOptions, ICompilerResult } from './compiler';
 
@@ -12,6 +10,8 @@ export { source, ICompilerOptions, ICompilerResult };
  * LLParse graph builder and compiler.
  */
 export class LLParse extends source.Builder {
+  private readonly prefix: string;
+
   /**
    * The prefix controls the names of methods and state struct in generated
    * public C headers:
@@ -28,10 +28,11 @@ export class LLParse extends source.Builder {
    *
    * @param prefix  Prefix to be used when generating public API.
    */
-  constructor(private readonly prefix: string = 'llparse') {
+  constructor(prefix: string = 'llparse') {
     super();
+    this.prefix = prefix;
   }
-
+  
   /**
    * Compile LLParse graph to the C code and C headers
    *
