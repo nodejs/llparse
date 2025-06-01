@@ -15,8 +15,10 @@ export interface INodeEdge {
 export abstract class Node<T extends frontend.node.Node> {
   protected cachedDecl: string | undefined;
   protected privCompilation: Compilation | undefined;
+  public readonly ref: T;
 
-  constructor(public readonly ref: T) {
+  constructor(ref: T) {
+    this.ref = ref;
   }
 
   public build(compilation: Compilation): string {

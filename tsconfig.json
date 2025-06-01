@@ -9,7 +9,8 @@
     "pretty": true,
     "sourceMap": true,
     "noUncheckedIndexedAccess": true,
-    "noUnusedLocals": true
+    "noUnusedLocals": true,
+    "erasableSyntaxOnly": true
   },
   "include": [
     "src/**/*.ts"
