@@ -229,7 +229,7 @@ export class TableLookup extends Node<frontend.node.TableLookup> {
       if (start === end) {
         out.push(`  single = vceqq_u8(input, ${v128(start)});`);
       } else {
-        out.push(`  single = vandq_u16(`);
+        out.push(`  single = vandq_u8(`);
         out.push(`    vcgeq_u8(input, ${v128(start)}),`);
         out.push(`    vcleq_u8(input, ${v128(end)})`);
         out.push('  );');
@@ -238,12 +238,12 @@ export class TableLookup extends Node<frontend.node.TableLookup> {
       if (off === 0) {
         out.push('  mask = single;');
       } else {
-        out.push('  mask = vorrq_u16(mask, single);');
+        out.push('  mask = vorrq_u8(mask, single);');
       }
     }
 
     // https://community.arm.com/arm-community-blogs/b/servers-and-cloud-computing-blog/posts/porting-x86-vector-bitmask-optimizations-to-arm-neon
-    out.push('  narrow = vshrn_n_u16(mask, 4);');
+    out.push('  narrow = vshrn_n_u16(vreinterpretq_u16_u8(mask), 4);');
     out.push('  match_mask = ~vget_lane_u64(vreinterpret_u64_u8(narrow), 0);');
     out.push('  match_len = __builtin_ctzll(match_mask) >> 2;');
     out.push('  if (match_len != 16) {');
