@@ -8,6 +8,7 @@ import { MulAdd } from './mul-add';
 import { Or } from './or';
 import { Store } from './store';
 import { Test } from './test';
+import { Unpack } from './unpack';
 import { Update } from './update';
 
 export * from './base';
