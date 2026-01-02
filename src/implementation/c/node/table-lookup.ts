@@ -245,7 +245,13 @@ export class TableLookup extends Node<frontend.node.TableLookup> {
     // https://community.arm.com/arm-community-blogs/b/servers-and-cloud-computing-blog/posts/porting-x86-vector-bitmask-optimizations-to-arm-neon
     out.push('  narrow = vshrn_n_u16(mask, 4);');
     out.push('  match_mask = ~vget_lane_u64(vreinterpret_u64_u8(narrow), 0);');
-    out.push('  match_len = __builtin_ctzll(match_mask) >> 2;');
+    // When all 16 bytes match, match_mask is 0. Calling __builtin_ctzll(0) is
+    // undefined behavior, so we handle this case explicitly.
+    out.push('  if (match_mask == 0) {');
+    out.push('    match_len = 16;');
+    out.push('  } else {');
+    out.push('    match_len = __builtin_ctzll(match_mask) >> 2;');
+    out.push('  }');
     out.push('  if (match_len != 16) {');
     out.push(`    ${ctx.posArg()} += match_len;`);
     {
