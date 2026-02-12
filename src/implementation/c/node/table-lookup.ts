@@ -202,7 +202,7 @@ export class TableLookup extends Node<frontend.node.TableLookup> {
       return false;
     }
 
-    out.push('#ifdef __ARM_NEON__');
+    out.push('#if defined(__ARM_NEON__) || defined(__ARM_NEON)');
     out.push(`while (${ctx.endPosArg()} - ${ctx.posArg()} >= 16) {`);
     out.push('  uint8x16_t input;');
     out.push('  uint8x16_t single;');
