@@ -1,5 +1,5 @@
 import * as frontend from 'llparse-frontend';
-import source = frontend.source;
+import { source } from 'llparse-frontend';
 
 export interface IHeaderBuilderOptions {
   readonly prefix: string;

@@ -9,7 +9,10 @@ import { Compilation } from '../compilation';
 type TransformWrap = Transform<frontend.transform.Transform>;
 
 export class MatchSequence {
-  constructor(private readonly transform: TransformWrap) {
+  private readonly transform: TransformWrap;
+
+  constructor(transform: TransformWrap) {
+    this.transform = transform;
   }
 
   public static buildGlobals(out: string[]): void {

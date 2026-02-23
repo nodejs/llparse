@@ -42,10 +42,18 @@ export class Compilation {
       Map<string, MatchSequence> = new Map();
   private readonly resumptionTargets: Set<string> = new Set();
 
-  constructor(public readonly prefix: string,
-      private readonly properties: ReadonlyArray<ICompilationProperty>,
+  public readonly prefix: string;
+  private readonly properties: ReadonlyArray<ICompilationProperty>;
+  private readonly options: ICompilationOptions;
+
+  constructor(prefix: string,
+      properties: ReadonlyArray<ICompilationProperty>,
       resumptionTargets: ReadonlySet<WrappedNode>,
-      private readonly options: ICompilationOptions) {
+      options: ICompilationOptions) {
+    this.prefix = prefix;
+    this.properties = properties;
+    this.options = options;
+
     for (const node of resumptionTargets) {
       this.resumptionTargets.add(STATE_PREFIX + node.ref.id.name);
     }

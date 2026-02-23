@@ -1,7 +1,6 @@
 import * as debugAPI from 'debug';
 import * as frontend from 'llparse-frontend';
-
-import source = frontend.source;
+import { source } from 'llparse-frontend';
 
 import * as cImpl from '../implementation/c';
 import { HeaderBuilder } from './header-builder';
@@ -50,8 +49,13 @@ export interface ICompilerResult {
 }
 
 export class Compiler {
-  constructor(public readonly prefix: string,
-              public readonly options: ICompilerOptions) {
+  public readonly prefix: string;
+  public readonly options: ICompilerOptions;
+
+  constructor(prefix: string,
+              options: ICompilerOptions) {
+    this.prefix = prefix;
+    this.options = options;
   }
 
   public compile(root: source.node.Node,
