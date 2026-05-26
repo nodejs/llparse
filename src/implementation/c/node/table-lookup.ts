@@ -202,7 +202,7 @@ export class TableLookup extends Node<frontend.node.TableLookup> {
       return false;
     }
 
-    out.push('#ifdef __ARM_NEON__');
+    out.push('#if defined(__ARM_NEON__) || defined(__ARM_NEON)');
     out.push(`while (${ctx.endPosArg()} - ${ctx.posArg()} >= 16) {`);
     out.push('  uint8x16_t input;');
     out.push('  uint8x16_t single;');
@@ -229,7 +229,7 @@ export class TableLookup extends Node<frontend.node.TableLookup> {
       if (start === end) {
         out.push(`  single = vceqq_u8(input, ${v128(start)});`);
       } else {
-        out.push(`  single = vandq_u16(`);
+        out.push(`  single = vandq_u8(`);
         out.push(`    vcgeq_u8(input, ${v128(start)}),`);
         out.push(`    vcleq_u8(input, ${v128(end)})`);
         out.push('  );');
@@ -238,14 +238,20 @@ export class TableLookup extends Node<frontend.node.TableLookup> {
       if (off === 0) {
         out.push('  mask = single;');
       } else {
-        out.push('  mask = vorrq_u16(mask, single);');
+        out.push('  mask = vorrq_u8(mask, single);');
       }
     }
 
     // https://community.arm.com/arm-community-blogs/b/servers-and-cloud-computing-blog/posts/porting-x86-vector-bitmask-optimizations-to-arm-neon
-    out.push('  narrow = vshrn_n_u16(mask, 4);');
+    out.push('  narrow = vshrn_n_u16(vreinterpretq_u16_u8(mask), 4);');
     out.push('  match_mask = ~vget_lane_u64(vreinterpret_u64_u8(narrow), 0);');
-    out.push('  match_len = __builtin_ctzll(match_mask) >> 2;');
+    // When all 16 bytes match, match_mask is 0. Calling __builtin_ctzll(0) is
+    // undefined behavior, so we handle this case explicitly.
+    out.push('  if (match_mask == 0) {');
+    out.push('    match_len = 16;');
+    out.push('  } else {');
+    out.push('    match_len = __builtin_ctzll(match_mask) >> 2;');
+    out.push('  }');
     out.push('  if (match_len != 16) {');
     out.push(`    ${ctx.posArg()} += match_len;`);
     {

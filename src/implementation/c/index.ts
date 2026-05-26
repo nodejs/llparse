@@ -49,7 +49,7 @@ export class CCompiler {
     out.push('#endif  /* __SSE4_2__ */');
     out.push('');
 
-    out.push('#ifdef __ARM_NEON__');
+    out.push('#if defined(__ARM_NEON__) || defined(__ARM_NEON)');
     out.push(' #include <arm_neon.h>');
     out.push('#endif  /* __ARM_NEON__ */');
     out.push('');
