@@ -1,4 +1,4 @@
-import * as debugAPI from 'debug';
+import { debuglog } from 'node:util';
 import * as frontend from 'llparse-frontend';
 
 import source = frontend.source;
@@ -6,7 +6,7 @@ import source = frontend.source;
 import * as cImpl from '../implementation/c';
 import { HeaderBuilder } from './header-builder';
 
-const debug = debugAPI('llparse:compiler');
+const debug = debuglog('llparse:compiler');
 
 export interface ICompilerOptions {
   /**
