@@ -319,8 +319,8 @@ export class TableLookup extends Node<frontend.node.TableLookup> {
         out.push(`  single = wasm_i8x16_eq(input, ${v128(start)});`);
       } else {
         out.push(`  single = wasm_v128_and(`);
-        out.push(`    wasm_i8x16_ge(input, ${v128(start)}),`);
-        out.push(`    wasm_i8x16_le(input, ${v128(end)})`);
+        out.push(`    wasm_u8x16_ge(input, ${v128(start)}),`);
+        out.push(`    wasm_u8x16_le(input, ${v128(end)})`);
         out.push('  );');
       }
 
