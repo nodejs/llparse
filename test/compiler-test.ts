@@ -214,6 +214,23 @@ describe('llparse/Compiler', () => {
         'off=29\noff=34\n');
     });
 
+    it('should vectorize table-lookup ranges crossing 0x80', async () => {
+      const start = p.node('start');
+
+      // A single [0x0e, 0xff] range: signed byte compares never match it
+      const range: number[] = [];
+      for (let ch = 0x0e; ch <= 0xff; ch++) {
+        range.push(ch);
+      }
+
+      start
+        .match(range, start)
+        .skipTo(printOff(p, start));
+
+      const binary = await build(p, start, 'match-range-unsigned');
+      await binary.check('abcdabcdabcdabcdabcd\x01üüüüüüüüüüüüüüüü', 'off=21\n');
+    });
+
     it('should compile overlapping matches', async () => {
       const start = p.node('start');
 
